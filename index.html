@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050a18">
-<title>Solo Leveling — Система (v38.7 unified AR)</title>
+<title>Solo Leveling — Система (v38.8 unified AR)</title>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
 html, body { width:100vw; height:100vh; height:100dvh; overflow:hidden; position:fixed; inset:0; background:#000; font-family:'Segoe UI',sans-serif; color:#b8d4ff; }
@@ -537,7 +537,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   100% { transform: translateY(-50%) rotate(-8deg) scaleX(1); opacity: 0; }
 }
 
-/* ИСПРАВЛЕНО: убраны transition left/top — rAF-цикл сам сглаживает */
 .ar-target {
   position: absolute;
   pointer-events: none;
@@ -905,8 +904,8 @@ const G = {
   mgActive:false, mgQuest:null, pendingReward:false,
   questCollapsed:false, pendingDamageShield:false, xpBoostNext:1, arRewardBoost:false
 };
-const SAVE_KEY = 'solo_leveling_v387';
-const LEGACY_KEYS = ['solo_leveling_v386','solo_leveling_v385','solo_leveling_v384','solo_leveling_v383','solo_leveling_v382','solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36','solo_leveling_v35','solo_leveling_v34','solo_leveling_v33','solo_leveling_v31','solo_leveling_v30'];
+const SAVE_KEY = 'solo_leveling_v388';
+const LEGACY_KEYS = ['solo_leveling_v387','solo_leveling_v386','solo_leveling_v385','solo_leveling_v384','solo_leveling_v383','solo_leveling_v382','solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36','solo_leveling_v35','solo_leveling_v34','solo_leveling_v33','solo_leveling_v31','solo_leveling_v30'];
 
 let _saveTimer = null;
 function saveGame() {
@@ -1377,7 +1376,6 @@ function attachOrientation() {
     if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) arLook.camYaw = e.webkitCompassHeading;
     else if (typeof e.alpha === 'number' && e.alpha !== null) arLook.camYaw = (360 - e.alpha) % 360;
     if (typeof e.beta === 'number' && e.beta !== null) arLook.camPitch = Math.max(-30, Math.min(30, (e.beta - 45) * 0.7));
-    // rAF-цикл сам обновит; scheduleARUpdate не нужен, но оставим для совместимости
   };
   arLook.orientationHandler = handler;
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -1418,7 +1416,7 @@ function attachDragLook() {
   };
 }
 
-/* ===== ИСПРАВЛЕНО: постоянный rAF-цикл на время AR-сессии ===== */
+/* ===== Постоянный rAF-цикл на время AR-сессии ===== */
 let _arLoopActive = false;
 let _arLastTick = 0;
 function scheduleARUpdate() { if (!_arLoopActive) startARLoop(); }
@@ -1663,11 +1661,11 @@ $('btnExitAR').addEventListener('click', () => {
 let AR = null;
 let finishARQuest = (success) => { if (typeof _finishARQuest === 'function') _finishARQuest(success); };
 /* ============================================================
-   v38.7: НОВЫЙ AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
+   v38.8: НОВЫЙ AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
    ============================================================ */
 AR = {
   VIEW_ANGLE: 70, ELEV_RANGE: 40, RETICLE_ZONE: 22, LOCK_ZONE: 14, ATTACK_ZONE: 22,
-  ATTACK_THRESHOLD: 0.73,   // кнопка атаки активна при заполнении кольца >= 73%
+  ATTACK_THRESHOLD: 0.73,
   TARGETS: [], PHASE: null, QUEST: null, PENALTY: null, RAF_ID: null, DOM: {}
 };
 AR.DOM.phaseHud    = document.getElementById('arPhaseHud');
@@ -1699,36 +1697,40 @@ function arAttackReady(target) { return arCloseness(target) >= AR.ATTACK_THRESHO
 
 const AR_TAP_BY_DOM = ['collect','sequence','parry','track','dodge','scan','protect','hold','balance','avoid_gaze','chase','multi_lock'];
 
-/* ---------- ЕДИНАЯ СИСТЕМА ПРИЦЕЛИВАНИЯ ---------- */
+/* ---------- ЕДИНАЯ СИСТЕМА ПРИЦЕЛИВАНИЯ ----------
+   Стрелка работает ВСЕГДА, пока есть живая ближайшая цель.
+   Скрывается только при >= 73% (захват). Подсказка — так же. */
 function arUpdateTargetUI(nearest, mode, phaseType) {
+  const tapByDom = AR_TAP_BY_DOM.includes(phaseType);
+
   if (!nearest) {
     arPointer.classList.add('hidden');
     arReticle.classList.remove('active');
     arProgress.classList.add('hidden');
     arProgressFill.setAttribute('stroke-dashoffset', AR_ARC_LENGTH);
+    arHint.classList.add('hide');
     btnAttack.disabled = true;
-    btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
+    btnAttack.textContent = tapByDom ? 'ТАПНИТЕ ПО ЦЕЛИ' : 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
     btnAttack.classList.remove('ready');
     return;
   }
+
   const dYaw = arDeltaYaw(nearest.yaw);
   const dElev = arDeltaElev(nearest.elev);
   const dist = Math.hypot(dYaw, dElev);
   const closeness = Math.max(0, Math.min(1, 1 - dist / AR.RETICLE_ZONE));
   const attackReady = closeness >= AR.ATTACK_THRESHOLD;
 
-  // Кольцо: 0..100%; зелёное при >= 73%
   arProgressFill.setAttribute('stroke-dashoffset', (AR_ARC_LENGTH * (1 - closeness)).toFixed(1));
   arProgressFill.classList.toggle('close', attackReady);
   arProgress.classList.remove('hidden');
-
-  // Прицел зелёный при >= 73%
   arReticle.classList.toggle('active', attackReady);
 
-  const tapByDom = AR_TAP_BY_DOM.includes(phaseType);
+  // Подсказка скрыта, когда цель захвачена
+  arHint.classList.toggle('hide', attackReady);
 
-  // Стрелка: только для механик с кнопкой (strike/shoot/rhythm) или наказания
-  if (!attackReady && !tapByDom) {
+  // Стрелка: показывается, пока не захвачено (во всех режимах)
+  if (!attackReady) {
     const anchor = pointerAnchor(dYaw, dElev);
     arPointer.classList.remove('hidden');
     arPointer.style.left = anchor.x + 'px';
@@ -1763,7 +1765,7 @@ function arCreateTarget(opts) {
     id: 'art_' + (++arTargetSeq), type: opts.type || 'MONSTER', emoji: opts.emoji || '👹',
     yaw: opts.yaw ?? Math.random() * 360, elev: opts.elev ?? arRand(-15, 15),
     hp: opts.hp ?? 10, maxHp: opts.hp ?? 10,
-    moveSpeed: (opts.moveSpeed ?? 0) * 3,   // конвертация: старые единицы → °/сек
+    moveSpeed: (opts.moveSpeed ?? 0) * 3,
     hidden: !!opts.hidden, revealed: !opts.hidden, alive: true,
     inView: false, inReticle: false, lockedSec: 0, el: null, hudEl: null,
     onHit: opts.onHit || null, onCollect: opts.onCollect || null, onMiss: opts.onMiss || null, extra: opts.extra || {}
@@ -1789,7 +1791,18 @@ function arRemoveTarget(t) {
 }
 function arClearTargets() { AR.TARGETS.forEach(t => { t.el?.remove(); t.hudEl?.remove(); }); AR.TARGETS = []; }
 
-/* ---------- ЕДИНОЕ ОБНОВЛЕНИЕ ВСЕХ ЦЕЛЕЙ (движение по времени) ---------- */
+/* Ближайшая ЖИВАЯ цель по (yaw, elev), опционально с фильтром */
+function arFindNearestTarget(filterFn) {
+  const alive = AR.TARGETS.filter(t => t.alive && (!filterFn || filterFn(t)));
+  if (alive.length === 0) return null;
+  let best = alive[0], bestDist = Infinity;
+  for (const t of alive) {
+    const d = Math.hypot(arDeltaYaw(t.yaw), arDeltaElev(t.elev));
+    if (d < bestDist) { bestDist = d; best = t; }
+  }
+  return best;
+}
+
 function arUpdateAllTargets(dt = 0.016) {
   for (const t of AR.TARGETS) {
     if (!t.alive) continue;
@@ -1819,24 +1832,11 @@ function arUpdateAllTargets(dt = 0.016) {
     nearest = { yaw: arLook.monsterYaw, elev: arLook.monsterElev };
   } else if (G.arQuest && !G.arQuest.ended && G.arQuest.scenario) {
     mode = 'quest';
-    const tapByDom = AR_TAP_BY_DOM.includes(phaseType);
-    if (!tapByDom) {
-      const visible = AR.TARGETS.filter(t => t.alive && !t.el.classList.contains('hidden'));
-      nearest = visible.sort((a, b) => {
-        const da = Math.hypot(arDeltaYaw(a.yaw), arDeltaElev(a.elev));
-        const db = Math.hypot(arDeltaYaw(b.yaw), arDeltaElev(b.elev));
-        return da - db;
-      })[0] || null;
-    }
+    nearest = arFindNearestTarget();
   } else if (AR.PENALTY && !AR.PENALTY.ended) {
     mode = 'penalty';
     AR.DOM.aphTimer.textContent = formatShort(Math.max(0, AR.PENALTY.timeLeft));
-    const visible = AR.TARGETS.filter(t => t.alive && t.type === 'MONSTER' && !t.el.classList.contains('hidden'));
-    nearest = visible.sort((a, b) => {
-      const da = Math.hypot(arDeltaYaw(a.yaw), arDeltaElev(a.elev));
-      const db = Math.hypot(arDeltaYaw(b.yaw), arDeltaElev(b.elev));
-      return da - db;
-    })[0] || null;
+    nearest = arFindNearestTarget(t => t.type === 'MONSTER');
   }
 
   arUpdateTargetUI(nearest, mode, phaseType);
@@ -1894,7 +1894,7 @@ function arCollectTarget(t) {
   arRemoveTarget(t);
 }
 
-/* ---------- 15 МЕХАНИК (смягчённые, выполнимые) ---------- */
+/* ---------- 15 МЕХАНИК ---------- */
 function arRunTrack(phase) {
   return new Promise((resolve) => {
     const total = phase.targets || 1; let found = 0, current = null, finished = false;
@@ -2007,7 +2007,14 @@ function arRunDodge(phase) {
       const flyIv = setInterval(() => {
         if (!obj.alive || finished) { clearInterval(flyIv); return; }
         const d = arDeltaYaw(obj.yaw);
-        if (Math.abs(d) < 12) { clearInterval(flyIv); if (obj.alive) { obj.alive = false; obj.el?.remove(); takeDamage(5, 'Пропущен удар!'); SFX.fail(); } }
+        if (Math.abs(d) < 12) {
+          clearInterval(flyIv);
+          if (obj.alive) {
+            obj.alive = false; obj.el?.remove();
+            takeDamage(5, 'Пропущен удар!'); SFX.fail();
+            if (G.hp <= 0) { finish(false); return; }
+          }
+        }
       }, 100);
       active.push(obj);
     }
@@ -2088,7 +2095,7 @@ function arRunSequence(phase) {
     let seqIv = null;
     for (let i = 0; i < total; i++) {
       const t = arCreateTarget({ type:'RUNE', emoji: ['💠','🔮','⚡','🌟','❄','🔥'][i % 6],
-        yaw: (arLook.camYaw + (i - (total-1)/2) * 25 + 360) % 360,
+        yaw: (arLook.camYaw + (i - (total-1)/2) * 20 + 360) % 360,
         elev: arRand(-15, 15), extra: { index: i } });
       t.el.style.pointerEvents = 'auto'; t.el.style.cursor = 'pointer';
       t.el.addEventListener('click', (e) => { e.stopPropagation(); onTap(t); });
@@ -2225,7 +2232,11 @@ function arRunAvoidGaze(phase) {
       cone.style.left = arClamp(xPct, -20, 120) + '%'; cone.style.top = '50%';
       cone.style.transform = `translate(-50%, -100%) rotate(${rel}deg)`;
       if (inGaze) {
-        if (Date.now() > damageCooldown) { damageCooldown = Date.now() + 1500; damageTaken++; takeDamage(3, 'Вас заметили!'); SFX.fail(); triggerFlash('red'); }
+        if (Date.now() > damageCooldown) {
+          damageCooldown = Date.now() + 1500; damageTaken++;
+          takeDamage(3, 'Вас заметили!'); SFX.fail(); triggerFlash('red');
+          if (G.hp <= 0) { finish(false); return; }
+        }
       } else { arSetPhaseHud('СКРЫТНОСТЬ', Math.min(1, (Date.now() - startTime) / limit)); }
       if (Date.now() - startTime > limit) finish(damageTaken < 6);
     }, 100);
@@ -2279,6 +2290,7 @@ function arRunProtect(phase) {
       objectHp -= 15; SFX.fail(); takeDamage(4, 'Объект повреждён!'); arRemoveTarget(e);
       const idx = enemies.indexOf(e); if (idx >= 0) enemies.splice(idx, 1);
       if (objectHp <= 0) finish(false);
+      if (G.hp <= 0) finish(false);
     }
     const moveIv = setInterval(() => {
       if (finished) return;
@@ -2415,7 +2427,6 @@ const AR_MECHANICS = {
   balance: arRunBalanceHold, rhythm: arRunTapRhythm, multi_lock: arRunMultiLock, scan: arRunScan
 };
 
-/* Сценарии — все выполнимы */
 const QUEST_AR_SCENARIO = {
   'Зачистить подземелье ранга E': [{ type:'track', targets:1, timeLimit:15 },{ type:'strike', hp:20, emoji:'👹' },{ type:'track', targets:1, timeLimit:15 },{ type:'strike', hp:20, emoji:'👺' },{ type:'strike', hp:20, emoji:'🐺' }],
   'Победить гоблинов-разведчиков': [{ type:'strike', hp:15, emoji:'👹', moveSpeed:1.2, count:3 }],
@@ -2499,7 +2510,6 @@ const QUEST_AR_SCENARIO = {
   'Уничтожить ледяную королеву': [{ type:'strike', hp:280, emoji:'❄', moveSpeed:1 },{ type:'dodge', obstacles:8, timeLimit:15 },{ type:'collect', items:8, timeLimit:15, spawnRate:500, emoji:'❄' },{ type:'parry', attacks:4, timeLimit:14 }]
 };
 
-/* ---------- ЗАПУСК AR-КВЕСТА ---------- */
 async function startARQuest(q) {
   if (G.arActive) return;
   try {
@@ -2557,12 +2567,15 @@ async function startARQuest(q) {
   }
 }
 
-/* Переопределяем finishARQuest из Части B */
 function _finishARQuest(success) {
   if (!G.arQuest || G.arQuest.ended) return;
   G.arQuest.ended = true;
   clearInterval(G.arQuest.timerIv);
-  arClearTargets(); arHidePhaseHud(); AR.PHASE = null;
+  arClearTargets(); arHidePhaseHud(); AR.PHASE = null; AR.QUEST = null;
+  AR.DOM.scanBeam.classList.remove('show');
+  AR.DOM.holdRing.classList.remove('show');
+  AR.DOM.parryArrow.classList.remove('show');
+  document.querySelectorAll('.ar-gaze-cone').forEach(el => el.remove());
   if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
   videoFeed.srcObject = null; cameraView.classList.remove('active'); G.arActive = false;
   detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook(); stopARLoop();
@@ -2575,7 +2588,6 @@ function _finishARQuest(success) {
 }
 finishARQuest = _finishARQuest;
 
-/* ---------- AR-ЗОНА НАКАЗАНИЯ ---------- */
 async function startARPenalty() {
   if (AR.PENALTY) return;
   if (Date.now() < G.penaltyCooldown) { addLog('Зона наказания на кулдауне.', 'penalty'); return; }
@@ -2636,6 +2648,10 @@ function finishARPenalty(success) {
   clearInterval(AR.PENALTY.timerIv);
   AR.PENALTY.monsters.forEach(m => { if (m.alive) arRemoveTarget(m); });
   arClearTargets();
+  AR.DOM.scanBeam.classList.remove('show');
+  AR.DOM.holdRing.classList.remove('show');
+  AR.DOM.parryArrow.classList.remove('show');
+  document.querySelectorAll('.ar-gaze-cone').forEach(el => el.remove());
   if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
   videoFeed.srcObject = null; cameraView.classList.remove('active');
   G.arActive = false; G.inPenalty = false;
@@ -2659,7 +2675,6 @@ function finishARPenalty(success) {
   setTimeout(() => { if (!G.busy && !G.inPenalty && !G.mgActive) scheduleNextQuest(); }, 2000);
 }
 
-/* ===== Старая зона наказания (не используется) ===== */
 const penaltyZone = $('penaltyZone'); const penaltyField = $('penaltyField');
 const penaltyTimerEl = $('penaltyTimer'); const penaltyScoreEl = $('penaltyScore');
 const btnSurrender = $('btnSurrender');
@@ -2691,7 +2706,6 @@ function takeDamage(dmg, reason) {
   }
 }
 
-/* ---------- КВЕСТЫ ---------- */
 function quest(name, desc, minMin, maxMin, reward, rank) { return {name, desc, minTime:minMin*60, maxTime:maxMin*60, reward, rank}; }
 const QUEST_POOL = [
   () => quest('Зачистить подземелье ранга E','Уничтожьте всех монстров внутри подземелья.',1,3,20,'E'),
