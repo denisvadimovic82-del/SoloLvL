@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050a18">
-<title>Solo Leveling — Система (v38.1 AR)</title>
+<title>Solo Leveling — Система (v38.2 AR)</title>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
 html, body { width:100vw; height:100vh; height:100dvh; overflow:hidden; position:fixed; inset:0; background:#000; font-family:'Segoe UI',sans-serif; color:#b8d4ff; }
@@ -1072,6 +1072,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   <div class="ar-slash" id="arSlash"></div>
   <div class="ar-damage-vignette" id="arDamageVignette"></div>
 
+  <!-- v38: доп. AR-элементы -->
   <div class="ar-phase-hud" id="arPhaseHud">
     <div id="arPhaseLabel">ФАЗА 1 / 3</div>
     <div class="ar-phase-bar"><div class="ar-phase-fill" id="arPhaseFill"></div></div>
@@ -1098,6 +1099,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
     <button class="ar-attack-btn" id="btnAttack" disabled>ЦЕЛЬ НЕ В ПРИЦЕЛЕ</button>
   </div>
 
+  <!-- HUD зоны наказания -->
   <div class="ar-penalty-hud" id="arPenaltyHud">
     <div class="aph-title">⚠ ЗОНА НАКАЗАНИЯ ⚠</div>
     <div class="aph-stats">
@@ -1108,7 +1110,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   </div>
 </div>
 
-<!-- Старые оверлеи (для совместимости, не используются в v38) -->
+<!-- Старые оверлеи (для совместимости, не используются в v38.2) -->
 <div class="penalty-zone" id="penaltyZone">
   <div class="penalty-header"><div class="penalty-title">⚠ ЗОНА НАКАЗАНИЯ ⚠</div></div>
   <div class="penalty-info">
@@ -1272,9 +1274,9 @@ const G = {
   xpBoostNext:1,
   arRewardBoost:false
 };
-// v38.1: ключ сохранения, миграция v38 -> v38.1
-const SAVE_KEY = 'solo_leveling_v381';
-const LEGACY_KEYS = ['solo_leveling_v38','solo_leveling_v37','solo_leveling_v36', 'solo_leveling_v35', 'solo_leveling_v34', 'solo_leveling_v33', 'solo_leveling_v31', 'solo_leveling_v30'];
+// v38.2: ключ сохранения, миграция v38.1 -> v38.2
+const SAVE_KEY = 'solo_leveling_v382';
+const LEGACY_KEYS = ['solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36', 'solo_leveling_v35', 'solo_leveling_v34', 'solo_leveling_v33', 'solo_leveling_v31', 'solo_leveling_v30'];
 
 let _saveTimer = null;
 function saveGame() {
@@ -2020,7 +2022,8 @@ function updateMonsterScreenPos() {
   const deltaElev = arLook.monsterElev - arLook.camPitch;
   const inView = Math.abs(deltaYaw) < AR_VIEW_ANGLE / 2 && Math.abs(deltaElev) < AR_ELEV_RANGE / 2;
   arLook.inView = inView;
-  const inAttackZone = Math.abs(deltaYaw) < AR_ATTACK_ZONE && Math.abs(deltaElev) < AR_ATTACK_ZONE;
+  // FIX #1: круговая зона прицела (было: квадратная)
+  const inAttackZone = Math.hypot(deltaYaw, deltaElev) < AR_ATTACK_ZONE;
   arLook.inAttackZone = inAttackZone;
   arReticle.classList.toggle('active', inAttackZone);
 
@@ -2242,12 +2245,14 @@ $('btnExitAR').addEventListener('click', () => {
 });
 
 /* ============================================================
-   v38.1: AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
+   v38.2: AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
    ИСПРАВЛЕНИЯ:
    - arInReticle: круговая проверка (Math.hypot)
-   - arUpdateAllTargets: активирует прицел и кнопку
-   - startQuestTimer: не очищает при 'minigame'
-   - startARQuest: не запускает второй таймер
+   - arUpdateAllTargets: активирует прицел и кнопку для квестов и зоны наказания
+   - startQuestTimer: не очищает при 'minigame' — таймер тикает всё время AR
+   - startARQuest: НЕ запускает второй таймер (использует q.remaining от startQuestTimer)
+   - catch в startARQuest: явный failQuest + сброс busy (квест не зависает)
+   - btnComplete: вызывает startARQuest без setTimeout (user gesture для камеры)
    ============================================================ */
 const AR = {
   VIEW_ANGLE: 70, ELEV_RANGE: 40, RETICLE_ZONE: 22, LOCK_ZONE: 14,
@@ -2344,7 +2349,7 @@ function arUpdateAllTargets() {
     if (t.hudEl) { t.hudEl.style.left = cx + '%'; t.hudEl.style.top = cy + '%'; }
   }
 
-  // FIX #2: активация прицела и кнопки (как в охоте)
+  // FIX #2: активация прицела и кнопки для квестов (как в охоте)
   if (G.arQuest && !G.arQuest.ended) {
     const anyInReticle = AR.TARGETS.some(t => t.alive && t.inReticle);
     arReticle.classList.toggle('active', anyInReticle);
@@ -2361,6 +2366,21 @@ function arUpdateAllTargets() {
       if (phaseType === 'shoot') btnText = 'ВЫСТРЕЛ';
       if (phaseType === 'rhythm') btnText = 'В РИТМ';
       btnAttack.textContent = btnText;
+      btnAttack.classList.add('ready');
+    } else {
+      btnAttack.disabled = true;
+      btnAttack.textContent = 'НАВЕДИТЕ НА ЦЕЛЬ';
+      btnAttack.classList.remove('ready');
+    }
+  }
+
+  // FIX: в зоне наказания прицел и кнопка как в охоте
+  if (AR.PENALTY && !AR.PENALTY.ended) {
+    const anyInReticle = AR.TARGETS.some(t => t.alive && t.inReticle && t.type === 'MONSTER');
+    arReticle.classList.toggle('active', anyInReticle);
+    if (anyInReticle) {
+      btnAttack.disabled = false;
+      btnAttack.textContent = 'АТАКОВАТЬ';
       btnAttack.classList.add('ready');
     } else {
       btnAttack.disabled = true;
@@ -2459,7 +2479,6 @@ function arRunStrike(phase) {
       const dmg = 8 + Math.floor(Math.random() * 7) + Math.floor(G.level / 2);
       arStrikeTarget(current, dmg);
     }
-    // FIX #2: кнопка управляется arUpdateAllTargets — не трогаем disabled здесь
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
     const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(kills >= totalKills); }, 200);
@@ -2674,7 +2693,6 @@ function arRunShoot(phase) {
       hit++; SFX.hit(); arRemoveTarget(current); current = null;
       if (hit >= total) finish(true); else setTimeout(spawn, 300);
     }
-    // FIX #2: кнопка управляется arUpdateAllTargets
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
     const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(hit >= total); }, 200);
@@ -2868,7 +2886,6 @@ const AR_MECHANICS = {
   balance: arRunBalanceHold, rhythm: arRunTapRhythm, multi_lock: arRunMultiLock, scan: arRunScan
 };
 
-// QUEST_AR_SCENARIO — 80 квестов (сокращено для читаемости, полный набор ниже)
 const QUEST_AR_SCENARIO = {
   'Зачистить подземелье ранга E': [{ type:'track', targets:1, timeLimit:10 },{ type:'strike', hp:20, emoji:'👹' },{ type:'track', targets:1, timeLimit:10 },{ type:'strike', hp:20, emoji:'👺' },{ type:'track', targets:1, timeLimit:10 },{ type:'strike', hp:20, emoji:'🐺' }],
   'Победить гоблинов-разведчиков': [{ type:'strike', hp:15, emoji:'👹', moveSpeed:1.5, count:3 }],
@@ -2989,6 +3006,7 @@ async function startARQuest(q) {
   } catch (err) {
     addLog('Ошибка AR: ' + (err.message || err), 'fail');
     speak('Ошибка камеры.'); triggerFlash('red');
+    // FIX: явный сброс — квест не зависает
     G.arActive = false; AR.PHASE = null; AR.QUEST = null;
     arClearTargets(); arHidePhaseHud();
     if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
@@ -3015,6 +3033,8 @@ function finishARQuest(success) {
   videoFeed.srcObject = null; cameraView.classList.remove('active'); G.arActive = false;
   detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
   const q = G.arQuest.quest; G.arQuest = null;
+  // FIX: сброс busy/phase — иначе задания не появляются
+  G.busy = false;
   if (success) { addLog(`✓ AR-задание «${q.name}» выполнено!`, 'success'); speak('Задание выполнено.'); completeQuestReward(q); }
   else { addLog(`✕ AR-задание «${q.name}» провалено.`, 'fail'); speak('Задание провалено.'); failQuest('AR-провал'); }
   updateUI(); saveGame();
@@ -3048,6 +3068,7 @@ async function startARPenalty() {
       AR.DOM.aphTimer.textContent = formatShort(Math.max(0, AR.PENALTY.timeLeft));
       if (AR.PENALTY.timeLeft <= 0) finishARPenalty(false);
     }, 1000);
+    // FIX: кнопка управляется arUpdateAllTargets (как в охоте)
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = () => {
       if (!AR.PENALTY) return;
@@ -3111,7 +3132,7 @@ const btnSurrender = $('btnSurrender');
 let penaltyActive = false, penaltyTimeLeft = 60, penaltyCollected = 0;
 let penaltyTimerInterval = null, penaltySpawnInterval = null;
 function getBallLifetime(rank) { const base = {E:1500,D:1300,C:1100,B:900,A:800,S:700}; return base[rank]||1500; }
-function startPenaltyZone() { /* v38.1: не используется, оставлено для совместимости */ }
+function startPenaltyZone() { /* v38.2: не используется */ }
 function collectBall(ball) { if(!penaltyActive || ball.classList.contains('collected')) return; ball.classList.add('collected'); penaltyCollected++; penaltyScoreEl.textContent = penaltyCollected; SFX.ballPop(); if(penaltyCollected >= 55) endPenaltyZone(true); }
 function endPenaltyZone(success) { if(!penaltyActive) return; penaltyActive = false; clearInterval(penaltyTimerInterval); clearInterval(penaltySpawnInterval); penaltyField.innerHTML = ''; setTimeout(() => penaltyZone.classList.remove('active'), 1500); }
 btnSurrender.addEventListener('click', () => { if(penaltyActive) endPenaltyZone(false); });
@@ -3140,7 +3161,7 @@ function takeDamage(dmg, reason) {
   }
 }
 
-function quest(name, desc, minMin, maxMin, reward, rank) { return {name, desc, minTime:minMin*60, maxTime:maxMax*60, reward, rank}; }
+function quest(name, desc, minMin, maxMin, reward, rank) { return {name, desc, minTime:minMin*60, maxTime:maxMin*60, reward, rank}; }
 const QUEST_POOL = [
   () => quest('Зачистить подземелье ранга E','Уничтожьте всех монстров внутри подземелья.',1,3,20,'E'),
   () => quest('Победить гоблинов-разведчиков','Отбейте атаку разведывательного отряда гоблинов.',1,2,18,'E'),
@@ -3223,7 +3244,6 @@ const QUEST_POOL = [
   () => quest('Победить теневого монарха','Сразите монарха.',8,12,120,'S'),
   () => quest('Уничтожить ледяную королеву','Убейте королеву.',6,9,80,'S')
 ];
-
 function pickRandomQuest() {
   const currentRank = getRankByLevel(G.level);
   const maxIdx = RANK_ORDER.indexOf(currentRank);
