@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050a18">
-<title>Solo Leveling — Система (v38.2 AR)</title>
+<title>Solo Leveling — Система (v38.3 AR)</title>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
 html, body { width:100vw; height:100vh; height:100dvh; overflow:hidden; position:fixed; inset:0; background:#000; font-family:'Segoe UI',sans-serif; color:#b8d4ff; }
@@ -246,7 +246,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .blocker-title { font-size:22px; font-weight:700; margin-bottom:12px; }
 .blocker-btn { padding:14px 28px; background:#991111; border:1px solid #ff8888; color:#fff; font-size:15px; cursor:pointer; }
 
-.camera-view { position:fixed; inset:0; z-index:500; background:#000; display:none; }
+.camera-view { position:fixed; inset:0; z-index:500; background:#000; display:none; touch-action:none; }
 .camera-view.active { display:block; }
 #videoFeed { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
 .ar-topbar { position:absolute; top:0; left:0; right:0; padding:16px; display:flex; justify-content:space-between; background:linear-gradient(180deg,rgba(5,12,28,0.9),transparent); z-index:10; }
@@ -255,7 +255,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .ar-bottombar { position:absolute; bottom:0; left:0; right:0; padding:16px; display:flex; flex-direction:column; align-items:center; gap:12px; background:linear-gradient(0deg,rgba(5,12,28,0.9),transparent); z-index:10; }
 .ar-timer { font-size:28px; color:#ffaa44; font-family:'Courier New',monospace; font-weight:800; }
 .ar-attack-btn { background:linear-gradient(180deg,#ff4444,#991111); border:1px solid #ff8888; color:#fff; padding:16px 40px; font-size:16px; font-weight:800; cursor:pointer; }
-.damage-number { position:absolute; font-size:32px; color:#ff4444; font-weight:900; animation:damageAnim 0.8s forwards; z-index:9; }
+.damage-number { position:absolute; font-size:32px; color:#ff4444; font-weight:900; animation:damageAnim 0.8s forwards; z-index:9; pointer-events:none; }
 @keyframes damageAnim { 0%{opacity:0; transform:scale(0.5);} 20%{opacity:1; transform:scale(1.3);} 100%{opacity:0; transform:scale(1) translateY(-80px);} }
 
 .penalty-zone { position:fixed; inset:0; background:radial-gradient(circle at 50% 50%,#2a0000,#0a0000); z-index:6000; display:none; flex-direction:column; animation:zonePulse 2s infinite alternate; }
@@ -311,7 +311,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .mg-balance-zone { position:absolute; top:0; bottom:0; background:rgba(68,255,136,0.35); border:1px solid #44ff88; }
 
 /* v37: HUD охоты + ранги + анимация */
-.camera-view { touch-action: none; }
 .ar-monster {
   position: absolute;
   font-size: 120px;
@@ -321,124 +320,52 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   filter: drop-shadow(0 0 18px rgba(255,68,68,0.8));
 }
 .ar-monster.hidden { opacity: 0; }
-.ar-monster.locked {
-  filter: drop-shadow(0 0 28px #44ff88) drop-shadow(0 0 50px rgba(68,255,136,0.6));
-}
+.ar-monster.locked { filter: drop-shadow(0 0 28px #44ff88) drop-shadow(0 0 50px rgba(68,255,136,0.6)); }
 .ar-monster.hit { animation: monsterHit 0.3s; }
 @keyframes monsterHit { 0%{filter:brightness(3);} 100%{filter:brightness(1);} }
 .ar-monster.dead { opacity:0; transition:opacity 0.6s; }
 
 .ar-player-bar {
   position: absolute;
-  top: 56px;
-  left: 0;
-  right: 0;
+  top: 56px; left: 0; right: 0;
   padding: 0 14px;
   z-index: 9;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: flex; align-items: center; gap: 10px;
   background: linear-gradient(180deg, rgba(5,15,40,0.92), rgba(10,30,70,0.75));
   border-top: 1px solid rgba(74,138,255,0.4);
   border-bottom: 1px solid rgba(74,138,255,0.4);
   box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 0 20px rgba(20,50,150,0.2);
-  font-size: 11px;
-  color: #b8d4ff;
+  font-size: 11px; color: #b8d4ff;
   pointer-events: none;
   min-height: 38px;
-  flex-wrap: nowrap;
-  overflow: hidden;
+  flex-wrap: nowrap; overflow: hidden;
 }
-.ar-player-bar .apb-name {
-  font-weight: 800;
-  color: #ffcc44;
-  letter-spacing: 1px;
-  text-shadow: 0 0 8px #ffcc44;
-  white-space: nowrap;
-  max-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
-}
-.ar-player-bar .apb-rank {
-  display: inline-block;
-  padding: 1px 7px;
-  font-size: 10px;
-  font-weight: 800;
-  border: 1px solid currentColor;
-  border-radius: 2px;
-  letter-spacing: 1px;
-  flex-shrink: 0;
-}
+.ar-player-bar .apb-name { font-weight: 800; color: #ffcc44; letter-spacing: 1px; text-shadow: 0 0 8px #ffcc44; white-space: nowrap; max-width: 80px; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+.ar-player-bar .apb-rank { display: inline-block; padding: 1px 7px; font-size: 10px; font-weight: 800; border: 1px solid currentColor; border-radius: 2px; letter-spacing: 1px; flex-shrink: 0; }
 .ar-player-bar .apb-rank.rank-E { color: #88ddaa; border-color: #44ff88; }
 .ar-player-bar .apb-rank.rank-D { color: #88aaff; border-color: #4a8aff; }
 .ar-player-bar .apb-rank.rank-C { color: #cc88ff; border-color: #aa44ff; }
 .ar-player-bar .apb-rank.rank-B { color: #ffcc44; border-color: #ffaa00; }
 .ar-player-bar .apb-rank.rank-A { color: #ff8844; border-color: #ff6600; }
 .ar-player-bar .apb-rank.rank-S { color: #ff4444; border-color: #ff0000; box-shadow: 0 0 10px #ff4444; }
-
-.ar-player-bar .apb-level {
-  font-size: 10px;
-  color: #9ec0ff;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
+.ar-player-bar .apb-level { font-size: 10px; color: #9ec0ff; flex-shrink: 0; white-space: nowrap; }
 .ar-player-bar .apb-level b { color: #e0ecff; font-weight: 800; }
-
-.ar-player-bar .apb-hp-wrap {
-  flex: 1;
-  min-width: 60px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.ar-player-bar .apb-hp-bar {
-  flex: 1;
-  height: 10px;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid rgba(74,138,255,0.4);
-  overflow: hidden;
-}
-.ar-player-bar .apb-hp-fill {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, #44ff88, #88ffbb);
-  transition: width 0.3s;
-  box-shadow: 0 0 8px #44ff88;
-}
+.ar-player-bar .apb-hp-wrap { flex: 1; min-width: 60px; display: flex; align-items: center; gap: 6px; }
+.ar-player-bar .apb-hp-bar { flex: 1; height: 10px; background: rgba(0,0,0,0.6); border: 1px solid rgba(74,138,255,0.4); overflow: hidden; }
+.ar-player-bar .apb-hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #44ff88, #88ffbb); transition: width 0.3s; box-shadow: 0 0 8px #44ff88; }
 .ar-player-bar .apb-hp-fill.low { background: linear-gradient(90deg, #ffaa00, #ffcc44); box-shadow: 0 0 8px #ffaa00; }
 .ar-player-bar .apb-hp-fill.critical { background: linear-gradient(90deg, #ff0000, #ff4444); box-shadow: 0 0 10px #ff0000; animation: hpCriticalPulse 0.4s infinite alternate; }
 @keyframes hpCriticalPulse { from{opacity:0.6;} to{opacity:1;} }
-.ar-player-bar .apb-hp-text {
-  font-size: 10px;
-  font-family: 'Courier New', monospace;
-  color: #e0ecff;
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
-  min-width: 52px;
-  text-align: right;
-}
-.ar-player-bar .apb-stat {
-  font-size: 10px;
-  color: #9ec0ff;
-  white-space: nowrap;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
+.ar-player-bar .apb-hp-text { font-size: 10px; font-family: 'Courier New', monospace; color: #e0ecff; font-weight: 700; white-space: nowrap; flex-shrink: 0; min-width: 52px; text-align: right; }
+.ar-player-bar .apb-stat { font-size: 10px; color: #9ec0ff; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 3px; }
 .ar-player-bar .apb-stat b { color: #e0ecff; font-weight: 800; }
 
 .ar-monster-hud {
-  position: absolute;
-  width: 180px;
-  z-index: 9;
+  position: absolute; width: 180px; z-index: 9;
   transform: translate(-50%, -100%);
   margin-top: -72px;
   background: linear-gradient(135deg, rgba(40,0,0,0.94), rgba(80,10,10,0.88));
-  border: 1px solid #ff4444;
-  border-left: 3px solid #ff2222;
+  border: 1px solid #ff4444; border-left: 3px solid #ff2222;
   padding: 6px 10px 8px;
   box-shadow: 0 0 20px rgba(255,68,68,0.5), inset 0 0 20px rgba(150,20,20,0.3);
   pointer-events: none;
@@ -446,144 +373,73 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   text-align: center;
 }
 .ar-monster-hud.hidden { opacity: 0; }
-.ar-monster-hud::before {
-  content: "";
-  position: absolute;
-  bottom: -8px; left: 50%;
-  transform: translateX(-50%);
-  width: 0; height: 0;
-  border-left: 7px solid transparent;
-  border-right: 7px solid transparent;
-  border-top: 8px solid #ff2222;
-}
-.ar-monster-hud .amh-title {
-  font-size: 12px;
-  font-weight: 800;
-  color: #ffe0e0;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
-  text-shadow: 0 0 8px #ff4444;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.ar-monster-hud .amh-rank {
-  display: inline-block;
-  padding: 1px 7px;
-  font-size: 10px;
-  font-weight: 800;
-  border: 1px solid currentColor;
-  border-radius: 2px;
-  letter-spacing: 1px;
-  flex-shrink: 0;
-}
+.ar-monster-hud::before { content: ""; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 8px solid #ff2222; }
+.ar-monster-hud .amh-title { font-size: 12px; font-weight: 800; color: #ffe0e0; letter-spacing: 1px; margin-bottom: 4px; text-shadow: 0 0 8px #ff4444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.ar-monster-hud .amh-rank { display: inline-block; padding: 1px 7px; font-size: 10px; font-weight: 800; border: 1px solid currentColor; border-radius: 2px; letter-spacing: 1px; flex-shrink: 0; }
 .ar-monster-hud .amh-rank.rank-E { color: #88ddaa; border-color: #44ff88; }
 .ar-monster-hud .amh-rank.rank-D { color: #88aaff; border-color: #4a8aff; }
 .ar-monster-hud .amh-rank.rank-C { color: #cc88ff; border-color: #aa44ff; }
 .ar-monster-hud .amh-rank.rank-B { color: #ffcc44; border-color: #ffaa00; }
 .ar-monster-hud .amh-rank.rank-A { color: #ff8844; border-color: #ff6600; }
 .ar-monster-hud .amh-rank.rank-S { color: #ff4444; border-color: #ff0000; box-shadow: 0 0 10px #ff4444; }
-
-.ar-monster-hud .amh-hp-bar {
-  height: 10px;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,68,68,0.4);
-  overflow: hidden;
-  margin-bottom: 3px;
-}
-.ar-monster-hud .amh-hp-fill {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, #ff2222, #ff6666);
-  transition: width 0.2s;
-  box-shadow: 0 0 8px #ff4444;
-}
-.ar-monster-hud .amh-hp-text {
-  font-size: 10px;
-  font-family: 'Courier New', monospace;
-  color: #ffd0d0;
-  font-weight: 700;
-}
+.ar-monster-hud .amh-hp-bar { height: 10px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,68,68,0.4); overflow: hidden; margin-bottom: 3px; }
+.ar-monster-hud .amh-hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff2222, #ff6666); transition: width 0.2s; box-shadow: 0 0 8px #ff4444; }
+.ar-monster-hud .amh-hp-text { font-size: 10px; font-family: 'Courier New', monospace; color: #ffd0d0; font-weight: 700; }
 
 .ar-rank-warning {
   position: absolute;
   top: 108px; left: 50%;
   transform: translateX(-50%);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  padding: 5px 14px;
-  border-radius: 12px;
+  font-size: 11px; font-weight: 800; letter-spacing: 2px;
+  padding: 5px 14px; border-radius: 12px;
   background: rgba(5,12,28,0.85);
-  border: 1px solid #ffaa44;
-  color: #ffaa44;
+  border: 1px solid #ffaa44; color: #ffaa44;
   text-shadow: 0 0 8px currentColor;
-  pointer-events: none;
-  z-index: 9;
-  opacity: 0;
-  transition: opacity 0.3s;
+  pointer-events: none; z-index: 9;
+  opacity: 0; transition: opacity 0.3s;
   white-space: nowrap;
 }
 .ar-rank-warning.show { opacity: 1; }
 .ar-rank-warning.danger { border-color: #ff4444; color: #ff4444; }
 .ar-rank-warning.safe { border-color: #44ff88; color: #44ff88; }
 
+/* FIX #7: прицел поверх всех монстров */
 .ar-reticle {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   width: 180px; height: 180px;
   transform: translate(-50%,-50%);
   border: 2px dashed rgba(74,138,255,0.55);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 4;
+  z-index: 100; /* FIX: было 4 */
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 .ar-reticle.active {
-  border-color: #44ff88;
-  border-style: solid;
+  border-color: #44ff88; border-style: solid;
   box-shadow: 0 0 32px #44ff88, inset 0 0 24px rgba(68,255,136,0.3);
   transform: translate(-50%,-50%) scale(1.05);
 }
-.ar-reticle::before,
-.ar-reticle::after {
-  content: "";
-  position: absolute;
-  background: rgba(74,138,255,0.6);
-}
+.ar-reticle::before, .ar-reticle::after { content: ""; position: absolute; background: rgba(74,138,255,0.6); }
 .ar-reticle::before { left: 50%; top: -12px; bottom: -12px; width: 1px; transform: translateX(-50%); }
 .ar-reticle::after  { top: 50%; left: -12px; right: -12px; height: 1px; transform: translateY(-50%); }
-.ar-reticle.active::before,
-.ar-reticle.active::after { background: #44ff88; }
-
-.ar-reticle .corner-mark {
-  position: absolute;
-  width: 22px; height: 22px;
-  border: 3px solid #4a8aff;
-  transition: border-color 0.2s;
-}
+.ar-reticle.active::before, .ar-reticle.active::after { background: #44ff88; }
+.ar-reticle .corner-mark { position: absolute; width: 22px; height: 22px; border: 3px solid #4a8aff; transition: border-color 0.2s; }
 .ar-reticle .corner-mark.tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
 .ar-reticle .corner-mark.tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
 .ar-reticle .corner-mark.bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
 .ar-reticle .corner-mark.br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
 .ar-reticle.active .corner-mark { border-color: #44ff88; }
 
+/* FIX #7: стрелка поверх всех */
 .ar-pointer {
-  position: absolute;
-  width: 0; height: 0;
-  z-index: 6;
+  position: absolute; width: 0; height: 0;
+  z-index: 101; /* FIX: было 6 */
   pointer-events: none;
   transition: opacity 0.25s;
 }
 .ar-pointer.hidden { opacity: 0; }
-
 .ar-pointer-arrow {
-  position: absolute;
-  top: 0; left: 0;
+  position: absolute; top: 0; left: 0;
   width: 90px; height: 90px;
   margin: -45px 0 0 -45px;
   transform-origin: 45px 45px;
@@ -591,41 +447,31 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   filter: drop-shadow(0 0 12px #ffcc44);
 }
 .ar-pointer-arrow svg { display: block; width: 100%; height: 100%; }
-
-.ar-pointer-arrow.pulse {
-  animation: pointerPulse 0.7s ease-in-out infinite alternate;
-}
+.ar-pointer-arrow.pulse { animation: pointerPulse 0.7s ease-in-out infinite alternate; }
 @keyframes pointerPulse {
   from { filter: drop-shadow(0 0 10px #ffcc44); }
   to   { filter: drop-shadow(0 0 26px #ffcc44) drop-shadow(0 0 40px #ffaa00); }
 }
-
 .ar-pointer-label {
-  position: absolute;
-  top: 0; left: 0;
+  position: absolute; top: 0; left: 0;
   transform: translate(-50%, -50%) translateY(70px);
-  white-space: nowrap;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1px;
+  white-space: nowrap; font-size: 13px; font-weight: 700; letter-spacing: 1px;
   color: #ffcc44;
   text-shadow: 0 0 10px #ffcc44, 0 0 20px rgba(255,204,68,0.6);
   background: rgba(5,12,28,0.75);
   border: 1px solid #ffcc44;
-  padding: 4px 12px;
-  border-radius: 14px;
+  padding: 4px 12px; border-radius: 14px;
   pointer-events: none;
   transition: color 0.2s, border-color 0.2s;
 }
 .ar-pointer-label.close { color: #44ff88; border-color: #44ff88; text-shadow: 0 0 10px #44ff88; }
 
 .ar-progress-svg {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   width: 240px; height: 240px;
   transform: translate(-50%,-50%) rotate(-90deg);
   pointer-events: none;
-  z-index: 3;
+  z-index: 99; /* FIX: под прицелом, но над целями */
   transition: opacity 0.2s;
 }
 .ar-progress-svg.hidden { opacity: 0; }
@@ -639,52 +485,36 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   color: #0a1a10;
   animation: attackPulse 0.8s ease-in-out infinite alternate;
 }
-.ar-attack-btn:disabled {
-  opacity: 0.45;
-  filter: grayscale(0.6);
-  animation: none;
-}
+.ar-attack-btn:disabled { opacity: 0.45; filter: grayscale(0.6); animation: none; }
 @keyframes attackPulse {
   from { box-shadow: 0 0 10px #44ff88; }
   to   { box-shadow: 0 0 36px #88ffbb; transform: scale(1.04); }
 }
 
 .ar-hint {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   transform: translate(-50%,-50%) translateY(120px);
-  font-size: 12px;
-  color: #9ec0ff;
-  letter-spacing: 2px;
-  text-align: center;
-  pointer-events: none;
-  z-index: 4;
+  font-size: 12px; color: #9ec0ff; letter-spacing: 2px; text-align: center;
+  pointer-events: none; z-index: 4;
   text-shadow: 0 0 10px #2a5cff;
   transition: opacity 0.3s;
   background: rgba(5,12,28,0.6);
-  padding: 6px 14px;
-  border-radius: 12px;
+  padding: 6px 14px; border-radius: 12px;
   border: 1px solid rgba(74,138,255,0.4);
 }
 .ar-hint.hide { opacity: 0; }
 
 .ar-attack-warning {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   transform: translate(-50%,-50%) translateY(-140px);
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 3px;
+  font-size: 14px; font-weight: 800; letter-spacing: 3px;
   color: #ff4444;
   text-shadow: 0 0 12px #ff0000, 0 0 24px #ff0000;
   background: rgba(40,0,0,0.85);
   border: 2px solid #ff4444;
-  padding: 6px 16px;
-  border-radius: 4px;
-  pointer-events: none;
-  z-index: 9;
-  opacity: 0;
-  transition: opacity 0.15s;
+  padding: 6px 16px; border-radius: 4px;
+  pointer-events: none; z-index: 9;
+  opacity: 0; transition: opacity 0.15s;
   animation: warningPulse 0.4s infinite alternate;
 }
 .ar-attack-warning.show { opacity: 1; }
@@ -693,29 +523,21 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   to   { box-shadow: 0 0 30px #ff8888; }
 }
 
-.ar-monster.winding {
-  animation: monsterWindUp 0.8s ease-in-out forwards;
-}
+.ar-monster.winding { animation: monsterWindUp 0.8s ease-in-out forwards; }
 @keyframes monsterWindUp {
   0%   { transform: translate(-50%,-50%) scale(1) rotate(0deg); filter: drop-shadow(0 0 18px rgba(255,68,68,0.8)); }
   30%  { transform: translate(-50%,-50%) scale(0.92) rotate(-4deg); filter: drop-shadow(0 0 20px #ff4444) brightness(1.1); }
   60%  { transform: translate(-50%,-50%) scale(0.88) rotate(-6deg); filter: drop-shadow(0 0 26px #ff2222) brightness(1.2); }
   100% { transform: translate(-50%,-50%) scale(0.85) rotate(-8deg); filter: drop-shadow(0 0 30px #ff0000) brightness(1.3); }
 }
-
-.ar-monster.lunging {
-  animation: monsterLunge 0.45s cubic-bezier(0.4,0,0.7,1.4) forwards;
-}
+.ar-monster.lunging { animation: monsterLunge 0.45s cubic-bezier(0.4,0,0.7,1.4) forwards; }
 @keyframes monsterLunge {
   0%   { transform: translate(-50%,-50%) scale(0.85) rotate(-8deg); filter: drop-shadow(0 0 30px #ff0000) brightness(1.3); }
   40%  { transform: translate(-50%,-50%) scale(1.7) rotate(4deg) translateY(30px); filter: drop-shadow(0 0 50px #ff0000) brightness(2.2); }
   70%  { transform: translate(-50%,-50%) scale(1.5) rotate(2deg) translateY(20px); filter: drop-shadow(0 0 40px #ff2200) brightness(1.8); }
   100% { transform: translate(-50%,-50%) scale(1) rotate(0deg) translateY(0); filter: drop-shadow(0 0 18px rgba(255,68,68,0.8)) brightness(1); }
 }
-
-.ar-monster.recoiling {
-  animation: monsterRecoil 0.3s ease-out forwards;
-}
+.ar-monster.recoiling { animation: monsterRecoil 0.3s ease-out forwards; }
 @keyframes monsterRecoil {
   0%   { transform: translate(-50%,-50%) scale(1.3); }
   50%  { transform: translate(-50%,-50%) scale(0.92); }
@@ -723,12 +545,9 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 }
 
 .ar-shockwave {
-  position: absolute;
-  width: 60px; height: 60px;
-  border: 4px solid #ff4444;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 8;
+  position: absolute; width: 60px; height: 60px;
+  border: 4px solid #ff4444; border-radius: 50%;
+  pointer-events: none; z-index: 8;
   transform: translate(-50%,-50%);
   animation: shockwaveExpand 0.6s ease-out forwards;
   box-shadow: 0 0 30px #ff0000, inset 0 0 20px #ff4444;
@@ -737,79 +556,59 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   0%   { width: 60px; height: 60px; opacity: 1; border-width: 6px; }
   100% { width: 500px; height: 500px; opacity: 0; border-width: 1px; }
 }
-
 .ar-hit-particle {
-  position: absolute;
-  width: 8px; height: 8px;
-  border-radius: 50%;
+  position: absolute; width: 8px; height: 8px; border-radius: 50%;
   background: #ff4444;
   box-shadow: 0 0 12px #ff0000, 0 0 6px #ff8888;
-  pointer-events: none;
-  z-index: 8;
+  pointer-events: none; z-index: 8;
   transform: translate(-50%,-50%);
 }
 @keyframes particleFly {
   0%   { opacity: 1; transform: translate(-50%,-50%) translate(0,0) scale(1); }
   100% { opacity: 0; transform: translate(-50%,-50%) translate(var(--tx), var(--ty)) scale(0.2); }
 }
-
 .ar-damage-vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 8;
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 8;
   background: radial-gradient(circle, transparent 40%, rgba(255,0,0,0.6) 100%);
-  opacity: 0;
-  transition: opacity 0.1s;
+  opacity: 0; transition: opacity 0.1s;
 }
 .ar-damage-vignette.show { opacity: 1; animation: vignetteFade 0.6s forwards; }
 @keyframes vignetteFade { from{opacity:1;} to{opacity:0;} }
-
 .ar-slash {
-  position: absolute;
-  top: 50%; left: -20%;
+  position: absolute; top: 50%; left: -20%;
   width: 140%; height: 6px;
   background: linear-gradient(90deg, transparent, #fff, #ff4444, #fff, transparent);
   box-shadow: 0 0 30px #ff0000, 0 0 60px #ff2222;
   transform: translateY(-50%) rotate(-8deg) scaleX(0);
   transform-origin: left center;
-  pointer-events: none;
-  z-index: 8;
+  pointer-events: none; z-index: 8;
   opacity: 0;
 }
-.ar-slash.show {
-  animation: slashStrike 0.3s ease-out forwards;
-}
+.ar-slash.show { animation: slashStrike 0.3s ease-out forwards; }
 @keyframes slashStrike {
   0%   { transform: translateY(-50%) rotate(-8deg) scaleX(0); opacity: 1; }
   60%  { transform: translateY(-50%) rotate(-8deg) scaleX(1); opacity: 1; }
   100% { transform: translateY(-50%) rotate(-8deg) scaleX(1); opacity: 0; }
 }
 
-/* ===== v38: 15 AR-механик + AR-зона наказания ===== */
+/* v38: 15 AR-механик + AR-зона наказания */
 .ar-target {
   position: absolute;
   pointer-events: none;
-  z-index: 5;
+  z-index: 5; /* FIX: ниже прицела (100) */
   transition: opacity 0.25s, left 0.06s linear, top 0.06s linear, transform 0.15s;
   filter: drop-shadow(0 0 18px rgba(74,138,255,0.8));
   will-change: left, top, transform;
 }
 .ar-target.hidden { opacity: 0; }
-.ar-target.locked {
-  filter: drop-shadow(0 0 28px #44ff88) drop-shadow(0 0 50px rgba(68,255,136,0.6));
-}
+.ar-target.locked { filter: drop-shadow(0 0 28px #44ff88) drop-shadow(0 0 50px rgba(68,255,136,0.6)); }
 .ar-target.hit { animation: monsterHit 0.3s; }
 .ar-target.dead { opacity: 0; transition: opacity 0.6s; }
-
 .ar-target.ar-coin  { filter: drop-shadow(0 0 14px #ffcc44); font-size: 44px; }
 .ar-target.ar-point { filter: drop-shadow(0 0 14px #4a8aff); font-size: 44px; }
 .ar-target.ar-rune  { filter: drop-shadow(0 0 16px #aa44ff); font-size: 52px; }
-.ar-target.ar-obstacle {
-  filter: drop-shadow(0 0 16px #ff4444);
-  font-size: 56px;
-  z-index: 7;
-}
+.ar-target.ar-obstacle { filter: drop-shadow(0 0 16px #ff4444); font-size: 56px; z-index: 6; /* FIX: всё ещё ниже прицела */ }
 
 .ar-phase-hud {
   position: absolute;
@@ -820,78 +619,48 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   border: 1px solid #4a8aff;
   border-radius: 4px;
   padding: 5px 14px;
-  font-size: 11px;
-  letter-spacing: 2px;
+  font-size: 11px; letter-spacing: 2px;
   color: #9ec0ff;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.25s;
-  white-space: nowrap;
-  text-align: center;
+  opacity: 0; transition: opacity 0.25s;
+  white-space: nowrap; text-align: center;
   box-shadow: 0 0 16px rgba(42,92,255,0.4);
 }
 .ar-phase-hud.show { opacity: 1; }
-.ar-phase-hud b { color: #ffcc44; }
-.ar-phase-hud .ar-phase-bar {
-  height: 4px;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid rgba(74,138,255,0.4);
-  margin-top: 4px;
-  overflow: hidden;
-}
-.ar-phase-hud .ar-phase-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg,#2a5cff,#6ee7ff);
-  box-shadow: 0 0 8px #4a8aff;
-  transition: width 0.12s linear;
-}
+.ar-phase-hud .ar-phase-bar { height: 4px; background: rgba(0,0,0,0.6); border: 1px solid rgba(74,138,255,0.4); margin-top: 4px; overflow: hidden; }
+.ar-phase-hud .ar-phase-fill { height: 100%; width: 0%; background: linear-gradient(90deg,#2a5cff,#6ee7ff); box-shadow: 0 0 8px #4a8aff; transition: width 0.12s linear; }
 
 .ar-hold-ring {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   width: 200px; height: 200px;
   transform: translate(-50%,-50%);
   pointer-events: none;
-  z-index: 5;
-  opacity: 0;
-  transition: opacity 0.2s;
+  z-index: 98; /* FIX: под прицелом (100), но над целями (5) */
+  opacity: 0; transition: opacity 0.2s;
 }
 .ar-hold-ring.show { opacity: 1; }
-.ar-hold-ring circle {
-  fill: none;
-  stroke-width: 5;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: 100px 100px;
-}
+.ar-hold-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 100px 100px; }
 .ar-hold-ring .ahr-track { stroke: rgba(74,138,255,0.18); }
 .ar-hold-ring .ahr-fill  { stroke: #44ff88; transition: stroke-dashoffset 0.1s linear; }
 
 .ar-parry-arrow {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   width: 200px; height: 200px;
   transform: translate(-50%,-50%);
-  pointer-events: none;
-  z-index: 8;
-  opacity: 0;
-  transition: opacity 0.15s;
+  pointer-events: none; z-index: 98;
+  opacity: 0; transition: opacity 0.15s;
 }
 .ar-parry-arrow.show { opacity: 1; }
 .ar-parry-arrow svg { width: 100%; height: 100%; }
 
 .ar-scan-beam {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   width: 300px; height: 300px;
   transform: translate(-50%,-50%);
   border-radius: 50%;
   border: 2px solid rgba(74,138,255,0.15);
-  pointer-events: none;
-  z-index: 3;
-  opacity: 0;
-  transition: opacity 0.2s;
+  pointer-events: none; z-index: 3;
+  opacity: 0; transition: opacity 0.2s;
 }
 .ar-scan-beam.show { opacity: 1; animation: scanPulse 1.6s ease-out infinite; }
 @keyframes scanPulse {
@@ -900,26 +669,22 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 }
 
 .ar-gaze-cone {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   width: 0; height: 0;
   border-left: 60px solid transparent;
   border-right: 60px solid transparent;
   border-bottom: 180px solid rgba(255,68,68,0.22);
   transform-origin: 50% 100%;
-  pointer-events: none;
-  z-index: 4;
+  pointer-events: none; z-index: 4;
   filter: drop-shadow(0 0 12px rgba(255,68,68,0.6));
 }
 .ar-gaze-cone.safe { border-bottom-color: rgba(68,255,136,0.22); filter: drop-shadow(0 0 12px rgba(68,255,136,0.6)); }
 
 .ar-chase-trail {
-  position: absolute;
-  width: 40px; height: 40px;
+  position: absolute; width: 40px; height: 40px;
   border-radius: 50%;
   border: 2px dashed #ffaa44;
-  pointer-events: none;
-  z-index: 4;
+  pointer-events: none; z-index: 4;
   transform: translate(-50%,-50%);
   opacity: 0.5;
   animation: chaseTrail 0.6s linear infinite;
@@ -927,12 +692,10 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 @keyframes chaseTrail { from{transform:translate(-50%,-50%) scale(0.6); opacity:0.6;} to{transform:translate(-50%,-50%) scale(1.3); opacity:0;} }
 
 .ar-multi-link {
-  position: absolute;
-  height: 2px;
+  position: absolute; height: 2px;
   background: linear-gradient(90deg, rgba(68,255,136,0.1), #44ff88, rgba(68,255,136,0.1));
   transform-origin: 0 50%;
-  pointer-events: none;
-  z-index: 4;
+  pointer-events: none; z-index: 4;
   box-shadow: 0 0 10px #44ff88;
   opacity: 0.8;
 }
@@ -945,65 +708,31 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 }
 
 .ar-penalty-hud {
-  position: absolute;
-  top: 56px; left: 0; right: 0;
+  position: absolute; top: 56px; left: 0; right: 0;
   padding: 8px 14px;
   z-index: 9;
   background: linear-gradient(180deg, rgba(60,0,0,0.95), rgba(30,0,0,0.7));
-  border-top: 1px solid #ff4444;
-  border-bottom: 1px solid #ff4444;
+  border-top: 1px solid #ff4444; border-bottom: 1px solid #ff4444;
   box-shadow: 0 0 20px rgba(255,68,68,0.4);
-  color: #ffb8b8;
-  font-size: 11px;
-  display: none;
-  pointer-events: none;
+  color: #ffb8b8; font-size: 11px;
+  display: none; pointer-events: none;
 }
 .ar-penalty-hud.show { display: block; }
-.ar-penalty-hud .aph-title {
-  text-align: center;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 3px;
-  color: #ff4444;
-  text-shadow: 0 0 12px #ff0000;
-  margin-bottom: 4px;
-  animation: warningPulse 0.8s infinite alternate;
-}
-.ar-penalty-hud .aph-stats {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
+.ar-penalty-hud .aph-title { text-align: center; font-size: 13px; font-weight: 800; letter-spacing: 3px; color: #ff4444; text-shadow: 0 0 12px #ff0000; margin-bottom: 4px; animation: warningPulse 0.8s infinite alternate; }
+.ar-penalty-hud .aph-stats { display: flex; justify-content: space-between; margin-bottom: 4px; }
 .ar-penalty-hud .aph-stats b { color: #ff8888; }
-.ar-penalty-hud .aph-progress {
-  height: 6px;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,68,68,0.4);
-  overflow: hidden;
-}
-.ar-penalty-hud .aph-progress-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #ff2222, #ff6666);
-  transition: width 0.3s;
-  box-shadow: 0 0 8px #ff4444;
-}
+.ar-penalty-hud .aph-progress { height: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,68,68,0.4); overflow: hidden; }
+.ar-penalty-hud .aph-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ff2222, #ff6666); transition: width 0.3s; box-shadow: 0 0 8px #ff4444; }
 
 .ar-quest-phase-indicator {
-  position: absolute;
-  bottom: 120px; left: 50%;
+  position: absolute; bottom: 120px; left: 50%;
   transform: translateX(-50%);
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: #9ec0ff;
+  font-size: 11px; letter-spacing: 2px; color: #9ec0ff;
   background: rgba(5,12,28,0.85);
   border: 1px solid #4a8aff;
-  padding: 4px 12px;
-  border-radius: 12px;
-  z-index: 9;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.25s;
+  padding: 4px 12px; border-radius: 12px;
+  z-index: 9; pointer-events: none;
+  opacity: 0; transition: opacity 0.25s;
 }
 .ar-quest-phase-indicator.show { opacity: 1; }
 </style>
@@ -1072,7 +801,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   <div class="ar-slash" id="arSlash"></div>
   <div class="ar-damage-vignette" id="arDamageVignette"></div>
 
-  <!-- v38: доп. AR-элементы -->
   <div class="ar-phase-hud" id="arPhaseHud">
     <div id="arPhaseLabel">ФАЗА 1 / 3</div>
     <div class="ar-phase-bar"><div class="ar-phase-fill" id="arPhaseFill"></div></div>
@@ -1099,7 +827,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
     <button class="ar-attack-btn" id="btnAttack" disabled>ЦЕЛЬ НЕ В ПРИЦЕЛЕ</button>
   </div>
 
-  <!-- HUD зоны наказания -->
   <div class="ar-penalty-hud" id="arPenaltyHud">
     <div class="aph-title">⚠ ЗОНА НАКАЗАНИЯ ⚠</div>
     <div class="aph-stats">
@@ -1110,7 +837,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   </div>
 </div>
 
-<!-- Старые оверлеи (для совместимости, не используются в v38.2) -->
+<!-- Старые оверлеи (для совместимости, не используются в v38.3) -->
 <div class="penalty-zone" id="penaltyZone">
   <div class="penalty-header"><div class="penalty-title">⚠ ЗОНА НАКАЗАНИЯ ⚠</div></div>
   <div class="penalty-info">
@@ -1274,9 +1001,8 @@ const G = {
   xpBoostNext:1,
   arRewardBoost:false
 };
-// v38.2: ключ сохранения, миграция v38.1 -> v38.2
-const SAVE_KEY = 'solo_leveling_v382';
-const LEGACY_KEYS = ['solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36', 'solo_leveling_v35', 'solo_leveling_v34', 'solo_leveling_v33', 'solo_leveling_v31', 'solo_leveling_v30'];
+const SAVE_KEY = 'solo_leveling_v383';
+const LEGACY_KEYS = ['solo_leveling_v382','solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36','solo_leveling_v35','solo_leveling_v34','solo_leveling_v33','solo_leveling_v31','solo_leveling_v30'];
 
 let _saveTimer = null;
 function saveGame() {
@@ -1308,23 +1034,12 @@ function loadGame() {
     const d = JSON.parse(raw);
     if(!d.playerName) return false;
     Object.assign(G, d);
-    G.started = false;
-    G.busy = false;
-    G.activeQuest = null;
-    G.timerInterval = null;
-    G.mgActive = false;
-    G.mgQuest = null;
-    G.questPhase = 'inactive';
-    G.pendingReward = false;
-    G.questCollapsed = false;
-    G.pendingDamageShield = false;
-    G.xpBoostNext = 1;
-    G.arRewardBoost = false;
+    G.started = false; G.busy = false; G.activeQuest = null; G.timerInterval = null;
+    G.mgActive = false; G.mgQuest = null; G.questPhase = 'inactive';
+    G.pendingReward = false; G.questCollapsed = false; G.pendingDamageShield = false;
+    G.xpBoostNext = 1; G.arRewardBoost = false;
     if (G.stream) { try { G.stream.getTracks().forEach(t => t.stop()); } catch(e) {} }
-    G.stream = null;
-    G.arActive = false;
-    G.arQuest = null;
-    G.inPenalty = false;
+    G.stream = null; G.arActive = false; G.arQuest = null; G.inPenalty = false;
     return true;
   } catch(e) { return false; }
 }
@@ -1336,27 +1051,11 @@ function resetGame() {
   if (penaltyTimerInterval) { clearInterval(penaltyTimerInterval); penaltyTimerInterval = null; }
   if (penaltySpawnInterval) { clearInterval(penaltySpawnInterval); penaltySpawnInterval = null; }
   if (G.arQuest && G.arQuest.timerInterval) { clearInterval(G.arQuest.timerInterval); G.arQuest.timerInterval = null; }
-  stopMonsterAttacks();
-  endARLook();
+  stopMonsterAttacks(); endARLook();
   window.removeEventListener('beforeunload', beforeUnloadHandler);
   window.removeEventListener('popstate', popstateHandler);
   try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
   LEGACY_KEYS.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
-  G.playerName = '';
-  G.level = 1; G.xp = 0; G.xpNext = 50;
-  G.str = 10; G.vit = 10; G.agi = 10; G.int = 10; G.per = 10;
-  G.statPoints = 0; G.maxHp = 100; G.hp = 100;
-  G.gold = 0; G.done = 0; G.failed = 0;
-  G.inventory = {}; G.abilities = []; G.rank = 'E';
-  G.inPenalty = false; G.started = false; G.busy = false;
-  G.activeQuest = null; G.awakened = false; G.chatHistory = [];
-  G.arActive = false; G.arQuest = null;
-  G.questPhase = 'inactive'; G.pendingReward = false;
-  G.debuffActive = false; G.debuffEndTime = 0; G.baseStats = null;
-  G.mgActive = false; G.mgQuest = null; G.questCollapsed = false;
-  G.pendingDamageShield = false;
-  G.xpBoostNext = 1;
-  G.arRewardBoost = false;
   location.reload();
 }
 
@@ -1391,10 +1090,7 @@ const SFX = {
 
 let voiceRu = null, speechQueue = [], isSpeaking = false;
 function initSpeech() {
-  try {
-    const v = speechSynthesis.getVoices();
-    voiceRu = v.find(x => x.lang.startsWith('ru')) || v[0];
-  } catch(e) {}
+  try { const v = speechSynthesis.getVoices(); voiceRu = v.find(x => x.lang.startsWith('ru')) || v[0]; } catch(e) {}
 }
 if('speechSynthesis' in window) { initSpeech(); speechSynthesis.onvoiceschanged = initSpeech; }
 function processSpeechQueue() {
@@ -1413,49 +1109,33 @@ function processSpeechQueue() {
 }
 function speak(t) {
   if(!('speechSynthesis' in window) || !G.speechEnabled) return;
-  speechQueue.push(t);
-  processSpeechQueue();
+  speechQueue.push(t); processSpeechQueue();
 }
 
-function triggerFlash(type) {
-  const el = document.createElement('div');
-  el.className = `screen-flash-${type}`;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 700);
-}
-function triggerScreenShake() {
-  document.body.classList.add('screen-shake');
-  setTimeout(() => document.body.classList.remove('screen-shake'), 400);
-}
+function triggerFlash(type) { const el = document.createElement('div'); el.className = `screen-flash-${type}`; document.body.appendChild(el); setTimeout(() => el.remove(), 700); }
+function triggerScreenShake() { document.body.classList.add('screen-shake'); setTimeout(() => document.body.classList.remove('screen-shake'), 400); }
 function showFloatingText(text, color) {
-  const el = document.createElement('div');
-  el.className = 'floating-text';
-  el.textContent = text;
-  el.style.color = color;
+  const el = document.createElement('div'); el.className = 'floating-text'; el.textContent = text; el.style.color = color;
   el.style.left = Math.min(80, Math.max(20, Math.random() * 40 + 30)) + '%';
   el.style.top = Math.min(80, Math.max(30, Math.random() * 30 + 40)) + '%';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1600);
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1600);
 }
 
 function formatTime(s) {
-  if (!isFinite(s) || isNaN(s)) s = 0;
+  if (!isFinite(s) || isNaN(s) || s < 0) s = 0;
   s = Math.max(0, Math.ceil(s));
   return `${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 }
+// FIX #4: защита от NaN
 function formatShort(s) {
-  if (!isFinite(s) || isNaN(s)) s = 0;
+  if (!isFinite(s) || isNaN(s) || s < 0) s = 0;
   s = Math.max(0, Math.ceil(s));
   return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
 const RANK_ORDER = ['E','D','C','B','A','S'];
 function getRankByLevel(l) {
-  if(l>=86) return 'S';
-  if(l>=66) return 'A';
-  if(l>=46) return 'B';
-  if(l>=26) return 'C';
-  if(l>=11) return 'D';
-  return 'E';
+  if(l>=86) return 'S'; if(l>=66) return 'A'; if(l>=46) return 'B';
+  if(l>=26) return 'C'; if(l>=11) return 'D'; return 'E';
 }
 
 const ABILITY_POOL = [
@@ -1484,43 +1164,29 @@ const SHOP_ITEMS = [
   {id:'sword',name:'🗡 Меч',desc:'Сила +5',price:400,permanent:true},
   {id:'armor',name:'🛡 Броня',desc:'Макс. HP +30',price:300,permanent:true}
 ];
-const SHOP_REFUSALS = [
-  'Недостаточно золота.','У вас нет средств.','Покупка невозможна.',
-  'Заработайте больше.','Кошелёк слишком лёгок.','Отказано.',
-  'Не по карману.','Сначала заработайте.'
-];
+const SHOP_REFUSALS = ['Недостаточно золота.','У вас нет средств.','Покупка невозможна.','Заработайте больше.','Кошелёк слишком лёгок.','Отказано.','Не по карману.','Сначала заработайте.'];
 
 const logArea = $('logArea');
 function addLog(text, type='') {
   G.chatHistory.push({text,type});
   if(G.chatHistory.length>80) G.chatHistory.shift();
-  const div = document.createElement('div');
-  div.className = 'sys-msg '+type;
-  div.textContent = text;
-  logArea.appendChild(div);
-  logArea.scrollTop = logArea.scrollHeight;
+  const div = document.createElement('div'); div.className = 'sys-msg '+type; div.textContent = text;
+  logArea.appendChild(div); logArea.scrollTop = logArea.scrollHeight;
   while(logArea.children.length>80) logArea.removeChild(logArea.firstChild);
   saveGame();
 }
 function renderChat() {
   logArea.innerHTML = '';
-  G.chatHistory.forEach(m => {
-    const d = document.createElement('div');
-    d.className = 'sys-msg '+m.type;
-    d.textContent = m.text;
-    logArea.appendChild(d);
-  });
+  G.chatHistory.forEach(m => { const d = document.createElement('div'); d.className = 'sys-msg '+m.type; d.textContent = m.text; logArea.appendChild(d); });
   logArea.scrollTop = logArea.scrollHeight;
 }
 
 function updateUI() {
-  $('lvlEl').textContent = G.level;
-  $('goldEl').textContent = G.gold;
+  $('lvlEl').textContent = G.level; $('goldEl').textContent = G.gold;
   $('rankEl').textContent = G.rank;
   $('hpEl').textContent = `${G.hp}/${G.maxHp}`;
   $('hpFill').style.width = (G.hp/G.maxHp*100)+'%';
-  $('doneEl').textContent = G.done;
-  $('failEl').textContent = G.failed;
+  $('doneEl').textContent = G.done; $('failEl').textContent = G.failed;
   $('xpInfo').textContent = `XP: ${G.xp} / ${G.xpNext}`;
   if (G.playerName) $('playerNameDisplay').textContent = G.playerName;
   const badge = $('debuffBadge');
@@ -1528,23 +1194,14 @@ function updateUI() {
   else badge.classList.remove('show');
   if (G.arActive) updateArPlayerHud();
 }
-
 function renderStatus() {
-  $('statLevel').textContent = G.level;
-  $('statRank').textContent = `РАНГ ${G.rank}`;
+  $('statLevel').textContent = G.level; $('statRank').textContent = `РАНГ ${G.rank}`;
   $('statFreePoints').textContent = G.statPoints;
-  $('statStrVal').textContent = G.str;
-  $('statVitVal').textContent = G.vit;
-  $('statAgiVal').textContent = G.agi;
-  $('statIntVal').textContent = G.int;
-  $('statPerVal').textContent = G.per;
+  $('statStrVal').textContent = G.str; $('statVitVal').textContent = G.vit;
+  $('statAgiVal').textContent = G.agi; $('statIntVal').textContent = G.int; $('statPerVal').textContent = G.per;
   const hasPoints = G.statPoints > 0;
-  document.querySelectorAll('.stat-plus').forEach(b => {
-    b.disabled = !hasPoints;
-    b.style.opacity = hasPoints ? '1' : '0.3';
-  });
+  document.querySelectorAll('.stat-plus').forEach(b => { b.disabled = !hasPoints; b.style.opacity = hasPoints ? '1' : '0.3'; });
 }
-
 function updateDebuffTimer() {
   if(!G.debuffActive) return;
   const left = Math.max(0,(G.debuffEndTime-Date.now())/1000);
@@ -1553,50 +1210,31 @@ function updateDebuffTimer() {
 }
 function applyDebuff() {
   if(G.debuffActive) return;
-  G.debuffActive=true;
-  G.debuffEndTime = Date.now()+5*60*1000;
+  G.debuffActive=true; G.debuffEndTime = Date.now()+5*60*1000;
   G.baseStats={str:G.str,vit:G.vit,agi:G.agi,int:G.int,per:G.per};
-  G.str=Math.max(1,G.str-2);
-  G.vit=Math.max(1,G.vit-2);
-  G.agi=Math.max(1,G.agi-2);
-  G.int=Math.max(1,G.int-2);
-  G.per=Math.max(1,G.per-2);
+  G.str=Math.max(1,G.str-2); G.vit=Math.max(1,G.vit-2); G.agi=Math.max(1,G.agi-2);
+  G.int=Math.max(1,G.int-2); G.per=Math.max(1,G.per-2);
   $('debuffBadge').classList.add('show');
   addLog('⚠ ДЕБАФФ «СЛАБОСТЬ»: все характеристики -2 на 5 минут.','penalty');
-  speak('Слабость.');
-  updateUI();
-  saveGame();
+  speak('Слабость.'); updateUI(); saveGame();
 }
 function removeDebuff() {
   if(!G.debuffActive) return;
-  if(G.baseStats){
-    G.str=G.baseStats.str;
-    G.vit=G.baseStats.vit;
-    G.agi=G.baseStats.agi;
-    G.int=G.baseStats.int;
-    G.per=G.baseStats.per;
-  }
+  if(G.baseStats){ G.str=G.baseStats.str; G.vit=G.baseStats.vit; G.agi=G.baseStats.agi; G.int=G.baseStats.int; G.per=G.baseStats.per; }
   G.debuffActive=false; G.baseStats=null; G.debuffEndTime=0;
   $('debuffBadge').classList.remove('show');
   addLog('✓ Дебафф «Слабость» снят.','success');
-  updateUI();
-  saveGame();
+  updateUI(); saveGame();
 }
 setInterval(updateDebuffTimer, 1000);
 
 const playerNameInput = $('playerNameInput');
-const consentBox = $('consentBox');
-const consentCheck = $('consentCheck');
-const btnConfirm = $('btnConfirm');
-const welcomeOverlay = $('welcomeOverlay');
-const loadingScreen = $('loadingScreen');
-const loadingSub = $('loadingSub');
+const consentBox = $('consentBox'); const consentCheck = $('consentCheck');
+const btnConfirm = $('btnConfirm'); const welcomeOverlay = $('welcomeOverlay');
+const loadingScreen = $('loadingScreen'); const loadingSub = $('loadingSub');
 const systemPanel = $('systemPanel');
 let consentAgreed = false;
-
-function updateConfirmBtn() {
-  btnConfirm.disabled = !(playerNameInput.value.trim().length>=2 && consentAgreed);
-}
+function updateConfirmBtn() { btnConfirm.disabled = !(playerNameInput.value.trim().length>=2 && consentAgreed); }
 playerNameInput.addEventListener('input', updateConfirmBtn);
 consentBox.addEventListener('click', () => {
   consentAgreed = !consentAgreed;
@@ -1610,38 +1248,25 @@ btnConfirm.addEventListener('click', () => {
   if(name.length<2) return;
   G.playerName = name;
   if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
-  btnConfirm.textContent = '...';
-  btnConfirm.disabled = true;
-  loadingScreen.classList.add('show');
-  welcomeOverlay.classList.add('hide');
+  btnConfirm.textContent = '...'; btnConfirm.disabled = true;
+  loadingScreen.classList.add('show'); welcomeOverlay.classList.add('hide');
   runLoadingSequence();
 });
 function runLoadingSequence() {
   const steps = [
-    {text:'Установка связи...',delay:900},
-    {text:'Сканирование души...',delay:800},
-    {text:'Проверка потенциала...',delay:900},
-    {text:'Активация...',delay:700},
+    {text:'Установка связи...',delay:900},{text:'Сканирование души...',delay:800},
+    {text:'Проверка потенциала...',delay:900},{text:'Активация...',delay:700},
     {text:'Пробуждение завершено.',delay:600}
   ];
   let i = 0;
   function next() {
-    if(i>=steps.length) {
-      loadingScreen.classList.remove('show');
-      systemPanel.classList.add('show');
-      G.awakened=true;
-      startGame();
-      return;
-    }
-    loadingSub.textContent = steps[i].text;
-    const delay = steps[i].delay;
-    i++;
-    setTimeout(next, delay);
+    if(i>=steps.length) { loadingScreen.classList.remove('show'); systemPanel.classList.add('show'); G.awakened=true; startGame(); return; }
+    loadingSub.textContent = steps[i].text; const delay = steps[i].delay; i++; setTimeout(next, delay);
   }
   next();
 }
 
-/* ================== МАГАЗИН / ИНВЕНТАРЬ / СПОСОБНОСТИ ================== */
+/* ===== МАГАЗИН / ИНВЕНТАРЬ / СПОСОБНОСТИ ===== */
 function buyItem(id) {
   const item = SHOP_ITEMS.find(i => i.id === id);
   if(!item) return;
@@ -1654,18 +1279,14 @@ function buyItem(id) {
     if(id==='dagger') G.str+=2;
     if(id==='sword') G.str+=5;
     if(id==='armor'){G.maxHp+=30;G.hp+=30;}
-    addLog(`Куплено: ${item.name}.`,'success'); speak(`Куплено: ${item.name}`); triggerFlash('blue');
-  } else {
-    G.inventory[id]=(G.inventory[id]||0)+1;
-    addLog(`Куплено: ${item.name}.`,'success'); speak(`Куплено: ${item.name}`); triggerFlash('blue');
-  }
+  } else { G.inventory[id]=(G.inventory[id]||0)+1; }
+  addLog(`Куплено: ${item.name}.`,'success'); speak(`Куплено: ${item.name}`); triggerFlash('blue');
   updateUI(); renderShop(); saveGame();
 }
 function renderShop() {
   const body = $('shopBody'); body.innerHTML = '';
   SHOP_ITEMS.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'shop-item';
+    const div = document.createElement('div'); div.className = 'shop-item';
     div.innerHTML = `<div class="shop-item-info"><div class="shop-item-name">${item.name}</div><div class="shop-item-desc">${item.desc}</div></div><div class="shop-item-price">${item.price} G</div><button class="shop-buy" data-id="${item.id}">КУПИТЬ</button>`;
     body.appendChild(div);
   });
@@ -1682,22 +1303,18 @@ function useItem(id) {
 }
 function equipItem(id) {
   if(!G.inventory[id] || G.inventory[id] <= 0) return;
-  const rareItem = RARE_ITEMS.find(i => i.id === id);
-  if(!rareItem) return;
+  const rareItem = RARE_ITEMS.find(i => i.id === id); if(!rareItem) return;
   if(rareItem.onEquip) rareItem.onEquip();
-  G.inventory[id]--;
-  if(G.inventory[id] <= 0) delete G.inventory[id];
+  G.inventory[id]--; if(G.inventory[id] <= 0) delete G.inventory[id];
   addLog(`Экипировано: ${rareItem.name}. ${rareItem.desc}`,'success'); speak(`Экипировано: ${rareItem.name}`);
   SFX.reward(); triggerFlash('gold'); updateUI(); renderInventory(); saveGame();
 }
 function sellItem(id) {
   if(!G.inventory[id] || G.inventory[id] <= 0) return;
-  const shopItem = SHOP_ITEMS.find(i => i.id === id);
-  const rareItem = RARE_ITEMS.find(i => i.id === id);
+  const shopItem = SHOP_ITEMS.find(i => i.id === id); const rareItem = RARE_ITEMS.find(i => i.id === id);
   if(!shopItem && !rareItem) return;
   const price = shopItem ? Math.floor(shopItem.price * 0.5) : Math.floor(50 + Math.random()*100);
-  G.gold += price; G.inventory[id]--;
-  if(G.inventory[id] <= 0) delete G.inventory[id];
+  G.gold += price; G.inventory[id]--; if(G.inventory[id] <= 0) delete G.inventory[id];
   addLog(`Продано: ${(shopItem||rareItem).name}. +${price} G.`,'success'); speak(`Продано. Плюс ${price} золота`);
   SFX.success(); updateUI(); renderInventory(); saveGame();
 }
@@ -1706,32 +1323,18 @@ function renderInventory() {
   const items = Object.keys(G.inventory).filter(k => G.inventory[k] > 0);
   if(items.length === 0) { body.innerHTML = '<div class="inv-empty">Инвентарь пуст.</div>'; return; }
   items.forEach(id => {
-    const shopItem = SHOP_ITEMS.find(i => i.id === id);
-    const rareItem = RARE_ITEMS.find(i => i.id === id);
+    const shopItem = SHOP_ITEMS.find(i => i.id === id); const rareItem = RARE_ITEMS.find(i => i.id === id);
     const name = shopItem ? shopItem.name : (rareItem ? rareItem.name : id);
     const isUsable = ['potion_small','potion_large','elixir'].includes(id);
-    const isEquippable = !!rareItem;
-    const isSellable = !!(shopItem || rareItem);
-    const div = document.createElement('div');
-    div.className = 'inv-item';
-    div.innerHTML = `
-      <div class="inv-item-name">${name}</div>
-      <div class="inv-item-count">×${G.inventory[id]}</div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;">
-        ${isUsable ? `<button class="inv-use" data-id="${id}" data-action="use">ИСПОЛЬЗОВАТЬ</button>` : ''}
-        ${isEquippable ? `<button class="inv-use" data-id="${id}" data-action="equip" style="background:linear-gradient(180deg,#ffcc44,#aa8800);border-color:#ffdd88;color:#0a1a10;">ЭКИПИРОВАТЬ</button>` : ''}
-        ${isSellable ? `<button class="inv-use" data-id="${id}" data-action="sell" style="background:linear-gradient(180deg,#556,#334);border-color:#889;color:#dde;">ПРОДАТЬ</button>` : ''}
-      </div>`;
+    const isEquippable = !!rareItem; const isSellable = !!(shopItem || rareItem);
+    const div = document.createElement('div'); div.className = 'inv-item';
+    div.innerHTML = `<div class="inv-item-name">${name}</div><div class="inv-item-count">×${G.inventory[id]}</div><div style="display:flex;gap:4px;flex-wrap:wrap;">${isUsable ? `<button class="inv-use" data-id="${id}" data-action="use">ИСПОЛЬЗОВАТЬ</button>` : ''}${isEquippable ? `<button class="inv-use" data-id="${id}" data-action="equip" style="background:linear-gradient(180deg,#ffcc44,#aa8800);border-color:#ffdd88;color:#0a1a10;">ЭКИПИРОВАТЬ</button>` : ''}${isSellable ? `<button class="inv-use" data-id="${id}" data-action="sell" style="background:linear-gradient(180deg,#556,#334);border-color:#889;color:#dde;">ПРОДАТЬ</button>` : ''}</div>`;
     body.appendChild(div);
   });
-  body.querySelectorAll('.inv-use').forEach(b => {
-    b.addEventListener('click', () => {
-      const action = b.dataset.action; const id = b.dataset.id;
-      if (action === 'use') useItem(id);
-      else if (action === 'equip') equipItem(id);
-      else if (action === 'sell') sellItem(id);
-    });
-  });
+  body.querySelectorAll('.inv-use').forEach(b => b.addEventListener('click', () => {
+    const action = b.dataset.action; const id = b.dataset.id;
+    if (action === 'use') useItem(id); else if (action === 'equip') equipItem(id); else if (action === 'sell') sellItem(id);
+  }));
 }
 function activateAbility(abId) {
   const idx = G.abilities.findIndex(a => a.id === abId);
@@ -1743,13 +1346,13 @@ function activateAbility(abId) {
     case 'bloodlust': G.pendingDamageShield = true; msg = 'Bloodlust: поглотит следующий урон.'; break;
     case 'mutilation': G.xpBoostNext = Math.max(G.xpBoostNext, 1.3); msg = 'Mutilation: следующее задание даст +30% XP.'; break;
     case 'rulers_authority':
-      if (G.arActive && AR.PHASE) { G.pendingReward = true; addLog("Ruler's Authority: текущая AR-фаза засчитана.", 'success'); msg = "Ruler's Authority: фаза засчитана."; }
-      else { addLog("Ruler's Authority: нет активной задачи.", 'fail'); speak('Нет активной задачи'); return; }
+      if (G.arActive && AR.PHASE) { G.pendingReward = true; msg = "Ruler's Authority: фаза засчитана."; }
+      else { addLog("Ruler's Authority: нет активной задачи.", 'fail'); return; }
       break;
     case 'dragons_fear': G.arRewardBoost = true; msg = "Dragon's Fear: следующая AR-охота даст удвоенную награду."; break;
-    case 'shadow_extraction': G.gold += 50; msg = 'Shadow Extraction: извлечена тень, +50 G.'; break;
+    case 'shadow_extraction': G.gold += 50; msg = 'Shadow Extraction: +50 G.'; break;
     case 'shadow_exchange': G.hp = Math.min(G.maxHp, G.hp + 30); msg = 'Shadow Exchange: HP +30.'; break;
-    case 'monarchs_domain': G.xpBoostNext = Math.max(G.xpBoostNext, 1.4); G.pendingDamageShield = true; msg = "Monarch's Domain: +40% XP и защита от одного провала."; break;
+    case 'monarchs_domain': G.xpBoostNext = Math.max(G.xpBoostNext, 1.4); G.pendingDamageShield = true; msg = "Monarch's Domain: +40% XP и защита."; break;
     default: return;
   }
   G.abilities.splice(idx, 1); addLog(msg, 'success'); speak(msg); SFX.reward(); triggerFlash('gold');
@@ -1759,8 +1362,7 @@ function renderAbilities() {
   const body = $('abilitiesBody'); body.innerHTML = '';
   if(G.abilities.length === 0) { body.innerHTML = '<div class="inv-empty">Способности не получены.</div>'; return; }
   G.abilities.forEach(ab => {
-    const div = document.createElement('div');
-    div.className = 'ability-item';
+    const div = document.createElement('div'); div.className = 'ability-item';
     div.innerHTML = `<div class="ability-name">✦ ${ab.name}</div><div class="ability-desc">${ab.desc}</div><button class="inv-use" data-id="${ab.id}" style="margin-top:6px;background:linear-gradient(180deg,#ffcc44,#aa8800);border-color:#ffdd88;color:#0a1a10;">АКТИВИРОВАТЬ</button>`;
     body.appendChild(div);
   });
@@ -1778,7 +1380,7 @@ function grantRandomReward() {
     if(available.length === 0) return;
     const ab = available[Math.floor(Math.random()*available.length)];
     G.abilities.push(ab); showRewardModal('ПОЛУЧЕНА СПОСОБНОСТЬ', ab.name, ab.desc, 'ПРИНЯТЬ'); speak(`Получена способность: ${ab.name}.`);
-  }else{
+  } else {
     const item = RARE_ITEMS[Math.floor(Math.random()*RARE_ITEMS.length)];
     G.inventory[item.id]=(G.inventory[item.id]||0)+1;
     showRewardModal('ПОЛУЧЕН ПРЕДМЕТ', item.name, item.desc, 'ЗАБРАТЬ'); speak(`Получен предмет: ${item.name}.`);
@@ -1788,13 +1390,10 @@ function grantRandomReward() {
 function checkRankUp() {
   const newRank = getRankByLevel(G.level);
   if(newRank !== G.rank) {
-    const oldRank = G.rank;
-    G.rank = newRank;
-    $('rankEl').textContent = G.rank;
+    const oldRank = G.rank; G.rank = newRank; $('rankEl').textContent = G.rank;
     $('rankupText').textContent = `Ваш ранг повышен с ${oldRank} до ${newRank}!`;
     $('rankupOverlay').classList.add('show');
-    speak(`Ранг повышен до ${newRank}.`);
-    SFX.rankup(); triggerFlash('gold');
+    speak(`Ранг повышен до ${newRank}.`); SFX.rankup(); triggerFlash('gold');
     addLog(`★ РАНГ ПОВЫШЕН: ${oldRank} → ${newRank}`,'level');
     setTimeout(() => { if(Math.random()<0.8) grantRandomReward(); }, 1500);
     saveGame();
@@ -1802,38 +1401,21 @@ function checkRankUp() {
 }
 $('btnRankupOk').addEventListener('click', () => $('rankupOverlay').classList.remove('show'));
 
-/* ================== v37: AR + HUD + ранги ================== */
-const cameraView = $('cameraView');
-const videoFeed = $('videoFeed');
-const arMonster = $('arMonster');
-const arMonsterHud = $('arMonsterHud');
-const arMonsterRank = $('arMonsterRank');
-const arMonsterName = $('arMonsterName');
-const arHpFill = $('arHpFill');
-const arMonsterHpText = $('arMonsterHpText');
-const arTimer = $('arTimer');
-const btnAttack = $('btnAttack');
-const arReticle = $('arReticle');
-const arHint = $('arHint');
-const arPointer = $('arPointer');
-const arPointerArrow = $('arPointerArrow');
-const arPointerLabel = $('arPointerLabel');
-const arProgress = $('arProgress');
-const arProgressFill = $('arProgressFill');
-const arAttackWarning = $('arAttackWarning');
-const arDamageVignette = $('arDamageVignette');
-const arSlash = $('arSlash');
-const arPlayerBar = $('arPlayerBar');
-const arPlayerName = $('arPlayerName');
-const arPlayerRank = $('arPlayerRank');
-const arPlayerLevel = $('arPlayerLevel');
-const arPlayerHpFill = $('arPlayerHpFill');
-const arPlayerHpText = $('arPlayerHpText');
-const arPlayerAtk = $('arPlayerAtk');
-const arPlayerDef = $('arPlayerDef');
+/* ===== AR: базовые элементы ===== */
+const cameraView = $('cameraView'); const videoFeed = $('videoFeed');
+const arMonster = $('arMonster'); const arMonsterHud = $('arMonsterHud');
+const arMonsterRank = $('arMonsterRank'); const arMonsterName = $('arMonsterName');
+const arHpFill = $('arHpFill'); const arMonsterHpText = $('arMonsterHpText');
+const arTimer = $('arTimer'); const btnAttack = $('btnAttack');
+const arReticle = $('arReticle'); const arHint = $('arHint');
+const arPointer = $('arPointer'); const arPointerArrow = $('arPointerArrow'); const arPointerLabel = $('arPointerLabel');
+const arProgress = $('arProgress'); const arProgressFill = $('arProgressFill');
+const arAttackWarning = $('arAttackWarning'); const arDamageVignette = $('arDamageVignette'); const arSlash = $('arSlash');
+const arPlayerBar = $('arPlayerBar'); const arPlayerName = $('arPlayerName'); const arPlayerRank = $('arPlayerRank');
+const arPlayerLevel = $('arPlayerLevel'); const arPlayerHpFill = $('arPlayerHpFill'); const arPlayerHpText = $('arPlayerHpText');
+const arPlayerAtk = $('arPlayerAtk'); const arPlayerDef = $('arPlayerDef');
 const arRankWarning = $('arRankWarning');
 
-const MONSTER_RANKS = { E:{rank:'E'}, D:{rank:'D'}, C:{rank:'C'}, B:{rank:'B'}, A:{rank:'A'}, S:{rank:'S'} };
 const MONSTERS = [
   {emoji:'👹', name:'ГНИЛЬНЫЙ ГОБЛИН',      baseRank:'E', hp:20,  reward:10, attackDamage:3,  attackCooldown:2600},
   {emoji:'🕷', name:'ПЕПЕЛЬНЫЙ ПАУК',       baseRank:'E', hp:22,  reward:11, attackDamage:3,  attackCooldown:2500},
@@ -1879,24 +1461,16 @@ const arLook = {
   inView: false, inAttackZone: false,
   orientationHandler: null, detachDragLook: null, rafId: null
 };
-
 let arMonsterAttackInterval = null;
 let arMonsterWarnTimeout = null;
 
-function normalizeAngle(a) {
-  a = ((a % 360) + 360) % 360;
-  return a > 180 ? a - 360 : a;
-}
-
+function normalizeAngle(a) { a = ((a % 360) + 360) % 360; return a > 180 ? a - 360 : a; }
 function requestCamera() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    return Promise.reject(new Error('Камера не поддерживается'));
-  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.reject(new Error('Камера не поддерживается'));
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
     .then(stream => { G.cameraAllowed = true; return stream; })
     .catch(err => { G.cameraAllowed = false; throw err; });
 }
-
 function attachOrientation() {
   const handler = (e) => {
     if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) arLook.camYaw = e.webkitCompassHeading;
@@ -1913,9 +1487,7 @@ function attachOrientation() {
   window.addEventListener('deviceorientation', handler, true);
   return Promise.resolve(true);
 }
-function detachOrientation() {
-  if (arLook.orientationHandler) { window.removeEventListener('deviceorientation', arLook.orientationHandler, true); arLook.orientationHandler = null; }
-}
+function detachOrientation() { if (arLook.orientationHandler) { window.removeEventListener('deviceorientation', arLook.orientationHandler, true); arLook.orientationHandler = null; } }
 function attachDragLook() {
   let dragging = false, sx = 0, sy = 0, startYaw = 0, startPitch = 0;
   const down = (e) => { const p = e.touches ? e.touches[0] : e; dragging = true; sx = p.clientX; sy = p.clientY; startYaw = arLook.camYaw; startPitch = arLook.camPitch; };
@@ -1976,30 +1548,22 @@ function pickMonsterForPlayer() {
   else chosenRank = availableRanks[availableRanks.length - 1];
   const sameRank = MONSTERS.filter(m => m.baseRank === chosenRank);
   const baseMonster = sameRank.length > 0 ? sameRank[Math.floor(Math.random() * sameRank.length)] : MONSTERS[Math.floor(Math.random() * MONSTERS.length)];
-  return {
-    emoji: baseMonster.emoji, name: baseMonster.name, rank: chosenRank,
-    hp: baseMonster.hp, maxHp: baseMonster.hp, reward: baseMonster.reward,
-    attackDamage: baseMonster.attackDamage, attackCooldown: baseMonster.attackCooldown
-  };
+  return { emoji: baseMonster.emoji, name: baseMonster.name, rank: chosenRank, hp: baseMonster.hp, maxHp: baseMonster.hp, reward: baseMonster.reward, attackDamage: baseMonster.attackDamage, attackCooldown: baseMonster.attackCooldown };
 }
 function updateArPlayerHud() {
   arPlayerName.textContent = G.playerName || '—';
-  arPlayerRank.textContent = G.rank;
-  arPlayerRank.className = 'apb-rank rank-' + G.rank;
+  arPlayerRank.textContent = G.rank; arPlayerRank.className = 'apb-rank rank-' + G.rank;
   arPlayerLevel.textContent = G.level;
   const pct = G.hp / G.maxHp * 100;
   arPlayerHpFill.style.width = Math.max(0, pct) + '%';
   arPlayerHpFill.className = 'apb-hp-fill' + (pct <= 25 ? ' critical' : pct <= 50 ? ' low' : '');
   arPlayerHpText.textContent = `${Math.max(0, G.hp)}/${G.maxHp}`;
-  const atk = 8 + Math.floor(G.str / 2) + Math.floor(G.level / 2);
-  const def = Math.floor(G.vit / 3) + Math.floor(G.agi / 5);
-  arPlayerAtk.textContent = atk; arPlayerDef.textContent = def;
+  arPlayerAtk.textContent = 8 + Math.floor(G.str / 2) + Math.floor(G.level / 2);
+  arPlayerDef.textContent = Math.floor(G.vit / 3) + Math.floor(G.agi / 5);
 }
 function updateArMonsterHud() {
-  const m = G.arQuest && G.arQuest.monster;
-  if (!m) return;
-  arMonsterRank.textContent = m.rank;
-  arMonsterRank.className = 'amh-rank rank-' + m.rank;
+  const m = G.arQuest && G.arQuest.monster; if (!m) return;
+  arMonsterRank.textContent = m.rank; arMonsterRank.className = 'amh-rank rank-' + m.rank;
   arMonsterName.textContent = m.name;
   const pct = G.arQuest.hp / G.arQuest.maxHp * 100;
   arHpFill.style.width = Math.max(0, pct) + '%';
@@ -2014,6 +1578,66 @@ function showRankWarning(monsterRank) {
   setTimeout(() => arRankWarning.classList.remove('show'), 4000);
 }
 
+/* FIX #9: единая функция для прицела/стрелки/дуги/кнопки — используется в охоте, заданиях, наказании */
+function arUpdateTargetUI(nearest, isPenalty, phaseType) {
+  if (!nearest) {
+    arPointer.classList.add('hidden');
+    arReticle.classList.remove('active');
+    arProgress.classList.add('hidden');
+    if (isPenalty) { btnAttack.disabled = true; btnAttack.textContent = 'НАВЕДИТЕ НА ЦЕЛЬ'; btnAttack.classList.remove('ready'); }
+    return;
+  }
+  const dYaw = arDeltaYaw(nearest.yaw);
+  const dElev = arDeltaElev(nearest.elev);
+  const dist = Math.hypot(dYaw, dElev);
+  const inReticle = dist < AR.RETICLE_ZONE;
+
+  // Прицел
+  arReticle.classList.toggle('active', inReticle);
+
+  // Дуга — по круговому расстоянию (синхронно с кнопкой)
+  const closeness = Math.max(0, 1 - dist / AR.RETICLE_ZONE);
+  arProgressFill.setAttribute('stroke-dashoffset', (AR_ARC_LENGTH * (1 - closeness)).toFixed(1));
+  arProgressFill.classList.toggle('close', inReticle);
+  arProgress.classList.remove('hidden');
+
+  // Стрелка
+  if (!inReticle) {
+    const anchor = pointerAnchor(dYaw, dElev);
+    arPointer.classList.remove('hidden');
+    arPointer.style.left = anchor.x + 'px';
+    arPointer.style.top = anchor.y + 'px';
+    // FIX #8: инвертировать elev — стрелка вверх, если цель выше
+    const arrowAngle = Math.atan2(-dElev, dYaw);
+    const deg = (arrowAngle * 180 / Math.PI) + 90;
+    arPointerArrow.style.transform = `rotate(${deg}deg)`;
+    arPointerLabel.textContent = `${Math.round(dist)}°`;
+  } else {
+    arPointer.classList.add('hidden');
+  }
+
+  // Кнопка
+  if (isPenalty) {
+    btnAttack.disabled = !inReticle;
+    btnAttack.textContent = inReticle ? 'АТАКОВАТЬ' : 'НАВЕДИТЕ НА ЦЕЛЬ';
+    btnAttack.classList.toggle('ready', inReticle);
+  } else {
+    const tapByDom = ['collect','sequence','parry','track','dodge','scan','protect','hold','balance','avoid_gaze','chase','multi_lock'].includes(phaseType);
+    if (tapByDom) {
+      btnAttack.disabled = true;
+      btnAttack.textContent = 'ТАПНИТЕ ПО ЦЕЛИ';
+      btnAttack.classList.remove('ready');
+    } else {
+      btnAttack.disabled = !inReticle;
+      let btnText = 'АТАКОВАТЬ';
+      if (phaseType === 'shoot') btnText = 'ВЫСТРЕЛ';
+      if (phaseType === 'rhythm') btnText = 'В РИТМ';
+      btnAttack.textContent = inReticle ? btnText : 'НАВЕДИТЕ НА ЦЕЛЬ';
+      btnAttack.classList.toggle('ready', inReticle);
+    }
+  }
+}
+
 function updateMonsterScreenPos() {
   if (!G.arActive || !G.arQuest) return;
   if (G.arQuest.scenario) return; // AR-квест — обновляется через arUpdateAllTargets
@@ -2022,14 +1646,13 @@ function updateMonsterScreenPos() {
   const deltaElev = arLook.monsterElev - arLook.camPitch;
   const inView = Math.abs(deltaYaw) < AR_VIEW_ANGLE / 2 && Math.abs(deltaElev) < AR_ELEV_RANGE / 2;
   arLook.inView = inView;
-  // FIX #1: круговая зона прицела (было: квадратная)
   const inAttackZone = Math.hypot(deltaYaw, deltaElev) < AR_ATTACK_ZONE;
   arLook.inAttackZone = inAttackZone;
   arReticle.classList.toggle('active', inAttackZone);
 
-  const distYaw = Math.min(1, Math.abs(deltaYaw) / (AR_VIEW_ANGLE / 2));
-  const distElev = Math.min(1, Math.abs(deltaElev) / (AR_ELEV_RANGE / 2));
-  const closeness = 1 - Math.max(distYaw, distElev);
+  // FIX #1: дуга по круговому расстоянию, синхронно с кнопкой
+  const dist = Math.hypot(deltaYaw, deltaElev);
+  const closeness = Math.max(0, 1 - dist / AR_ATTACK_ZONE);
   arProgressFill.setAttribute('stroke-dashoffset', (AR_ARC_LENGTH * (1 - closeness)).toFixed(1));
   arProgressFill.classList.toggle('close', inAttackZone);
   arProgress.classList.remove('hidden');
@@ -2043,7 +1666,9 @@ function updateMonsterScreenPos() {
     btnAttack.disabled = true; btnAttack.textContent = inView ? 'НАВЕДИТЕ НА ЦЕЛЬ' : 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
     const anchor = pointerAnchor(deltaYaw, deltaElev);
     arPointer.style.left = anchor.x + 'px'; arPointer.style.top = anchor.y + 'px';
-    const deg = (anchor.angle * 180 / Math.PI) + 90;
+    // FIX #8: инвертировать elev
+    const arrowAngle = Math.atan2(-deltaElev, deltaYaw);
+    const deg = (arrowAngle * 180 / Math.PI) + 90;
     arPointerArrow.style.transform = `rotate(${deg}deg)`;
     const absYaw = Math.round(Math.abs(deltaYaw)), absElev = Math.round(Math.abs(deltaElev));
     let dirText;
@@ -2076,16 +1701,11 @@ function spawnHitParticles(x, y) {
     cameraView.appendChild(p); setTimeout(() => p.remove(), 800);
   }
 }
-function spawnShockwave(x, y) {
-  const w = document.createElement('div'); w.className = 'ar-shockwave';
-  w.style.left = x + 'px'; w.style.top = y + 'px';
-  cameraView.appendChild(w); setTimeout(() => w.remove(), 700);
-}
+function spawnShockwave(x, y) { const w = document.createElement('div'); w.className = 'ar-shockwave'; w.style.left = x + 'px'; w.style.top = y + 'px'; cameraView.appendChild(w); setTimeout(() => w.remove(), 700); }
 function playSlashEffect() { arSlash.classList.remove('show'); void arSlash.offsetWidth; arSlash.classList.add('show'); }
 function startMonsterAttacks() {
   stopMonsterAttacks();
-  const m = G.arQuest && G.arQuest.monster;
-  if (!m) return;
+  const m = G.arQuest && G.arQuest.monster; if (!m) return;
   arMonsterAttackInterval = setInterval(() => {
     if (!G.arActive || !G.arQuest || G.arQuest.hp <= 0) return;
     if (!arLook.inView) return;
@@ -2157,8 +1777,7 @@ function startAR(questData = null) {
     cameraView.classList.add('active'); G.arActive = true;
     const monster = pickMonsterForPlayer();
     G.arQuest = { monster, hp: monster.hp, maxHp: monster.maxHp, timeLeft: 45, timerInterval: null, questData };
-    arMonster.textContent = monster.emoji;
-    arHpFill.style.width = '100%';
+    arMonster.textContent = monster.emoji; arHpFill.style.width = '100%';
     arMonster.classList.remove('dead'); arMonster.classList.remove('locked');
     arMonsterHud.classList.add('hidden');
     btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
@@ -2186,7 +1805,6 @@ function updateARTimer() {
   arTimer.textContent = `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
   arTimer.classList.toggle('danger', t <= 5);
 }
-
 btnAttack.addEventListener('click', () => {
   if (!G.arQuest || G.arQuest.hp <= 0) return;
   if (!arLook.inAttackZone) { SFX.error(); return; }
@@ -2196,8 +1814,7 @@ btnAttack.addEventListener('click', () => {
   G.arQuest.hp -= dmg;
   arMonster.classList.remove('hit'); void arMonster.offsetWidth; arMonster.classList.add('hit');
   SFX.hit(); triggerScreenShake();
-  const dmgEl = document.createElement('div'); dmgEl.className = 'damage-number';
-  dmgEl.textContent = `-${dmg}`;
+  const dmgEl = document.createElement('div'); dmgEl.className = 'damage-number'; dmgEl.textContent = `-${dmg}`;
   dmgEl.style.left = (arMonster.offsetLeft + arMonster.offsetWidth/2) + 'px';
   dmgEl.style.top = (arMonster.offsetTop) + 'px';
   cameraView.appendChild(dmgEl); setTimeout(() => dmgEl.remove(), 800);
@@ -2213,9 +1830,7 @@ function endAR(success) {
   if (G.arQuest && G.arQuest.timerInterval) clearInterval(G.arQuest.timerInterval);
   stopMonsterAttacks(); endARLook();
   if (success) {
-    const m = G.arQuest.monster;
-    const mult = G.arRewardBoost ? 2 : 1;
-    const reward = m.reward * mult;
+    const m = G.arQuest.monster; const mult = G.arRewardBoost ? 2 : 1; const reward = m.reward * mult;
     G.gold += reward;
     if (G.arRewardBoost) { G.arRewardBoost = false; addLog("Dragon's Fear: награда удвоена!", 'success'); }
     showFloatingText(`+${reward} G`, '#ffcc44');
@@ -2233,7 +1848,6 @@ function endAR(success) {
   }
   G.arQuest = null; updateUI(); saveGame();
 }
-
 $('btnAR').addEventListener('click', () => startAR());
 $('btnExitAR').addEventListener('click', () => {
   if (G.arQuest && G.arQuest.timerInterval) clearInterval(G.arQuest.timerInterval);
@@ -2245,20 +1859,25 @@ $('btnExitAR').addEventListener('click', () => {
 });
 
 /* ============================================================
-   v38.2: AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
+   v38.3: AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
    ИСПРАВЛЕНИЯ:
-   - arInReticle: круговая проверка (Math.hypot)
-   - arUpdateAllTargets: активирует прицел и кнопку для квестов и зоны наказания
-   - startQuestTimer: не очищает при 'minigame' — таймер тикает всё время AR
-   - startARQuest: НЕ запускает второй таймер (использует q.remaining от startQuestTimer)
-   - catch в startARQuest: явный failQuest + сброс busy (квест не зависает)
-   - btnComplete: вызывает startARQuest без setTimeout (user gesture для камеры)
+   - arInReticle: Math.hypot (круг)
+   - arUpdateAllTargets: универсальный блок для квестов и наказания
+     (прицел, стрелка, дуга, кнопка)
+   - дуга по круговому расстоянию (синхронно с кнопкой)
+   - atan2(-deltaElev, deltaYaw) — стрелка верх/низ правильно
+   - formatShort: защита от NaN
+   - q.remaining: защита от undefined
+   - aphTimer: обновляется в arUpdateAllTargets
+   - hold: emoji 📦, стрелка в arRunHold
+   - finishARPenalty: без "Территория зачищена"
+   - startARQuest: без второго таймера, catch с явным failQuest
+   - btnComplete: без setTimeout (user gesture для камеры)
    ============================================================ */
 const AR = {
-  VIEW_ANGLE: 70, ELEV_RANGE: 40, RETICLE_ZONE: 22, LOCK_ZONE: 14,
+  VIEW_ANGLE: 70, ELEV_RANGE: 40, RETICLE_ZONE: 22, LOCK_ZONE: 14, ATTACK_ZONE: 22,
   TARGETS: [], PHASE: null, QUEST: null, PENALTY: null, RAF_ID: null, DOM: {}
 };
-
 AR.DOM.phaseHud    = document.getElementById('arPhaseHud');
 AR.DOM.phaseLabel  = document.getElementById('arPhaseLabel');
 AR.DOM.phaseFill   = document.getElementById('arPhaseFill');
@@ -2277,12 +1896,8 @@ function arClamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function arRand(a, b) { return a + Math.random() * (b - a); }
 function arDeltaYaw(targetYaw) { return normalizeAngle(targetYaw - arLook.camYaw); }
 function arDeltaElev(targetElev) { return targetElev - arLook.camPitch; }
-
-// FIX #1: круговая проверка прицела (было: квадратная)
 function arInReticle(target, zone = AR.RETICLE_ZONE) {
-  const dYaw = arDeltaYaw(target.yaw);
-  const dElev = arDeltaElev(target.elev);
-  return Math.hypot(dYaw, dElev) < zone;
+  return Math.hypot(arDeltaYaw(target.yaw), arDeltaElev(target.elev)) < zone;
 }
 function arInView(target) {
   return Math.abs(arDeltaYaw(target.yaw)) < AR.VIEW_ANGLE / 2 && Math.abs(arDeltaElev(target.elev)) < AR.ELEV_RANGE / 2;
@@ -2291,14 +1906,12 @@ function arInView(target) {
 let arTargetSeq = 0;
 function arCreateTarget(opts) {
   const t = {
-    id: 'art_' + (++arTargetSeq),
-    type: opts.type || 'MONSTER', emoji: opts.emoji || '👹',
+    id: 'art_' + (++arTargetSeq), type: opts.type || 'MONSTER', emoji: opts.emoji || '👹',
     yaw: opts.yaw ?? Math.random() * 360, elev: opts.elev ?? arRand(-15, 15),
     hp: opts.hp ?? 10, maxHp: opts.hp ?? 10, moveSpeed: opts.moveSpeed ?? 0,
     hidden: !!opts.hidden, revealed: !opts.hidden, alive: true,
     inView: false, inReticle: false, lockedSec: 0, el: null, hudEl: null,
-    onHit: opts.onHit || null, onCollect: opts.onCollect || null,
-    onMiss: opts.onMiss || null, extra: opts.extra || {}
+    onHit: opts.onHit || null, onCollect: opts.onCollect || null, onMiss: opts.onMiss || null, extra: opts.extra || {}
   };
   const el = document.createElement('div');
   el.className = 'ar-target ar-' + t.type.toLowerCase();
@@ -2307,8 +1920,7 @@ function arCreateTarget(opts) {
   el.style.left = '50%'; el.style.top = '50%'; el.style.transform = 'translate(-50%,-50%)';
   cameraView.appendChild(el); t.el = el;
   if (t.type === 'MONSTER') {
-    const hud = document.createElement('div');
-    hud.className = 'ar-monster-hud hidden';
+    const hud = document.createElement('div'); hud.className = 'ar-monster-hud hidden';
     hud.innerHTML = `<div class="amh-title"><span class="amh-rank rank-${G.rank}">${G.rank}</span><span>${t.emoji}</span></div><div class="amh-hp-bar"><div class="amh-hp-fill" style="width:100%"></div></div><div class="amh-hp-text">${t.hp} / ${t.maxHp}</div>`;
     cameraView.appendChild(hud); t.hudEl = hud;
   }
@@ -2320,20 +1932,15 @@ function arRemoveTarget(t) {
   setTimeout(() => { t.el?.remove(); t.hudEl?.remove(); }, 650);
   AR.TARGETS = AR.TARGETS.filter(x => x !== t);
 }
-function arClearTargets() {
-  AR.TARGETS.forEach(t => { t.el?.remove(); t.hudEl?.remove(); });
-  AR.TARGETS = [];
-}
+function arClearTargets() { AR.TARGETS.forEach(t => { t.el?.remove(); t.hudEl?.remove(); }); AR.TARGETS = []; }
 
 function arUpdateAllTargets() {
   for (const t of AR.TARGETS) {
     if (!t.alive) continue;
     if (t.moveSpeed) t.yaw = (t.yaw + t.moveSpeed * 0.05 + 360) % 360;
-    const dYaw = arDeltaYaw(t.yaw);
-    const dElev = arDeltaElev(t.elev);
+    const dYaw = arDeltaYaw(t.yaw); const dElev = arDeltaElev(t.elev);
     const inView = Math.abs(dYaw) < AR.VIEW_ANGLE / 2 && Math.abs(dElev) < AR.ELEV_RANGE / 2;
     t.inView = inView;
-    // FIX #1: inReticle через круговую проверку
     t.inReticle = Math.hypot(dYaw, dElev) < AR.RETICLE_ZONE;
     if (t.hidden && !t.revealed) {
       if (Math.abs(dYaw) < 20 && Math.abs(dElev) < 20) { t.revealed = true; t.el.style.transition = 'opacity 0.5s'; }
@@ -2349,46 +1956,30 @@ function arUpdateAllTargets() {
     if (t.hudEl) { t.hudEl.style.left = cx + '%'; t.hudEl.style.top = cy + '%'; }
   }
 
-  // FIX #2: активация прицела и кнопки для квестов (как в охоте)
+  // Универсальный блок для квестов и наказания
   if (G.arQuest && !G.arQuest.ended) {
-    const anyInReticle = AR.TARGETS.some(t => t.alive && t.inReticle);
-    arReticle.classList.toggle('active', anyInReticle);
-    const phase = AR.PHASE;
-    const phaseType = phase ? phase.type : null;
-    const tapByDom = ['collect','sequence','parry','track','dodge','scan','protect','hold','balance','avoid_gaze','chase','multi_lock'].includes(phaseType);
-    if (tapByDom) {
-      btnAttack.disabled = true;
-      btnAttack.textContent = 'ТАПНИТЕ ПО ЦЕЛИ';
-      btnAttack.classList.remove('ready');
-    } else if (anyInReticle) {
-      btnAttack.disabled = false;
-      let btnText = 'АТАКОВАТЬ';
-      if (phaseType === 'shoot') btnText = 'ВЫСТРЕЛ';
-      if (phaseType === 'rhythm') btnText = 'В РИТМ';
-      btnAttack.textContent = btnText;
-      btnAttack.classList.add('ready');
-    } else {
-      btnAttack.disabled = true;
-      btnAttack.textContent = 'НАВЕДИТЕ НА ЦЕЛЬ';
-      btnAttack.classList.remove('ready');
-    }
+    const aliveTargets = AR.TARGETS.filter(t => t.alive);
+    const nearest = aliveTargets.sort((a, b) => {
+      const da = Math.hypot(arDeltaYaw(a.yaw), arDeltaElev(a.elev));
+      const db = Math.hypot(arDeltaYaw(b.yaw), arDeltaElev(b.elev));
+      return da - db;
+    })[0];
+    arUpdateTargetUI(nearest, false, AR.PHASE ? AR.PHASE.type : null);
   }
 
-  // FIX: в зоне наказания прицел и кнопка как в охоте
   if (AR.PENALTY && !AR.PENALTY.ended) {
-    const anyInReticle = AR.TARGETS.some(t => t.alive && t.inReticle && t.type === 'MONSTER');
-    arReticle.classList.toggle('active', anyInReticle);
-    if (anyInReticle) {
-      btnAttack.disabled = false;
-      btnAttack.textContent = 'АТАКОВАТЬ';
-      btnAttack.classList.add('ready');
-    } else {
-      btnAttack.disabled = true;
-      btnAttack.textContent = 'НАВЕДИТЕ НА ЦЕЛЬ';
-      btnAttack.classList.remove('ready');
-    }
+    // FIX #2: обновить таймер наказания
+    AR.DOM.aphTimer.textContent = formatShort(Math.max(0, AR.PENALTY.timeLeft));
+    const aliveTargets = AR.TARGETS.filter(t => t.alive && t.type === 'MONSTER');
+    const nearest = aliveTargets.sort((a, b) => {
+      const da = Math.hypot(arDeltaYaw(a.yaw), arDeltaElev(a.elev));
+      const db = Math.hypot(arDeltaYaw(b.yaw), arDeltaElev(b.elev));
+      return da - db;
+    })[0];
+    arUpdateTargetUI(nearest, true, null);
   }
 }
+
 function arSetPhaseHud(label, progress = null) {
   if (!AR.DOM.phaseHud) return;
   AR.DOM.phaseLabel.textContent = label;
@@ -2403,8 +1994,7 @@ function arStrikeTarget(t, dmg) {
   t.hp -= dmg;
   t.el.classList.remove('hit'); void t.el.offsetWidth; t.el.classList.add('hit');
   SFX.hit(); triggerScreenShake();
-  const dmgEl = document.createElement('div'); dmgEl.className = 'damage-number';
-  dmgEl.textContent = `-${dmg}`;
+  const dmgEl = document.createElement('div'); dmgEl.className = 'damage-number'; dmgEl.textContent = `-${dmg}`;
   dmgEl.style.left = t.el.style.left; dmgEl.style.top = t.el.style.top;
   cameraView.appendChild(dmgEl); setTimeout(() => dmgEl.remove(), 800);
   spawnHitParticles(parseFloat(t.el.style.left) / 100 * window.innerWidth, parseFloat(t.el.style.top) / 100 * window.innerHeight);
@@ -2427,8 +2017,7 @@ function arCollectTarget(t) {
 /* ---------- 15 МЕХАНИК ---------- */
 function arRunTrack(phase) {
   return new Promise((resolve) => {
-    const total = phase.targets || 1;
-    let found = 0, current = null;
+    const total = phase.targets || 1; let found = 0, current = null;
     const startTime = Date.now(), limit = (phase.timeLimit || 15) * 1000;
     function spawnNext() {
       if (found >= total) { finish(); return; }
@@ -2459,8 +2048,7 @@ function arRunStrike(phase) {
       if (kills >= totalKills) { finish(true); return; }
       current = arCreateTarget({
         type:'MONSTER', emoji: phase.emoji || '👹',
-        yaw: (arLook.camYaw + arRand(90, 270)) % 360, elev: arRand(-15, 15),
-        hp, moveSpeed: speed,
+        yaw: (arLook.camYaw + arRand(90, 270)) % 360, elev: arRand(-15, 15), hp, moveSpeed: speed,
         onHit: (t, dmg) => {
           if (needTaps) {
             tapCount++;
@@ -2485,8 +2073,7 @@ function arRunStrike(phase) {
     function finish(success) {
       clearInterval(iv); btnAttack.onclick = oldHandler;
       btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
-      if (current && current.alive) arRemoveTarget(current);
-      arHidePhaseHud(); resolve(success);
+      if (current && current.alive) arRemoveTarget(current); arHidePhaseHud(); resolve(success);
     }
     spawnNext();
   });
@@ -2538,10 +2125,8 @@ function arRunDodge(phase) {
     const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(dodged >= total); }, 200);
     function finish(success) {
       clearInterval(iv); clearInterval(spawner);
-      cameraView.removeEventListener('touchstart', onDown);
-      cameraView.removeEventListener('touchend', onUp);
-      cameraView.removeEventListener('mousedown', onDown);
-      cameraView.removeEventListener('mouseup', onUp);
+      cameraView.removeEventListener('touchstart', onDown); cameraView.removeEventListener('touchend', onUp);
+      cameraView.removeEventListener('mousedown', onDown); cameraView.removeEventListener('mouseup', onUp);
       active.forEach(o => { if (o.alive) { o.alive = false; o.el?.remove(); } });
       arHidePhaseHud(); resolve(success);
     }
@@ -2576,7 +2161,8 @@ function arRunHold(phase) {
     const need = (phase.targetSec || 5) * 1000, stability = phase.stability || 0.9, speed = phase.moveSpeed || 0;
     let held = 0; const startTime = Date.now(), limit = (phase.timeLimit || 60) * 1000;
     const ring = AR.DOM.holdRing; ring.classList.add('show');
-    const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🎯', yaw: (arLook.camYaw + arRand(60, 180)) % 360, elev: arRand(-10, 10), hp: 999, moveSpeed: speed });
+    // FIX #5: emoji 📦 для «Удержать груз»
+    const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '📦', yaw: (arLook.camYaw + arRand(60, 180)) % 360, elev: arRand(-10, 10), hp: 999, moveSpeed: speed });
     const iv = setInterval(() => {
       if (!t.alive) { finish(false); return; }
       if (arInReticle(t, 18 * stability + 4)) { held += 100; AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5 * (1 - Math.min(1, held / need))); arSetPhaseHud('УДЕРЖАНИЕ', held / need); }
@@ -2592,10 +2178,7 @@ function arRunSequence(phase) {
     const total = phase.targets || 4, limit = (phase.timeLimit || 15) * 1000;
     let sequence = [], input = [], showing = false; const targets = [];
     for (let i = 0; i < total; i++) {
-      const t = arCreateTarget({
-        type:'RUNE', emoji: ['💠','🔮','⚡','🌟','❄','🔥'][i % 6],
-        yaw: (arLook.camYaw + (i / total) * 360) % 360, elev: arRand(-10, 10), extra: { index: i }
-      });
+      const t = arCreateTarget({ type:'RUNE', emoji: ['💠','🔮','⚡','🌟','❄','🔥'][i % 6], yaw: (arLook.camYaw + (i / total) * 360) % 360, elev: arRand(-10, 10), extra: { index: i } });
       t.el.style.pointerEvents = 'auto'; t.el.style.cursor = 'pointer';
       t.el.addEventListener('click', (e) => { e.stopPropagation(); onTap(t); });
       t.el.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); onTap(t); }, { passive: false });
@@ -2634,8 +2217,7 @@ function arRunSequence(phase) {
 function arRunParry(phase) {
   return new Promise((resolve) => {
     const total = phase.attacks || 5, limit = (phase.timeLimit || 15) * 1000, startTime = Date.now();
-    let parried = 0, current = null, sx = 0, sy = 0;
-    const arrow = AR.DOM.parryArrow;
+    let parried = 0, current = null, sx = 0, sy = 0; const arrow = AR.DOM.parryArrow;
     function spawn() {
       if (parried >= total) { finish(true); return; }
       const yaw = (arLook.camYaw + arRand(60, 180) * (Math.random() < 0.5 ? 1 : -1) + 360) % 360;
@@ -2665,10 +2247,8 @@ function arRunParry(phase) {
     const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(parried >= total); }, 200);
     function finish(success) {
       clearInterval(iv);
-      cameraView.removeEventListener('touchstart', onDown);
-      cameraView.removeEventListener('touchend', onUp);
-      cameraView.removeEventListener('mousedown', onDown);
-      cameraView.removeEventListener('mouseup', onUp);
+      cameraView.removeEventListener('touchstart', onDown); cameraView.removeEventListener('touchend', onUp);
+      cameraView.removeEventListener('mousedown', onDown); cameraView.removeEventListener('mouseup', onUp);
       arrow.classList.remove('show'); if (current && current.alive) arRemoveTarget(current); arHidePhaseHud(); resolve(success);
     }
     spawn();
@@ -2786,7 +2366,7 @@ function arRunBalanceHold(phase) {
   return new Promise((resolve) => {
     const need = (phase.targetSec || 6) * 1000, tol = phase.tiltTolerance || 5;
     const startTime = Date.now(), limit = (phase.timeLimit || 30) * 1000; let held = 0;
-    const t = arCreateTarget({ type:'MONSTER', emoji: '🎯', yaw: arLook.camYaw, elev: 0, hp: 999 });
+    const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '⚖', yaw: arLook.camYaw, elev: 0, hp: 999 });
     const iv = setInterval(() => {
       if (!t.alive) { finish(false); return; }
       const tilt = Math.abs(arLook.camPitch) + Math.abs((arLook.camYaw % 10) - 5);
@@ -2805,7 +2385,7 @@ function arRunTapRhythm(phase) {
     const interval = 60000 / bpm, limit = (phase.timeLimit || 30) * 1000, startTime = Date.now();
     let beatCount = 0, successHits = 0, lastBeatTime = 0, beatActive = false;
     const reticle = document.getElementById('arReticle');
-    const t = arCreateTarget({ type:'MONSTER', emoji: '🎵', yaw: arLook.camYaw, elev: 0, hp: 999 });
+    const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🎵', yaw: arLook.camYaw, elev: 0, hp: 999 });
     const beatIv = setInterval(() => {
       if (beatCount >= beats) { clearInterval(beatIv); return; }
       beatCount++; beatActive = true; lastBeatTime = Date.now();
@@ -2816,10 +2396,8 @@ function arRunTapRhythm(phase) {
     function onAttack() {
       if (!beatActive) { SFX.fail(); return; }
       const dt = Date.now() - lastBeatTime;
-      if (dt <= tolerance) {
-        successHits++; SFX.hit(); arSetPhaseHud(`РИТМ ${successHits} / ${beats}`, successHits / beats);
-        if (successHits >= beats) finish(true);
-      } else { SFX.fail(); }
+      if (dt <= tolerance) { successHits++; SFX.hit(); arSetPhaseHud(`РИТМ ${successHits} / ${beats}`, successHits / beats); if (successHits >= beats) finish(true); }
+      else { SFX.fail(); }
     }
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
@@ -2827,8 +2405,7 @@ function arRunTapRhythm(phase) {
     function finish(success) {
       clearInterval(iv); clearInterval(beatIv);
       btnAttack.onclick = oldHandler; btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
-      reticle.classList.remove('rhythm-beat');
-      if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success);
+      reticle.classList.remove('rhythm-beat'); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success);
     }
   });
 }
@@ -2838,7 +2415,7 @@ function arRunMultiLock(phase) {
     const startTime = Date.now(), limit = (phase.timeLimit || 20) * 1000; let locked = 0; const targets = [];
     const baseYaw = (arLook.camYaw + 180) % 360;
     for (let i = 0; i < total; i++) {
-      const t = arCreateTarget({ type:'MONSTER', emoji: '🎯', yaw: (baseYaw + (i - total/2) * spread / total + 360) % 360, elev: arRand(-10, 10), hp: 999 });
+      const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🎯', yaw: (baseYaw + (i - total/2) * spread / total + 360) % 360, elev: arRand(-10, 10), hp: 999 });
       targets.push(t);
     }
     const iv = setInterval(() => {
@@ -2894,62 +2471,63 @@ const QUEST_AR_SCENARIO = {
   'Выполнить 100 отжиманий': [{ type:'rhythm', beats:10, bpm:120 }],
   'Выполнить 100 приседаний': [{ type:'rhythm', beats:10, bpm:110 }],
   'Выполнить 100 скручиваний': [{ type:'rhythm', beats:8, bpm:100 }],
-  'Удержать планку 3 минуты': [{ type:'balance', targetSec:5, tiltTolerance:5 },{ type:'hold', targetSec:5, stability:0.9 }],
+  'Удержать планку 3 минуты': [{ type:'balance', targetSec:5, tiltTolerance:5, emoji:'⚖' },{ type:'hold', targetSec:5, stability:0.9, emoji:'🎯' }],
   'Пробежать 5 километров': [{ type:'track', targets:3, timeLimit:15 },{ type:'dodge', obstacles:3, timeLimit:10 },{ type:'track', targets:2, timeLimit:10 }],
-  'Удержать груз 5 минут': [{ type:'hold', targetSec:6, stability:0.85 }],
-  'Медитировать 10 минут': [{ type:'balance', targetSec:6, tiltTolerance:4 }],
+  // FIX #5: груз — 📦
+  'Удержать груз 5 минут': [{ type:'hold', targetSec:6, stability:0.85, emoji:'📦' }],
+  'Медитировать 10 минут': [{ type:'balance', targetSec:6, tiltTolerance:4, emoji:'🧘' }],
   'Пробраться через лес': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'avoid_gaze', timeLimit:8, gazeAngle:60 }],
   'Убежать от волков': [{ type:'dodge', obstacles:8, timeLimit:12 }],
-  'Переплыть реку': [{ type:'balance', targetSec:4, tiltTolerance:6 },{ type:'dodge', obstacles:3, timeLimit:8 }],
+  'Переплыть реку': [{ type:'balance', targetSec:4, tiltTolerance:6, emoji:'🌊' },{ type:'dodge', obstacles:3, timeLimit:8 }],
   'Пройти через болото': [{ type:'dodge', obstacles:6, timeLimit:12 }],
   'Разведать подземелье': [{ type:'scan', hiddenPoints:3, timeLimit:15 }],
   'Найти скрытый проход': [{ type:'scan', hiddenPoints:1, timeLimit:12, scanRadius:10 }],
   'Отследить лазутчика': [{ type:'chase', chaseSec:5, moveSpeed:2 }],
   'Собрать редкие травы': [{ type:'collect', items:10, timeLimit:20, spawnRate:600, emoji:'🌿' }],
   'Защитить караван': [{ type:'protect', waves:2, enemiesPerWave:2, protectSec:12 },{ type:'strike', hp:15, emoji:'👹', moveSpeed:1, count:2 }],
-  'Пережить видение': [{ type:'hold', targetSec:5, stability:0.85 }],
+  'Пережить видение': [{ type:'hold', targetSec:5, stability:0.85, emoji:'🔮' }],
   'Ответить на зов': [{ type:'sequence', targets:3, timeLimit:12 }],
   'Поговорить с духом': [{ type:'sequence', targets:4, timeLimit:15 }],
   'Пройти испытание страхом': [{ type:'dodge', obstacles:6, timeLimit:15 }],
   'Вспомнить прошлое': [{ type:'sequence', targets:4, timeLimit:15 }],
-  'Пробудить скрытый навык': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'hold', targetSec:3, stability:0.9 }],
+  'Пробудить скрытый навык': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'hold', targetSec:3, stability:0.9, emoji:'✨' }],
   'Уклониться от 100 стрел': [{ type:'dodge', obstacles:10, timeLimit:15 },{ type:'parry', attacks:3, timeLimit:10 }],
   'Поймать 50 монет': [{ type:'collect', items:15, timeLimit:20, spawnRate:500, emoji:'🪙' }],
   'Ударить 100 раз за минуту': [{ type:'rhythm', beats:15, bpm:180 },{ type:'strike', hp:100, emoji:'👹', tapCount:30 }],
   'Успеть до заката': [{ type:'track', targets:1, timeLimit:10 },{ type:'strike', hp:15, emoji:'👺', moveSpeed:1 }],
   'Уничтожить гнездо пауков': [{ type:'strike', hp:12, emoji:'🕷', moveSpeed:1, count:4 },{ type:'collect', items:5, timeLimit:12, spawnRate:600, emoji:'🥚' }],
   'Отбить атаку волков': [{ type:'parry', attacks:3, timeLimit:10 },{ type:'dodge', obstacles:4, timeLimit:10 },{ type:'strike', hp:25, emoji:'🐺', moveSpeed:2, count:3 }],
-  'Победить орка-воина': [{ type:'strike', hp:40, emoji:'👺', moveSpeed:1 },{ type:'hold', targetSec:3, stability:0.9 },{ type:'strike', hp:40, emoji:'👺', moveSpeed:1 }],
+  'Победить орка-воина': [{ type:'strike', hp:40, emoji:'👺', moveSpeed:1 },{ type:'hold', targetSec:3, stability:0.9, emoji:'🎯' },{ type:'strike', hp:40, emoji:'👺', moveSpeed:1 }],
   'Уничтожить призрака': [{ type:'scan', hiddenPoints:1, timeLimit:10 },{ type:'strike', hp:35, emoji:'👻', moveSpeed:2 }],
   'Пробежать 10 километров': [{ type:'track', targets:6, timeLimit:20 },{ type:'dodge', obstacles:4, timeLimit:10 }],
   '50 отжиманий на одной руке': [{ type:'rhythm', beats:12, bpm:130 }],
   '50 подтягиваний': [{ type:'rhythm', beats:10, bpm:120 }],
   '100 приседаний с весом': [{ type:'rhythm', beats:12, bpm:110 }],
-  'Контроль маны': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'hold', targetSec:3, stability:0.9 }],
+  'Контроль маны': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'hold', targetSec:3, stability:0.9, emoji:'🔮' }],
   'Выжить в зоне наказания': [{ type:'dodge', obstacles:10, timeLimit:15 },{ type:'avoid_gaze', timeLimit:5, gazeAngle:50 }],
   'Скрыться от преследования': [{ type:'avoid_gaze', timeLimit:8, gazeAngle:50 }],
   'Взобраться на скалу': [{ type:'track', targets:5, timeLimit:15 },{ type:'dodge', obstacles:4, timeLimit:10 }],
   'Найти выход из подземелья': [{ type:'sequence', targets:5, timeLimit:18 },{ type:'scan', hiddenPoints:2, timeLimit:10 }],
   'Обследовать руины': [{ type:'scan', hiddenPoints:4, timeLimit:15 }],
-  'Найти источник маны': [{ type:'scan', hiddenPoints:1, timeLimit:12 },{ type:'hold', targetSec:3, stability:0.9 }],
+  'Найти источник маны': [{ type:'scan', hiddenPoints:1, timeLimit:12 },{ type:'hold', targetSec:3, stability:0.9, emoji:'💠' }],
   'Найти пропавшего охотника': [{ type:'track', targets:1, timeLimit:12 }],
   'Защитить деревню': [{ type:'protect', waves:2, enemiesPerWave:3, protectSec:12 },{ type:'strike', hp:20, emoji:'👹', moveSpeed:1, count:3 }],
-  'Удержать мост': [{ type:'protect', waves:2, enemiesPerWave:3, protectSec:12 },{ type:'hold', targetSec:5, stability:0.85 }],
+  'Удержать мост': [{ type:'protect', waves:2, enemiesPerWave:3, protectSec:12 },{ type:'hold', targetSec:5, stability:0.85, emoji:'🌉' }],
   'Охранять сокровищницу': [{ type:'protect', waves:2, enemiesPerWave:2, protectSec:12 },{ type:'collect', items:8, timeLimit:15, spawnRate:600, emoji:'🪙' }],
   'Открыть врата': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'rhythm', beats:5, bpm:100 }],
   'Сломать печать': [{ type:'strike', hp:25, emoji:'🔮', count:5 },{ type:'rhythm', beats:5, bpm:120 }],
-  'Закрыть разлом': [{ type:'hold', targetSec:8, stability:0.85 },{ type:'balance', targetSec:4, tiltTolerance:6 }],
+  'Закрыть разлом': [{ type:'hold', targetSec:8, stability:0.85, emoji:'🌀' },{ type:'balance', targetSec:4, tiltTolerance:6, emoji:'⚖' }],
   'Пробежать полосу препятствий': [{ type:'track', targets:5, timeLimit:15 },{ type:'dodge', obstacles:4, timeLimit:10 }],
   'Парировать 50 атак': [{ type:'parry', attacks:5, timeLimit:15 },{ type:'dodge', obstacles:5, timeLimit:10 }],
   'Выжить в ловушке': [{ type:'dodge', obstacles:10, timeLimit:15 },{ type:'avoid_gaze', timeLimit:5, gazeAngle:50 }],
   'Зачистить логово гоблинов': [{ type:'strike', hp:15, emoji:'👹', moveSpeed:1, count:5 },{ type:'collect', items:3, timeLimit:10, spawnRate:600, emoji:'🪙' }],
-  'Сразить каменного голема': [{ type:'strike', hp:60, emoji:'🗿' },{ type:'hold', targetSec:4, stability:0.85 },{ type:'strike', hp:60, emoji:'🗿' }],
+  'Сразить каменного голема': [{ type:'strike', hp:60, emoji:'🗿' },{ type:'hold', targetSec:4, stability:0.85, emoji:'🗿' },{ type:'strike', hp:60, emoji:'🗿' }],
   'Уничтожить летающего змея': [{ type:'shoot', targets:3, timeLimit:12, speed:3, emoji:'🐍' },{ type:'strike', hp:40, emoji:'🐍', moveSpeed:3, dodgeChance:0.3 }],
   'Сразить минотавра': [{ type:'strike', hp:70, emoji:'🐂', moveSpeed:2, dodgeChance:0.4 },{ type:'dodge', obstacles:4, timeLimit:10 }],
-  '200 бёрпи': [{ type:'rhythm', beats:20, bpm:140 },{ type:'hold', targetSec:5, stability:0.8 }],
+  '200 бёрпи': [{ type:'rhythm', beats:20, bpm:140 },{ type:'hold', targetSec:5, stability:0.8, emoji:'💪' }],
   'Закартировать подземелье': [{ type:'sequence', targets:6, timeLimit:20 },{ type:'scan', hiddenPoints:2, timeLimit:10 }],
   'Оборонять лагерь': [{ type:'protect', waves:3, enemiesPerWave:3, protectSec:15 },{ type:'strike', hp:20, emoji:'👺', moveSpeed:1, count:4 }],
-  'Удержать ворота': [{ type:'protect', waves:3, enemiesPerWave:3, protectSec:15 },{ type:'hold', targetSec:6, stability:0.85 }],
+  'Удержать ворота': [{ type:'protect', waves:3, enemiesPerWave:3, protectSec:15 },{ type:'hold', targetSec:6, stability:0.85, emoji:'🚪' }],
   'Сразить вожака стаи': [{ type:'strike', hp:80, emoji:'🐺', moveSpeed:2 },{ type:'dodge', obstacles:4, timeLimit:10 },{ type:'parry', attacks:2, timeLimit:8 }],
   'Принять силу тени': [{ type:'sequence', targets:5, timeLimit:18 },{ type:'multi_lock', targets:2, lockSec:3, spread:20 }],
   'Победить на арене': [{ type:'strike', hp:70, emoji:'👹', moveSpeed:2, dodgeChance:0.4 },{ type:'parry', attacks:3, timeLimit:10 }],
@@ -2958,30 +2536,29 @@ const QUEST_AR_SCENARIO = {
   'Победить короля гоблинов': [{ type:'strike', hp:100, emoji:'👑', moveSpeed:1 },{ type:'collect', items:10, timeLimit:15, spawnRate:600, emoji:'👺' },{ type:'strike', hp:100, emoji:'👑', moveSpeed:1 }],
   'Сразить королеву пауков': [{ type:'strike', hp:120, emoji:'🕷', moveSpeed:1, dodgeChance:0.3 },{ type:'collect', items:8, timeLimit:15, spawnRate:600, emoji:'🥚' },{ type:'dodge', obstacles:5, timeLimit:12 }],
   'Победить тёмного мага': [{ type:'sequence', targets:5, timeLimit:18 },{ type:'strike', hp:100, emoji:'🧙', moveSpeed:1, dodgeChance:0.4 },{ type:'parry', attacks:3, timeLimit:10 }],
-  'Уничтожить демона': [{ type:'dodge', obstacles:6, timeLimit:12 },{ type:'hold', targetSec:5, stability:0.8 },{ type:'strike', hp:150, emoji:'😈', moveSpeed:2, dodgeChance:0.4 },{ type:'parry', attacks:3, timeLimit:10 }],
+  'Уничтожить демона': [{ type:'dodge', obstacles:6, timeLimit:12 },{ type:'hold', targetSec:5, stability:0.8, emoji:'😈' },{ type:'strike', hp:150, emoji:'😈', moveSpeed:2, dodgeChance:0.4 },{ type:'parry', attacks:3, timeLimit:10 }],
   'Уничтожить некроманта': [{ type:'strike', hp:130, emoji:'💀', moveSpeed:1, dodgeChance:0.4 },{ type:'collect', items:8, timeLimit:15, spawnRate:600, emoji:'💠' },{ type:'sequence', targets:3, timeLimit:12 }],
   'Победить командира орков': [{ type:'strike', hp:160, emoji:'👺', moveSpeed:2, dodgeChance:0.4 },{ type:'dodge', obstacles:6, timeLimit:12 },{ type:'parry', attacks:3, timeLimit:10 }],
   'Сразить повелителя демонов': [{ type:'sequence', targets:5, timeLimit:15 },{ type:'dodge', obstacles:6, timeLimit:12 },{ type:'strike', hp:180, emoji:'😈', moveSpeed:2, dodgeChance:0.4 },{ type:'multi_lock', targets:2, lockSec:4, spread:20 }],
-  'Победить древнего голема': [{ type:'strike', hp:200, emoji:'🗿', dodgeChance:0.3 },{ type:'hold', targetSec:5, stability:0.85 },{ type:'balance', targetSec:4, tiltTolerance:6 }],
+  'Победить древнего голема': [{ type:'strike', hp:200, emoji:'🗿', dodgeChance:0.3 },{ type:'hold', targetSec:5, stability:0.85, emoji:'🗿' },{ type:'balance', targetSec:4, tiltTolerance:6, emoji:'⚖' }],
   'Уничтожить архилича': [{ type:'sequence', targets:5, timeLimit:15 },{ type:'dodge', obstacles:6, timeLimit:12 },{ type:'strike', hp:180, emoji:'💀', moveSpeed:1, dodgeChance:0.4 },{ type:'multi_lock', targets:3, lockSec:4, spread:25 }],
-  'Сразить дракона': [{ type:'track', targets:1, timeLimit:12 },{ type:'dodge', obstacles:8, timeLimit:15 },{ type:'strike', hp:250, emoji:'🐉', moveSpeed:2, dodgeChance:0.4 },{ type:'hold', targetSec:5, stability:0.8 },{ type:'multi_lock', targets:3, lockSec:4, spread:25 }],
+  'Сразить дракона': [{ type:'track', targets:1, timeLimit:12 },{ type:'dodge', obstacles:8, timeLimit:15 },{ type:'strike', hp:250, emoji:'🐉', moveSpeed:2, dodgeChance:0.4 },{ type:'hold', targetSec:5, stability:0.8, emoji:'🐉' },{ type:'multi_lock', targets:3, lockSec:4, spread:25 }],
   'Победить теневого монарха': [{ type:'sequence', targets:6, timeLimit:18 },{ type:'dodge', obstacles:8, timeLimit:15 },{ type:'strike', hp:300, emoji:'🦁', moveSpeed:2, dodgeChance:0.5 },{ type:'multi_lock', targets:3, lockSec:5, spread:20 }],
   'Уничтожить ледяную королеву': [{ type:'strike', hp:280, emoji:'❄', moveSpeed:1, dodgeChance:0.4 },{ type:'dodge', obstacles:8, timeLimit:15 },{ type:'collect', items:10, timeLimit:15, spawnRate:600, emoji:'❄' },{ type:'parry', attacks:4, timeLimit:12 }]
 };
 
-// FIX #3: startARQuest — НЕ запускает второй таймер (использует q.remaining от startQuestTimer)
 async function startARQuest(q) {
   if (G.arActive) return;
   try {
     const stream = await requestCamera();
     videoFeed.srcObject = stream; G.stream = stream;
     cameraView.classList.add('active'); G.arActive = true;
+    // FIX: защита q.remaining от undefined
+    if (typeof q.remaining !== 'number' || !isFinite(q.remaining)) q.remaining = q.duration || 120;
     G.arQuest = { quest: q, scenario: QUEST_AR_SCENARIO[q.name] || [{ type:'strike', hp:20, emoji:'👹' }], ended: false };
     arClearTargets(); AR.QUEST = G.arQuest;
     await attachOrientation().catch(() => false);
     attachDragLook(); scheduleARUpdate();
-
-    // FIX #3: не перезаписываем q.remaining — его уже тикает startQuestTimer
     $('arTimer').textContent = formatShort(Math.max(0, q.remaining));
     const timerIv = setInterval(() => {
       if (!G.arActive || !G.arQuest || G.arQuest.ended) { clearInterval(timerIv); return; }
@@ -3006,7 +2583,6 @@ async function startARQuest(q) {
   } catch (err) {
     addLog('Ошибка AR: ' + (err.message || err), 'fail');
     speak('Ошибка камеры.'); triggerFlash('red');
-    // FIX: явный сброс — квест не зависает
     G.arActive = false; AR.PHASE = null; AR.QUEST = null;
     arClearTargets(); arHidePhaseHud();
     if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
@@ -3033,7 +2609,6 @@ function finishARQuest(success) {
   videoFeed.srcObject = null; cameraView.classList.remove('active'); G.arActive = false;
   detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
   const q = G.arQuest.quest; G.arQuest = null;
-  // FIX: сброс busy/phase — иначе задания не появляются
   G.busy = false;
   if (success) { addLog(`✓ AR-задание «${q.name}» выполнено!`, 'success'); speak('Задание выполнено.'); completeQuestReward(q); }
   else { addLog(`✕ AR-задание «${q.name}» провалено.`, 'fail'); speak('Задание провалено.'); failQuest('AR-провал'); }
@@ -3068,7 +2643,7 @@ async function startARPenalty() {
       AR.DOM.aphTimer.textContent = formatShort(Math.max(0, AR.PENALTY.timeLeft));
       if (AR.PENALTY.timeLeft <= 0) finishARPenalty(false);
     }, 1000);
-    // FIX: кнопка управляется arUpdateAllTargets (как в охоте)
+    // Кнопка управляется arUpdateAllTargets (как в охоте)
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = () => {
       if (!AR.PENALTY) return;
@@ -3109,6 +2684,7 @@ function finishARPenalty(success) {
   AR.DOM.penaltyHud.classList.remove('show'); AR.PENALTY = null;
   if (success) {
     G.hp = Math.min(G.maxHp, G.hp + 20); G.gold += 10;
+    // FIX #3: без "Территория зачищена"
     addLog('✓ Вырвались из зоны наказания! +20 HP, +10 G.', 'success');
     showFloatingText('+20 HP', '#44ff88'); showFloatingText('+10 G', '#ffcc44');
     SFX.penaltyWin(); speak('Вы вырвались.');
@@ -3123,26 +2699,20 @@ function finishARPenalty(success) {
   setTimeout(() => { if (!G.busy && !G.inPenalty && !G.mgActive) scheduleNextQuest(); }, 2000);
 }
 
-/* ================== Старая зона наказания (не используется) ================== */
-const penaltyZone = $('penaltyZone');
-const penaltyField = $('penaltyField');
-const penaltyTimerEl = $('penaltyTimer');
-const penaltyScoreEl = $('penaltyScore');
+/* ===== Старая зона наказания (не используется) ===== */
+const penaltyZone = $('penaltyZone'); const penaltyField = $('penaltyField');
+const penaltyTimerEl = $('penaltyTimer'); const penaltyScoreEl = $('penaltyScore');
 const btnSurrender = $('btnSurrender');
 let penaltyActive = false, penaltyTimeLeft = 60, penaltyCollected = 0;
 let penaltyTimerInterval = null, penaltySpawnInterval = null;
 function getBallLifetime(rank) { const base = {E:1500,D:1300,C:1100,B:900,A:800,S:700}; return base[rank]||1500; }
-function startPenaltyZone() { /* v38.2: не используется */ }
+function startPenaltyZone() { /* v38.3: не используется */ }
 function collectBall(ball) { if(!penaltyActive || ball.classList.contains('collected')) return; ball.classList.add('collected'); penaltyCollected++; penaltyScoreEl.textContent = penaltyCollected; SFX.ballPop(); if(penaltyCollected >= 55) endPenaltyZone(true); }
 function endPenaltyZone(success) { if(!penaltyActive) return; penaltyActive = false; clearInterval(penaltyTimerInterval); clearInterval(penaltySpawnInterval); penaltyField.innerHTML = ''; setTimeout(() => penaltyZone.classList.remove('active'), 1500); }
 btnSurrender.addEventListener('click', () => { if(penaltyActive) endPenaltyZone(false); });
 
 function takeDamage(dmg, reason) {
-  if (G.pendingDamageShield) {
-    G.pendingDamageShield = false;
-    addLog('Защита сработала: урон поглощён.', 'success');
-    speak('Защита поглотила урон'); saveGame(); return;
-  }
+  if (G.pendingDamageShield) { G.pendingDamageShield = false; addLog('Защита сработала: урон поглощён.', 'success'); speak('Защита поглотила урон'); saveGame(); return; }
   G.hp = Math.max(0, G.hp - dmg);
   if (G.arActive) updateArPlayerHud();
   triggerFlash('red'); triggerScreenShake();
@@ -3252,7 +2822,6 @@ function pickRandomQuest() {
   return (highest.length>0 && Math.random()<0.6) ? highest[Math.floor(Math.random()*highest.length)]() : available[Math.floor(Math.random()*available.length)]();
 }
 
-// FIX #4: не очищаем таймер при 'minigame' — пусть тикает во время AR
 function startQuestTimer(q) {
   if (G.timerInterval) clearInterval(G.timerInterval);
   if (!q || q.remaining === undefined) return;
@@ -3268,8 +2837,7 @@ function startQuestTimer(q) {
       $('timerNumber').className = 'timer-number danger';
       $('timerFill').style.width = '0%';
       $('timerFill').className = 'timer-fill danger';
-      failQuest('Время истекло');
-      return;
+      failQuest('Время истекло'); return;
     }
     $('timerNumber').textContent = formatTime(q.remaining);
     $('timerFill').style.width = (q.remaining / total * 100) + '%';
@@ -3288,8 +2856,7 @@ function showQuest(q, isPenalty=false) {
   if (q.isPenalty === undefined) q.isPenalty = isPenalty;
   if (!q.duration) q.duration = q.minTime + Math.random()*(q.maxTime - q.minTime);
   q.remaining = q.duration; q.completed = false;
-  $('questName').textContent = q.name;
-  $('questDesc').textContent = q.desc;
+  $('questName').textContent = q.name; $('questDesc').textContent = q.desc;
   $('questRank').textContent = q.rank;
   $('questTitleText').textContent = q.isPenalty ? 'ЗОНА НАКАЗАНИЯ' : 'НОВОЕ ЗАДАНИЕ';
   $('timerNumber').textContent = formatTime(q.duration);
@@ -3306,15 +2873,13 @@ function showQuest(q, isPenalty=false) {
 }
 
 $('btnComplete').addEventListener('click', () => {
-  const q = G.activeQuest;
-  if (!q) return;
+  const q = G.activeQuest; if (!q) return;
   if (G.questPhase === 'active') {
     startQuestTimer(q);
-    $('btnComplete').disabled = true;
-    $('btnComplete').textContent = 'ВЫПОЛНЕНИЕ...';
+    $('btnComplete').disabled = true; $('btnComplete').textContent = 'ВЫПОЛНЕНИЕ...';
     G.questPhase = 'minigame';
     $('questOverlay').classList.remove('show');
-    startARQuest(q); // FIX: без setTimeout — сохраняем user gesture для камеры
+    startARQuest(q);
   } else if (G.pendingReward) {
     completeQuestReward(q);
   }
@@ -3340,8 +2905,7 @@ function completeQuestReward(q) {
   scheduleNextQuest();
 }
 function failQuest(reason) {
-  const q = G.activeQuest;
-  if (!q) return;
+  const q = G.activeQuest; if (!q) return;
   if (G.timerInterval) { clearInterval(G.timerInterval); G.timerInterval = null; }
   q.completed = true; SFX.fail();
   $('questOverlay').classList.remove('show');
@@ -3385,11 +2949,9 @@ function scheduleFirstQuest() {
     if (!G.busy && !G.inPenalty && !penaltyActive) showQuest(pickRandomQuest());
   }, 30000+Math.random()*60000);
 }
-
 function startGame() {
   if (G.started) return;
-  G.started = true;
-  updateUI();
+  G.started = true; updateUI();
   if (G.debuffActive && G.debuffEndTime > 0) {
     const left = (G.debuffEndTime - Date.now()) / 1000;
     if (left > 0) addLog(`Дебафф «Слабость» активен ещё ${formatShort(left)}.`, 'penalty');
@@ -3407,8 +2969,7 @@ function startGame() {
     speak(`С возвращением, ${G.playerName}.`);
     if (G.questCollapsed && G.activeQuest) {
       const q = G.activeQuest;
-      const card = document.createElement('div');
-      card.className = 'quest-card';
+      const card = document.createElement('div'); card.className = 'quest-card';
       card.innerHTML = `<div class="quest-card-info"><div class="quest-card-name">${q.isPenalty ? '⚠ ' : ''}${q.name}</div><span class="quest-card-rank">РАНГ ${q.rank}</span></div><div class="quest-card-timer">${formatTime(q.remaining || q.duration)}</div>`;
       card.addEventListener('click', () => { $('questOverlay').classList.add('show'); card.remove(); G.questCollapsed = false; saveGame(); });
       logArea.appendChild(card); logArea.scrollTop = logArea.scrollHeight;
@@ -3422,8 +2983,7 @@ function startGame() {
 $('btnSettings').addEventListener('click', () => $('settingsOverlay').classList.add('show'));
 $('btnCloseSettings').addEventListener('click', () => $('settingsOverlay').classList.remove('show'));
 $('btnCameraPerm').addEventListener('click', async () => {
-  const btn = $('btnCameraPerm');
-  btn.textContent = 'ЗАПРОС...';
+  const btn = $('btnCameraPerm'); btn.textContent = 'ЗАПРОС...';
   try {
     const stream = await requestCamera();
     if (G.stream) G.stream.getTracks().forEach(t => t.stop());
@@ -3431,10 +2991,7 @@ $('btnCameraPerm').addEventListener('click', async () => {
     btn.textContent = 'РАЗРЕШЕНО'; btn.classList.add('on');
     addLog('Доступ к камере разрешён.', 'success'); speak('Камера разрешена.');
     if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
-  } catch(e) {
-    btn.textContent = 'ОТКЛОНЕНО';
-    addLog('Доступ к камере отклонён.', 'fail'); speak('Камера отклонена.');
-  }
+  } catch(e) { btn.textContent = 'ОТКЛОНЕНО'; addLog('Доступ к камере отклонён.', 'fail'); speak('Камера отклонена.'); }
 });
 $('btnSpeechToggle').addEventListener('click', () => {
   G.speechEnabled = !G.speechEnabled;
@@ -3454,8 +3011,7 @@ $('btnAbilities').addEventListener('click', () => { renderAbilities(); $('abilit
 $('btnCloseAbilities').addEventListener('click', () => $('abilitiesOverlay').classList.remove('show'));
 
 $('statusOverlay').addEventListener('click', (e) => {
-  const btn = e.target.closest('.stat-plus');
-  if (!btn) return;
+  const btn = e.target.closest('.stat-plus'); if (!btn) return;
   if (G.statPoints <= 0) return;
   const stat = btn.dataset.stat;
   if (stat === 'str') G.str++;
@@ -3463,18 +3019,15 @@ $('statusOverlay').addEventListener('click', (e) => {
   if (stat === 'agi') G.agi++;
   if (stat === 'int') G.int++;
   if (stat === 'per') G.per++;
-  G.statPoints--;
-  playTone(880,0.1,'sine',0.1);
+  G.statPoints--; playTone(880,0.1,'sine',0.1);
   updateUI(); renderStatus(); saveGame();
 });
 $('btnReset').addEventListener('click', resetGame);
 
 $('btnCollapse').addEventListener('click', () => {
-  const q = G.activeQuest;
-  if (!q) return;
+  const q = G.activeQuest; if (!q) return;
   $('questOverlay').classList.remove('show');
-  const card = document.createElement('div');
-  card.className = 'quest-card';
+  const card = document.createElement('div'); card.className = 'quest-card';
   card.innerHTML = `<div class="quest-card-info"><div class="quest-card-name">${q.isPenalty ? '⚠ ' : ''}${q.name}</div><span class="quest-card-rank">РАНГ ${q.rank}</span></div><div class="quest-card-timer">${formatTime(q.remaining || q.duration)}</div>`;
   card.addEventListener('click', () => { $('questOverlay').classList.add('show'); card.remove(); G.questCollapsed = false; saveGame(); });
   logArea.appendChild(card); logArea.scrollTop = logArea.scrollHeight;
@@ -3482,14 +3035,8 @@ $('btnCollapse').addEventListener('click', () => {
 });
 
 const blocker = $('blocker');
-function beforeUnloadHandler(e) {
-  saveGameNow();
-  if (G.awakened) { e.preventDefault(); e.returnValue = 'Система не отпускает вас.'; return e.returnValue; }
-}
-function popstateHandler() {
-  history.pushState(null, '', location.href);
-  if (G.awakened) { blocker.classList.add('show'); speak('Вы не можете покинуть Систему.'); }
-}
+function beforeUnloadHandler(e) { saveGameNow(); if (G.awakened) { e.preventDefault(); e.returnValue = 'Система не отпускает вас.'; return e.returnValue; } }
+function popstateHandler() { history.pushState(null, '', location.href); if (G.awakened) { blocker.classList.add('show'); speak('Вы не можете покинуть Систему.'); } }
 window.addEventListener('beforeunload', beforeUnloadHandler);
 history.pushState(null, '', location.href);
 window.addEventListener('popstate', popstateHandler);
@@ -3533,8 +3080,7 @@ function attachRipple(e) {
   const size = Math.max(rect.width, rect.height);
   const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
   const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-  const wave = document.createElement('span');
-  wave.className = 'ripple-wave';
+  const wave = document.createElement('span'); wave.className = 'ripple-wave';
   wave.style.width = wave.style.height = size + 'px';
   wave.style.left = (rect.left + x - size/2) + 'px';
   wave.style.top = (rect.top + y - size/2) + 'px';
