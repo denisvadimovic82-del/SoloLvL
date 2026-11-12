@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050a18">
-<title>Solo Leveling — Система (v38.8 unified AR)</title>
+<title>Solo Leveling — Система (v38.9 unified AR)</title>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
 html, body { width:100vw; height:100vh; height:100dvh; overflow:hidden; position:fixed; inset:0; background:#000; font-family:'Segoe UI',sans-serif; color:#b8d4ff; }
@@ -904,8 +904,8 @@ const G = {
   mgActive:false, mgQuest:null, pendingReward:false,
   questCollapsed:false, pendingDamageShield:false, xpBoostNext:1, arRewardBoost:false
 };
-const SAVE_KEY = 'solo_leveling_v388';
-const LEGACY_KEYS = ['solo_leveling_v387','solo_leveling_v386','solo_leveling_v385','solo_leveling_v384','solo_leveling_v383','solo_leveling_v382','solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36','solo_leveling_v35','solo_leveling_v34','solo_leveling_v33','solo_leveling_v31','solo_leveling_v30'];
+const SAVE_KEY = 'solo_leveling_v389';
+const LEGACY_KEYS = ['solo_leveling_v388','solo_leveling_v387','solo_leveling_v386','solo_leveling_v385','solo_leveling_v384','solo_leveling_v383','solo_leveling_v382','solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36','solo_leveling_v35','solo_leveling_v34','solo_leveling_v33','solo_leveling_v31','solo_leveling_v30'];
 
 let _saveTimer = null;
 function saveGame() {
@@ -1661,7 +1661,8 @@ $('btnExitAR').addEventListener('click', () => {
 let AR = null;
 let finishARQuest = (success) => { if (typeof _finishARQuest === 'function') _finishARQuest(success); };
 /* ============================================================
-   v38.8: НОВЫЙ AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
+   v38.9: НОВЫЙ AR-ДВИЖОК — стрелка к ближайшей цели,
+   приоритет захвата (>=73%), подсказка скрывается при захвате.
    ============================================================ */
 AR = {
   VIEW_ANGLE: 70, ELEV_RANGE: 40, RETICLE_ZONE: 22, LOCK_ZONE: 14, ATTACK_ZONE: 22,
@@ -1729,7 +1730,7 @@ function arUpdateTargetUI(nearest, mode, phaseType) {
   // Подсказка скрыта, когда цель захвачена
   arHint.classList.toggle('hide', attackReady);
 
-  // Стрелка: показывается, пока не захвачено (во всех режимах)
+  // Стрелка: показывается, пока не захвачено — ВО ВСЕХ РЕЖИМАХ (включая tapByDom)
   if (!attackReady) {
     const anchor = pointerAnchor(dYaw, dElev);
     arPointer.classList.remove('hidden');
@@ -1803,6 +1804,18 @@ function arFindNearestTarget(filterFn) {
   return best;
 }
 
+/* Цель, в которую игрок УЖЕ навёл прицел (>= 73%). Приоритет над обычной ближайшей. */
+function arFindNearestTargetInAttackZone(filterFn) {
+  const alive = AR.TARGETS.filter(t => t.alive && (!filterFn || filterFn(t)) && arAttackReady(t));
+  if (alive.length === 0) return null;
+  let best = alive[0], bestDist = Infinity;
+  for (const t of alive) {
+    const d = Math.hypot(arDeltaYaw(t.yaw), arDeltaElev(t.elev));
+    if (d < bestDist) { bestDist = d; best = t; }
+  }
+  return best;
+}
+
 function arUpdateAllTargets(dt = 0.016) {
   for (const t of AR.TARGETS) {
     if (!t.alive) continue;
@@ -1832,11 +1845,12 @@ function arUpdateAllTargets(dt = 0.016) {
     nearest = { yaw: arLook.monsterYaw, elev: arLook.monsterElev };
   } else if (G.arQuest && !G.arQuest.ended && G.arQuest.scenario) {
     mode = 'quest';
-    nearest = arFindNearestTarget();
+    // Приоритет: цель, в которую уже наведён прицел (>=73%); иначе — ближайшая живая
+    nearest = arFindNearestTargetInAttackZone() || arFindNearestTarget();
   } else if (AR.PENALTY && !AR.PENALTY.ended) {
     mode = 'penalty';
     AR.DOM.aphTimer.textContent = formatShort(Math.max(0, AR.PENALTY.timeLeft));
-    nearest = arFindNearestTarget(t => t.type === 'MONSTER');
+    nearest = arFindNearestTargetInAttackZone(t => t.type === 'MONSTER') || arFindNearestTarget(t => t.type === 'MONSTER');
   }
 
   arUpdateTargetUI(nearest, mode, phaseType);
