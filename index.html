@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050a18">
-<title>Solo Leveling — Система (v38 AR)</title>
+<title>Solo Leveling — Система (v38.1 AR)</title>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
 html, body { width:100vw; height:100vh; height:100dvh; overflow:hidden; position:fixed; inset:0; background:#000; font-family:'Segoe UI',sans-serif; color:#b8d4ff; }
@@ -1072,7 +1072,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   <div class="ar-slash" id="arSlash"></div>
   <div class="ar-damage-vignette" id="arDamageVignette"></div>
 
-  <!-- v38: доп. AR-элементы -->
   <div class="ar-phase-hud" id="arPhaseHud">
     <div id="arPhaseLabel">ФАЗА 1 / 3</div>
     <div class="ar-phase-bar"><div class="ar-phase-fill" id="arPhaseFill"></div></div>
@@ -1099,7 +1098,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
     <button class="ar-attack-btn" id="btnAttack" disabled>ЦЕЛЬ НЕ В ПРИЦЕЛЕ</button>
   </div>
 
-  <!-- HUD зоны наказания -->
   <div class="ar-penalty-hud" id="arPenaltyHud">
     <div class="aph-title">⚠ ЗОНА НАКАЗАНИЯ ⚠</div>
     <div class="aph-stats">
@@ -1110,7 +1108,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   </div>
 </div>
 
-<!-- Зона наказания (старая, не используется в v38, оставлена для совместимости) -->
+<!-- Старые оверлеи (для совместимости, не используются в v38) -->
 <div class="penalty-zone" id="penaltyZone">
   <div class="penalty-header"><div class="penalty-title">⚠ ЗОНА НАКАЗАНИЯ ⚠</div></div>
   <div class="penalty-info">
@@ -1121,7 +1119,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   <div class="penalty-footer"><button class="penalty-surrender" id="btnSurrender">СДАТЬСЯ</button></div>
 </div>
 
-<!-- Мини-игра (не используется в v38, оставлена для совместимости) -->
 <div class="mg-overlay" id="mgOverlay">
   <div class="mg-top">
     <div class="mg-top-title" id="mgTitle">МИНИ-ИГРА</div>
@@ -1254,7 +1251,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 <div class="rankup-overlay" id="rankupOverlay"><div class="rankup-window"><div class="rankup-title">РАНГ ПОВЫШЕН</div><div class="rankup-sub" id="rankupText">—</div><button class="rankup-btn" id="btnRankupOk">ПРИНЯТЬ</button></div></div>
 <div class="reward-overlay" id="rewardOverlay"><div class="reward-window"><div class="reward-title" id="rewardTitle">ПОЛУЧЕН ПРЕДМЕТ</div><div class="reward-name" id="rewardName">—</div><div class="reward-desc" id="rewardDesc">—</div><button class="reward-btn" id="btnRewardOk">ЗАБРАТЬ</button></div></div>
 <div class="blocker" id="blocker"><div class="blocker-icon">🚫</div><div class="blocker-title">СИСТЕМА НЕ ОТПУСКАЕТ</div><div class="blocker-text">Вы не можете покинуть Систему.</div><button class="blocker-btn" id="blockerBtn">ВЕРНУТЬСЯ</button></div>
-
 <script>
 'use strict';
 
@@ -1276,9 +1272,9 @@ const G = {
   xpBoostNext:1,
   arRewardBoost:false
 };
-// v38: ключ сохранения, миграция v37 -> v38
-const SAVE_KEY = 'solo_leveling_v38';
-const LEGACY_KEYS = ['solo_leveling_v37','solo_leveling_v36', 'solo_leveling_v35', 'solo_leveling_v34', 'solo_leveling_v33', 'solo_leveling_v31', 'solo_leveling_v30'];
+// v38.1: ключ сохранения, миграция v38 -> v38.1
+const SAVE_KEY = 'solo_leveling_v381';
+const LEGACY_KEYS = ['solo_leveling_v38','solo_leveling_v37','solo_leveling_v36', 'solo_leveling_v35', 'solo_leveling_v34', 'solo_leveling_v33', 'solo_leveling_v31', 'solo_leveling_v30'];
 
 let _saveTimer = null;
 function saveGame() {
@@ -1643,38 +1639,28 @@ function runLoadingSequence() {
   next();
 }
 
+/* ================== МАГАЗИН / ИНВЕНТАРЬ / СПОСОБНОСТИ ================== */
 function buyItem(id) {
   const item = SHOP_ITEMS.find(i => i.id === id);
   if(!item) return;
   if(G.gold < item.price) {
     const phrase = SHOP_REFUSALS[Math.floor(Math.random()*SHOP_REFUSALS.length)];
-    addLog(phrase,'fail');
-    speak(phrase);
-    SFX.error();
-    triggerFlash('red');
-    return;
+    addLog(phrase,'fail'); speak(phrase); SFX.error(); triggerFlash('red'); return;
   }
   G.gold -= item.price;
   if(item.permanent) {
     if(id==='dagger') G.str+=2;
     if(id==='sword') G.str+=5;
     if(id==='armor'){G.maxHp+=30;G.hp+=30;}
-    addLog(`Куплено: ${item.name}.`,'success');
-    speak(`Куплено: ${item.name}`);
-    triggerFlash('blue');
+    addLog(`Куплено: ${item.name}.`,'success'); speak(`Куплено: ${item.name}`); triggerFlash('blue');
   } else {
     G.inventory[id]=(G.inventory[id]||0)+1;
-    addLog(`Куплено: ${item.name}.`,'success');
-    speak(`Куплено: ${item.name}`);
-    triggerFlash('blue');
+    addLog(`Куплено: ${item.name}.`,'success'); speak(`Куплено: ${item.name}`); triggerFlash('blue');
   }
-  updateUI();
-  renderShop();
-  saveGame();
+  updateUI(); renderShop(); saveGame();
 }
 function renderShop() {
-  const body = $('shopBody');
-  body.innerHTML = '';
+  const body = $('shopBody'); body.innerHTML = '';
   SHOP_ITEMS.forEach(item => {
     const div = document.createElement('div');
     div.className = 'shop-item';
@@ -1689,12 +1675,8 @@ function useItem(id) {
   else if(id==='potion_large'){G.hp=Math.min(G.maxHp,G.hp+80);G.inventory[id]--;showFloatingText('+80 HP','#44ff88');}
   else if(id==='elixir'){G.hp=G.maxHp;G.inventory[id]--;showFloatingText('MAX HP','#44ff88');}
   if(G.inventory[id]<=0) delete G.inventory[id];
-  addLog('Предмет использован.','success');
-  speak('Использовано.');
-  triggerFlash('blue');
-  updateUI();
-  renderInventory();
-  saveGame();
+  addLog('Предмет использован.','success'); speak('Использовано.'); triggerFlash('blue');
+  updateUI(); renderInventory(); saveGame();
 }
 function equipItem(id) {
   if(!G.inventory[id] || G.inventory[id] <= 0) return;
@@ -1703,13 +1685,8 @@ function equipItem(id) {
   if(rareItem.onEquip) rareItem.onEquip();
   G.inventory[id]--;
   if(G.inventory[id] <= 0) delete G.inventory[id];
-  addLog(`Экипировано: ${rareItem.name}. ${rareItem.desc}`,'success');
-  speak(`Экипировано: ${rareItem.name}`);
-  SFX.reward();
-  triggerFlash('gold');
-  updateUI();
-  renderInventory();
-  saveGame();
+  addLog(`Экипировано: ${rareItem.name}. ${rareItem.desc}`,'success'); speak(`Экипировано: ${rareItem.name}`);
+  SFX.reward(); triggerFlash('gold'); updateUI(); renderInventory(); saveGame();
 }
 function sellItem(id) {
   if(!G.inventory[id] || G.inventory[id] <= 0) return;
@@ -1717,24 +1694,15 @@ function sellItem(id) {
   const rareItem = RARE_ITEMS.find(i => i.id === id);
   if(!shopItem && !rareItem) return;
   const price = shopItem ? Math.floor(shopItem.price * 0.5) : Math.floor(50 + Math.random()*100);
-  G.gold += price;
-  G.inventory[id]--;
+  G.gold += price; G.inventory[id]--;
   if(G.inventory[id] <= 0) delete G.inventory[id];
-  addLog(`Продано: ${(shopItem||rareItem).name}. +${price} G.`,'success');
-  speak(`Продано. Плюс ${price} золота`);
-  SFX.success();
-  updateUI();
-  renderInventory();
-  saveGame();
+  addLog(`Продано: ${(shopItem||rareItem).name}. +${price} G.`,'success'); speak(`Продано. Плюс ${price} золота`);
+  SFX.success(); updateUI(); renderInventory(); saveGame();
 }
 function renderInventory() {
-  const body = $('inventoryBody');
-  body.innerHTML = '';
+  const body = $('inventoryBody'); body.innerHTML = '';
   const items = Object.keys(G.inventory).filter(k => G.inventory[k] > 0);
-  if(items.length === 0) {
-    body.innerHTML = '<div class="inv-empty">Инвентарь пуст.</div>';
-    return;
-  }
+  if(items.length === 0) { body.innerHTML = '<div class="inv-empty">Инвентарь пуст.</div>'; return; }
   items.forEach(id => {
     const shopItem = SHOP_ITEMS.find(i => i.id === id);
     const rareItem = RARE_ITEMS.find(i => i.id === id);
@@ -1751,14 +1719,12 @@ function renderInventory() {
         ${isUsable ? `<button class="inv-use" data-id="${id}" data-action="use">ИСПОЛЬЗОВАТЬ</button>` : ''}
         ${isEquippable ? `<button class="inv-use" data-id="${id}" data-action="equip" style="background:linear-gradient(180deg,#ffcc44,#aa8800);border-color:#ffdd88;color:#0a1a10;">ЭКИПИРОВАТЬ</button>` : ''}
         ${isSellable ? `<button class="inv-use" data-id="${id}" data-action="sell" style="background:linear-gradient(180deg,#556,#334);border-color:#889;color:#dde;">ПРОДАТЬ</button>` : ''}
-      </div>
-    `;
+      </div>`;
     body.appendChild(div);
   });
   body.querySelectorAll('.inv-use').forEach(b => {
     b.addEventListener('click', () => {
-      const action = b.dataset.action;
-      const id = b.dataset.id;
+      const action = b.dataset.action; const id = b.dataset.id;
       if (action === 'use') useItem(id);
       else if (action === 'equip') equipItem(id);
       else if (action === 'sell') sellItem(id);
@@ -1770,117 +1736,52 @@ function activateAbility(abId) {
   if (idx < 0) return;
   let msg = '';
   switch(abId) {
-    case 'stealth':
-      G.pendingDamageShield = true;
-      msg = 'Stealth активен: следующий провал без урона.';
-      break;
-    case 'quicksilver':
-      G.xpBoostNext = 1.5;
-      msg = 'Quicksilver: следующее задание даст +50% XP.';
-      break;
-    case 'bloodlust':
-      G.pendingDamageShield = true;
-      msg = 'Bloodlust: поглотит следующий урон.';
-      break;
-    case 'mutilation':
-      G.xpBoostNext = Math.max(G.xpBoostNext, 1.3);
-      msg = 'Mutilation: следующее задание даст +30% XP.';
-      break;
+    case 'stealth': G.pendingDamageShield = true; msg = 'Stealth активен: следующий провал без урона.'; break;
+    case 'quicksilver': G.xpBoostNext = 1.5; msg = 'Quicksilver: следующее задание даст +50% XP.'; break;
+    case 'bloodlust': G.pendingDamageShield = true; msg = 'Bloodlust: поглотит следующий урон.'; break;
+    case 'mutilation': G.xpBoostNext = Math.max(G.xpBoostNext, 1.3); msg = 'Mutilation: следующее задание даст +30% XP.'; break;
     case 'rulers_authority':
-      if (G.arActive && AR.PHASE) {
-        G.pendingReward = true;
-        addLog("Ruler's Authority: текущая AR-фаза засчитана.", 'success');
-        msg = "Ruler's Authority: фаза засчитана.";
-      } else if (G.mgActive && mgState && !mgState.ended) {
-        closeMG(true);
-        msg = "Ruler's Authority: задание засчитано.";
-      } else {
-        addLog("Ruler's Authority: нет активной задачи.", 'fail');
-        speak('Нет активной задачи');
-        return;
-      }
+      if (G.arActive && AR.PHASE) { G.pendingReward = true; addLog("Ruler's Authority: текущая AR-фаза засчитана.", 'success'); msg = "Ruler's Authority: фаза засчитана."; }
+      else { addLog("Ruler's Authority: нет активной задачи.", 'fail'); speak('Нет активной задачи'); return; }
       break;
-    case 'dragons_fear':
-      G.arRewardBoost = true;
-      msg = "Dragon's Fear: следующая AR-охота даст удвоенную награду.";
-      break;
-    case 'shadow_extraction':
-      G.gold += 50;
-      msg = 'Shadow Extraction: извлечена тень, +50 G.';
-      break;
-    case 'shadow_exchange':
-      G.hp = Math.min(G.maxHp, G.hp + 30);
-      msg = 'Shadow Exchange: HP +30.';
-      break;
-    case 'monarchs_domain':
-      G.xpBoostNext = Math.max(G.xpBoostNext, 1.4);
-      G.pendingDamageShield = true;
-      msg = "Monarch's Domain: +40% XP и защита от одного провала.";
-      break;
-    default:
-      return;
+    case 'dragons_fear': G.arRewardBoost = true; msg = "Dragon's Fear: следующая AR-охота даст удвоенную награду."; break;
+    case 'shadow_extraction': G.gold += 50; msg = 'Shadow Extraction: извлечена тень, +50 G.'; break;
+    case 'shadow_exchange': G.hp = Math.min(G.maxHp, G.hp + 30); msg = 'Shadow Exchange: HP +30.'; break;
+    case 'monarchs_domain': G.xpBoostNext = Math.max(G.xpBoostNext, 1.4); G.pendingDamageShield = true; msg = "Monarch's Domain: +40% XP и защита от одного провала."; break;
+    default: return;
   }
-  G.abilities.splice(idx, 1);
-  addLog(msg, 'success');
-  speak(msg);
-  SFX.reward();
-  triggerFlash('gold');
-  renderAbilities();
-  updateUI();
-  saveGame();
+  G.abilities.splice(idx, 1); addLog(msg, 'success'); speak(msg); SFX.reward(); triggerFlash('gold');
+  renderAbilities(); updateUI(); saveGame();
 }
 function renderAbilities() {
-  const body = $('abilitiesBody');
-  body.innerHTML = '';
-  if(G.abilities.length === 0) {
-    body.innerHTML = '<div class="inv-empty">Способности не получены.</div>';
-    return;
-  }
+  const body = $('abilitiesBody'); body.innerHTML = '';
+  if(G.abilities.length === 0) { body.innerHTML = '<div class="inv-empty">Способности не получены.</div>'; return; }
   G.abilities.forEach(ab => {
     const div = document.createElement('div');
     div.className = 'ability-item';
-    div.innerHTML = `
-      <div class="ability-name">✦ ${ab.name}</div>
-      <div class="ability-desc">${ab.desc}</div>
-      <button class="inv-use" data-id="${ab.id}" style="margin-top:6px;background:linear-gradient(180deg,#ffcc44,#aa8800);border-color:#ffdd88;color:#0a1a10;">АКТИВИРОВАТЬ</button>
-    `;
+    div.innerHTML = `<div class="ability-name">✦ ${ab.name}</div><div class="ability-desc">${ab.desc}</div><button class="inv-use" data-id="${ab.id}" style="margin-top:6px;background:linear-gradient(180deg,#ffcc44,#aa8800);border-color:#ffdd88;color:#0a1a10;">АКТИВИРОВАТЬ</button>`;
     body.appendChild(div);
   });
-  body.querySelectorAll('.inv-use').forEach(b => {
-    b.addEventListener('click', () => activateAbility(b.dataset.id));
-  });
+  body.querySelectorAll('.inv-use').forEach(b => b.addEventListener('click', () => activateAbility(b.dataset.id)));
 }
 function showRewardModal(title, name, desc, btnText) {
-  $('rewardTitle').textContent=title;
-  $('rewardName').textContent=name;
-  $('rewardDesc').textContent=desc;
-  $('btnRewardOk').textContent=btnText;
+  $('rewardTitle').textContent=title; $('rewardName').textContent=name; $('rewardDesc').textContent=desc; $('btnRewardOk').textContent=btnText;
   $('rewardOverlay').classList.add('show');
 }
-$('btnRewardOk').addEventListener('click', () => {
-  $('rewardOverlay').classList.remove('show');
-  renderAbilities();
-  renderInventory();
-  saveGame();
-});
+$('btnRewardOk').addEventListener('click', () => { $('rewardOverlay').classList.remove('show'); renderAbilities(); renderInventory(); saveGame(); });
 function grantRandomReward() {
   const isAbility = Math.random()<0.5;
   if(isAbility){
     const available = ABILITY_POOL.filter(a => !G.abilities.find(x => x.id === a.id));
     if(available.length === 0) return;
     const ab = available[Math.floor(Math.random()*available.length)];
-    G.abilities.push(ab);
-    showRewardModal('ПОЛУЧЕНА СПОСОБНОСТЬ', ab.name, ab.desc, 'ПРИНЯТЬ');
-    speak(`Получена способность: ${ab.name}.`);
+    G.abilities.push(ab); showRewardModal('ПОЛУЧЕНА СПОСОБНОСТЬ', ab.name, ab.desc, 'ПРИНЯТЬ'); speak(`Получена способность: ${ab.name}.`);
   }else{
     const item = RARE_ITEMS[Math.floor(Math.random()*RARE_ITEMS.length)];
     G.inventory[item.id]=(G.inventory[item.id]||0)+1;
-    showRewardModal('ПОЛУЧЕН ПРЕДМЕТ', item.name, item.desc, 'ЗАБРАТЬ');
-    speak(`Получен предмет: ${item.name}.`);
+    showRewardModal('ПОЛУЧЕН ПРЕДМЕТ', item.name, item.desc, 'ЗАБРАТЬ'); speak(`Получен предмет: ${item.name}.`);
   }
-  SFX.reward();
-  triggerFlash('gold');
-  saveGame();
+  SFX.reward(); triggerFlash('gold'); saveGame();
 }
 function checkRankUp() {
   const newRank = getRankByLevel(G.level);
@@ -1891,8 +1792,7 @@ function checkRankUp() {
     $('rankupText').textContent = `Ваш ранг повышен с ${oldRank} до ${newRank}!`;
     $('rankupOverlay').classList.add('show');
     speak(`Ранг повышен до ${newRank}.`);
-    SFX.rankup();
-    triggerFlash('gold');
+    SFX.rankup(); triggerFlash('gold');
     addLog(`★ РАНГ ПОВЫШЕН: ${oldRank} → ${newRank}`,'level');
     setTimeout(() => { if(Math.random()<0.8) grantRandomReward(); }, 1500);
     saveGame();
@@ -1931,15 +1831,7 @@ const arPlayerAtk = $('arPlayerAtk');
 const arPlayerDef = $('arPlayerDef');
 const arRankWarning = $('arRankWarning');
 
-const MONSTER_RANKS = {
-  E: { rank:'E', hpMul:1.0, dmgMul:1.0, rewardMul:1.0, cooldownMul:1.0 },
-  D: { rank:'D', hpMul:1.0, dmgMul:1.0, rewardMul:1.0, cooldownMul:1.0 },
-  C: { rank:'C', hpMul:1.0, dmgMul:1.0, rewardMul:1.0, cooldownMul:1.0 },
-  B: { rank:'B', hpMul:1.0, dmgMul:1.0, rewardMul:1.0, cooldownMul:1.0 },
-  A: { rank:'A', hpMul:1.0, dmgMul:1.0, rewardMul:1.0, cooldownMul:1.0 },
-  S: { rank:'S', hpMul:1.0, dmgMul:1.0, rewardMul:1.0, cooldownMul:1.0 }
-};
-
+const MONSTER_RANKS = { E:{rank:'E'}, D:{rank:'D'}, C:{rank:'C'}, B:{rank:'B'}, A:{rank:'A'}, S:{rank:'S'} };
 const MONSTERS = [
   {emoji:'👹', name:'ГНИЛЬНЫЙ ГОБЛИН',      baseRank:'E', hp:20,  reward:10, attackDamage:3,  attackCooldown:2600},
   {emoji:'🕷', name:'ПЕПЕЛЬНЫЙ ПАУК',       baseRank:'E', hp:22,  reward:11, attackDamage:3,  attackCooldown:2500},
@@ -1981,15 +1873,9 @@ const AR_ARC_LENGTH = 703.7;
 const AR_WARN_LEAD = 800;
 
 const arLook = {
-  monsterYaw: 0,
-  monsterElev: 0,
-  camYaw: 0,
-  camPitch: 0,
-  inView: false,
-  inAttackZone: false,
-  orientationHandler: null,
-  detachDragLook: null,
-  rafId: null
+  monsterYaw: 0, monsterElev: 0, camYaw: 0, camPitch: 0,
+  inView: false, inAttackZone: false,
+  orientationHandler: null, detachDragLook: null, rafId: null
 };
 
 let arMonsterAttackInterval = null;
@@ -2004,58 +1890,33 @@ function requestCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     return Promise.reject(new Error('Камера не поддерживается'));
   }
-  return navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'environment' },
-    audio: false
-  }).then(stream => { G.cameraAllowed = true; return stream; })
+  return navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+    .then(stream => { G.cameraAllowed = true; return stream; })
     .catch(err => { G.cameraAllowed = false; throw err; });
 }
 
 function attachOrientation() {
   const handler = (e) => {
-    if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
-      arLook.camYaw = e.webkitCompassHeading;
-    } else if (typeof e.alpha === 'number' && e.alpha !== null) {
-      arLook.camYaw = (360 - e.alpha) % 360;
-    }
-    if (typeof e.beta === 'number' && e.beta !== null) {
-      arLook.camPitch = Math.max(-30, Math.min(30, (e.beta - 45) * 0.7));
-    }
+    if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) arLook.camYaw = e.webkitCompassHeading;
+    else if (typeof e.alpha === 'number' && e.alpha !== null) arLook.camYaw = (360 - e.alpha) % 360;
+    if (typeof e.beta === 'number' && e.beta !== null) arLook.camPitch = Math.max(-30, Math.min(30, (e.beta - 45) * 0.7));
     scheduleARUpdate();
   };
   arLook.orientationHandler = handler;
-
-  if (typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     return DeviceOrientationEvent.requestPermission()
-      .then(res => {
-        if (res === 'granted') {
-          window.addEventListener('deviceorientation', handler, true);
-          return true;
-        }
-        return false;
-      })
+      .then(res => { if (res === 'granted') { window.addEventListener('deviceorientation', handler, true); return true; } return false; })
       .catch(() => false);
   }
   window.addEventListener('deviceorientation', handler, true);
   return Promise.resolve(true);
 }
-
 function detachOrientation() {
-  if (arLook.orientationHandler) {
-    window.removeEventListener('deviceorientation', arLook.orientationHandler, true);
-    arLook.orientationHandler = null;
-  }
+  if (arLook.orientationHandler) { window.removeEventListener('deviceorientation', arLook.orientationHandler, true); arLook.orientationHandler = null; }
 }
-
 function attachDragLook() {
   let dragging = false, sx = 0, sy = 0, startYaw = 0, startPitch = 0;
-  const down = (e) => {
-    const p = e.touches ? e.touches[0] : e;
-    dragging = true;
-    sx = p.clientX; sy = p.clientY;
-    startYaw = arLook.camYaw; startPitch = arLook.camPitch;
-  };
+  const down = (e) => { const p = e.touches ? e.touches[0] : e; dragging = true; sx = p.clientX; sy = p.clientY; startYaw = arLook.camYaw; startPitch = arLook.camPitch; };
   const move = (e) => {
     if (!dragging) return;
     const p = e.touches ? e.touches[0] : e;
@@ -2081,7 +1942,6 @@ function attachDragLook() {
     arLook.detachDragLook = null;
   };
 }
-
 function scheduleARUpdate() {
   if (arLook.rafId) return;
   arLook.rafId = requestAnimationFrame(() => {
@@ -2090,57 +1950,36 @@ function scheduleARUpdate() {
     if (typeof arUpdateAllTargets === 'function') arUpdateAllTargets();
   });
 }
-
 function pointerAnchor(deltaYaw, deltaElev) {
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
   const radius = Math.min(window.innerWidth, window.innerHeight) * 0.32;
   const ang = Math.atan2(deltaElev, deltaYaw);
-  return {
-    x: cx + Math.cos(ang) * radius,
-    y: cy + Math.sin(ang) * radius,
-    angle: ang
-  };
+  return { x: cx + Math.cos(ang) * radius, y: cy + Math.sin(ang) * radius, angle: ang };
 }
-
 function getDamageMultiplier(monsterRank, playerRank) {
   const diff = RANK_ORDER.indexOf(monsterRank) - RANK_ORDER.indexOf(playerRank);
   const table = { '-5':0.2, '-4':0.3, '-3':0.4, '-2':0.5, '-1':0.7, '0':1.0, '1':1.4, '2':1.9, '3':2.5, '4':3.2, '5':4.0 };
   return table[String(diff)] || 1.0;
 }
-
 function getPlayerDamageMultiplier(monsterRank, playerRank) {
   const diff = RANK_ORDER.indexOf(playerRank) - RANK_ORDER.indexOf(monsterRank);
   const table = { '-5':0.3, '-4':0.4, '-3':0.5, '-2':0.65, '-1':0.8, '0':1.0, '1':1.3, '2':1.7, '3':2.2, '4':2.8, '5':3.5 };
   return table[String(diff)] || 1.0;
 }
-
 function pickMonsterForPlayer() {
   const playerRankIdx = RANK_ORDER.indexOf(G.rank);
   const availableRanks = RANK_ORDER.slice(0, playerRankIdx + 1);
   let chosenRank;
-  if (availableRanks.length >= 2 && Math.random() < 0.3) {
-    chosenRank = availableRanks[availableRanks.length - 2];
-  } else {
-    chosenRank = availableRanks[availableRanks.length - 1];
-  }
+  if (availableRanks.length >= 2 && Math.random() < 0.3) chosenRank = availableRanks[availableRanks.length - 2];
+  else chosenRank = availableRanks[availableRanks.length - 1];
   const sameRank = MONSTERS.filter(m => m.baseRank === chosenRank);
-  const baseMonster = sameRank.length > 0
-    ? sameRank[Math.floor(Math.random() * sameRank.length)]
-    : MONSTERS[Math.floor(Math.random() * MONSTERS.length)];
-  const mult = MONSTER_RANKS[chosenRank];
+  const baseMonster = sameRank.length > 0 ? sameRank[Math.floor(Math.random() * sameRank.length)] : MONSTERS[Math.floor(Math.random() * MONSTERS.length)];
   return {
-    emoji: baseMonster.emoji,
-    name: baseMonster.name,
-    rank: chosenRank,
-    hp: Math.round(baseMonster.hp * mult.hpMul),
-    maxHp: Math.round(baseMonster.hp * mult.hpMul),
-    reward: Math.round(baseMonster.reward * mult.rewardMul),
-    attackDamage: Math.round(baseMonster.attackDamage * mult.dmgMul),
-    attackCooldown: Math.round(baseMonster.attackCooldown * mult.cooldownMul)
+    emoji: baseMonster.emoji, name: baseMonster.name, rank: chosenRank,
+    hp: baseMonster.hp, maxHp: baseMonster.hp, reward: baseMonster.reward,
+    attackDamage: baseMonster.attackDamage, attackCooldown: baseMonster.attackCooldown
   };
 }
-
 function updateArPlayerHud() {
   arPlayerName.textContent = G.playerName || '—';
   arPlayerRank.textContent = G.rank;
@@ -2152,10 +1991,8 @@ function updateArPlayerHud() {
   arPlayerHpText.textContent = `${Math.max(0, G.hp)}/${G.maxHp}`;
   const atk = 8 + Math.floor(G.str / 2) + Math.floor(G.level / 2);
   const def = Math.floor(G.vit / 3) + Math.floor(G.agi / 5);
-  arPlayerAtk.textContent = atk;
-  arPlayerDef.textContent = def;
+  arPlayerAtk.textContent = atk; arPlayerDef.textContent = def;
 }
-
 function updateArMonsterHud() {
   const m = G.arQuest && G.arQuest.monster;
   if (!m) return;
@@ -2166,25 +2003,13 @@ function updateArMonsterHud() {
   arHpFill.style.width = Math.max(0, pct) + '%';
   arMonsterHpText.textContent = `${Math.max(0, G.arQuest.hp)} / ${G.arQuest.maxHp}`;
 }
-
 function showRankWarning(monsterRank) {
   const diff = RANK_ORDER.indexOf(monsterRank) - RANK_ORDER.indexOf(G.rank);
-  if (diff >= 2) {
-    arRankWarning.textContent = `⚠ ОПАСНО: ${monsterRank}-ранг! Урон ×${getDamageMultiplier(monsterRank, G.rank).toFixed(1)}`;
-    arRankWarning.className = 'ar-rank-warning show danger';
-  } else if (diff === 1) {
-    arRankWarning.textContent = `⚠ ${monsterRank}-ранг: монстр сильнее вас`;
-    arRankWarning.className = 'ar-rank-warning show';
-  } else if (diff === 0) {
-    arRankWarning.textContent = `⚔ ${monsterRank}-ранг: равный бой`;
-    arRankWarning.className = 'ar-rank-warning show';
-  } else {
-    arRankWarning.textContent = `✓ ${monsterRank}-ранг: вы сильнее`;
-    arRankWarning.className = 'ar-rank-warning show safe';
-  }
-  setTimeout(() => {
-    arRankWarning.classList.remove('show');
-  }, 4000);
+  if (diff >= 2) { arRankWarning.textContent = `⚠ ОПАСНО: ${monsterRank}-ранг! Урон ×${getDamageMultiplier(monsterRank, G.rank).toFixed(1)}`; arRankWarning.className = 'ar-rank-warning show danger'; }
+  else if (diff === 1) { arRankWarning.textContent = `⚠ ${monsterRank}-ранг: монстр сильнее вас`; arRankWarning.className = 'ar-rank-warning show'; }
+  else if (diff === 0) { arRankWarning.textContent = `⚔ ${monsterRank}-ранг: равный бой`; arRankWarning.className = 'ar-rank-warning show'; }
+  else { arRankWarning.textContent = `✓ ${monsterRank}-ранг: вы сильнее`; arRankWarning.className = 'ar-rank-warning show safe'; }
+  setTimeout(() => arRankWarning.classList.remove('show'), 4000);
 }
 
 function updateMonsterScreenPos() {
@@ -2193,214 +2018,125 @@ function updateMonsterScreenPos() {
 
   const deltaYaw = normalizeAngle(arLook.monsterYaw - arLook.camYaw);
   const deltaElev = arLook.monsterElev - arLook.camPitch;
-
-  const inViewYaw = Math.abs(deltaYaw) < AR_VIEW_ANGLE / 2;
-  const inViewElev = Math.abs(deltaElev) < AR_ELEV_RANGE / 2;
-  const inView = inViewYaw && inViewElev;
+  const inView = Math.abs(deltaYaw) < AR_VIEW_ANGLE / 2 && Math.abs(deltaElev) < AR_ELEV_RANGE / 2;
   arLook.inView = inView;
-
-  const inAttackZone = Math.abs(deltaYaw) < AR_ATTACK_ZONE &&
-                       Math.abs(deltaElev) < AR_ATTACK_ZONE;
+  const inAttackZone = Math.abs(deltaYaw) < AR_ATTACK_ZONE && Math.abs(deltaElev) < AR_ATTACK_ZONE;
   arLook.inAttackZone = inAttackZone;
-
   arReticle.classList.toggle('active', inAttackZone);
 
   const distYaw = Math.min(1, Math.abs(deltaYaw) / (AR_VIEW_ANGLE / 2));
   const distElev = Math.min(1, Math.abs(deltaElev) / (AR_ELEV_RANGE / 2));
   const closeness = 1 - Math.max(distYaw, distElev);
-  const dashOffset = AR_ARC_LENGTH * (1 - closeness);
-  arProgressFill.setAttribute('stroke-dashoffset', dashOffset.toFixed(1));
+  arProgressFill.setAttribute('stroke-dashoffset', (AR_ARC_LENGTH * (1 - closeness)).toFixed(1));
   arProgressFill.classList.toggle('close', inAttackZone);
   arProgress.classList.remove('hidden');
 
   if (inAttackZone) {
-    arPointer.classList.add('hidden');
-    arHint.classList.add('hide');
-    arMonster.classList.add('locked');
-    btnAttack.disabled = false;
-    btnAttack.textContent = 'АТАКОВАТЬ';
-    btnAttack.classList.add('ready');
+    arPointer.classList.add('hidden'); arHint.classList.add('hide'); arMonster.classList.add('locked');
+    btnAttack.disabled = false; btnAttack.textContent = 'АТАКОВАТЬ'; btnAttack.classList.add('ready');
   } else {
-    arPointer.classList.remove('hidden');
-    arMonster.classList.remove('locked');
+    arPointer.classList.remove('hidden'); arMonster.classList.remove('locked');
     arHint.classList.toggle('hide', inView);
-    btnAttack.disabled = true;
-    btnAttack.textContent = inView ? 'НАВЕДИТЕ НА ЦЕЛЬ' : 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
-    btnAttack.classList.remove('ready');
-
+    btnAttack.disabled = true; btnAttack.textContent = inView ? 'НАВЕДИТЕ НА ЦЕЛЬ' : 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
     const anchor = pointerAnchor(deltaYaw, deltaElev);
-    arPointer.style.left = anchor.x + 'px';
-    arPointer.style.top  = anchor.y + 'px';
+    arPointer.style.left = anchor.x + 'px'; arPointer.style.top = anchor.y + 'px';
     const deg = (anchor.angle * 180 / Math.PI) + 90;
     arPointerArrow.style.transform = `rotate(${deg}deg)`;
-
-    const absYaw = Math.round(Math.abs(deltaYaw));
-    const absElev = Math.round(Math.abs(deltaElev));
+    const absYaw = Math.round(Math.abs(deltaYaw)), absElev = Math.round(Math.abs(deltaElev));
     let dirText;
-    if (Math.abs(deltaYaw) > Math.abs(deltaElev)) {
-      dirText = deltaYaw > 0 ? 'ВПРАВО' : 'ВЛЕВО';
-    } else {
-      dirText = deltaElev > 0 ? 'ВЫШЕ' : 'НИЖЕ';
-    }
-    if (absYaw < 15 && absElev < 15) {
-      arPointerLabel.textContent = 'ЦЕЛЬ РЯДОМ';
-      arPointerLabel.classList.add('close');
-      arPointerArrow.classList.add('pulse');
-    } else {
-      arPointerLabel.textContent = `${dirText} ${Math.max(absYaw, absElev)}°`;
-      arPointerLabel.classList.remove('close');
-      arPointerArrow.classList.toggle('pulse', Math.max(absYaw, absElev) < 45);
-    }
+    if (Math.abs(deltaYaw) > Math.abs(deltaElev)) dirText = deltaYaw > 0 ? 'ВПРАВО' : 'ВЛЕВО';
+    else dirText = deltaElev > 0 ? 'ВЫШЕ' : 'НИЖЕ';
+    if (absYaw < 15 && absElev < 15) { arPointerLabel.textContent = 'ЦЕЛЬ РЯДОМ'; arPointerLabel.classList.add('close'); arPointerArrow.classList.add('pulse'); }
+    else { arPointerLabel.textContent = `${dirText} ${Math.max(absYaw, absElev)}°`; arPointerLabel.classList.remove('close'); arPointerArrow.classList.toggle('pulse', Math.max(absYaw, absElev) < 45); }
   }
 
-  if (!inView) {
-    arMonster.classList.add('hidden');
-    arMonsterHud.classList.add('hidden');
-    return;
-  }
-  arMonster.classList.remove('hidden');
-  arMonsterHud.classList.remove('hidden');
+  if (!inView) { arMonster.classList.add('hidden'); arMonsterHud.classList.add('hidden'); return; }
+  arMonster.classList.remove('hidden'); arMonsterHud.classList.remove('hidden');
   const xPct = 50 + (deltaYaw / (AR_VIEW_ANGLE / 2)) * 50;
   const yPct = 50 + (deltaElev / (AR_ELEV_RANGE / 2)) * 50;
   const clampedX = Math.max(8, Math.min(92, xPct));
   const clampedY = Math.max(15, Math.min(85, yPct));
-  arMonster.style.left = clampedX + '%';
-  arMonster.style.top  = clampedY + '%';
+  arMonster.style.left = clampedX + '%'; arMonster.style.top = clampedY + '%';
   arMonster.style.transform = 'translate(-50%,-50%)';
-  arMonsterHud.style.left = clampedX + '%';
-  arMonsterHud.style.top  = clampedY + '%';
+  arMonsterHud.style.left = clampedX + '%'; arMonsterHud.style.top = clampedY + '%';
 }
 
-/* ===== Атаки монстра + анимация ===== */
 function spawnHitParticles(x, y) {
-  const count = 12;
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    p.className = 'ar-hit-particle';
-    p.style.left = x + 'px';
-    p.style.top = y + 'px';
-    const ang = Math.random() * Math.PI * 2;
-    const dist = 80 + Math.random() * 120;
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div'); p.className = 'ar-hit-particle';
+    p.style.left = x + 'px'; p.style.top = y + 'px';
+    const ang = Math.random() * Math.PI * 2, dist = 80 + Math.random() * 120;
     p.style.setProperty('--tx', Math.cos(ang) * dist + 'px');
     p.style.setProperty('--ty', Math.sin(ang) * dist + 'px');
     p.style.animation = `particleFly 0.6s ease-out forwards`;
     p.style.animationDelay = (Math.random() * 0.05) + 's';
-    cameraView.appendChild(p);
-    setTimeout(() => p.remove(), 800);
+    cameraView.appendChild(p); setTimeout(() => p.remove(), 800);
   }
 }
-
 function spawnShockwave(x, y) {
-  const w = document.createElement('div');
-  w.className = 'ar-shockwave';
-  w.style.left = x + 'px';
-  w.style.top = y + 'px';
-  cameraView.appendChild(w);
-  setTimeout(() => w.remove(), 700);
+  const w = document.createElement('div'); w.className = 'ar-shockwave';
+  w.style.left = x + 'px'; w.style.top = y + 'px';
+  cameraView.appendChild(w); setTimeout(() => w.remove(), 700);
 }
-
-function playSlashEffect() {
-  arSlash.classList.remove('show');
-  void arSlash.offsetWidth;
-  arSlash.classList.add('show');
-}
-
+function playSlashEffect() { arSlash.classList.remove('show'); void arSlash.offsetWidth; arSlash.classList.add('show'); }
 function startMonsterAttacks() {
   stopMonsterAttacks();
   const m = G.arQuest && G.arQuest.monster;
   if (!m) return;
-  const cooldown = m.attackCooldown;
   arMonsterAttackInterval = setInterval(() => {
     if (!G.arActive || !G.arQuest || G.arQuest.hp <= 0) return;
     if (!arLook.inView) return;
-
-    arAttackWarning.classList.add('show');
-    arMonster.classList.add('winding');
-    SFX.error();
-
+    arAttackWarning.classList.add('show'); arMonster.classList.add('winding'); SFX.error();
     arMonsterWarnTimeout = setTimeout(() => {
-      arAttackWarning.classList.remove('show');
-      arMonster.classList.remove('winding');
+      arAttackWarning.classList.remove('show'); arMonster.classList.remove('winding');
       if (!G.arActive || !G.arQuest || G.arQuest.hp <= 0) return;
       if (!arLook.inView) return;
-
       arMonster.classList.add('lunging');
-
       setTimeout(() => {
         if (!G.arActive || !G.arQuest) return;
-
         const cx = arMonster.offsetLeft + arMonster.offsetWidth / 2;
-        const cy = arMonster.offsetTop  + arMonster.offsetHeight / 2;
-
-        spawnShockwave(cx, cy);
-        spawnHitParticles(cx, cy);
-        playSlashEffect();
-
-        arDamageVignette.classList.remove('show');
-        void arDamageVignette.offsetWidth;
-        arDamageVignette.classList.add('show');
-
+        const cy = arMonster.offsetTop + arMonster.offsetHeight / 2;
+        spawnShockwave(cx, cy); spawnHitParticles(cx, cy); playSlashEffect();
+        arDamageVignette.classList.remove('show'); void arDamageVignette.offsetWidth; arDamageVignette.classList.add('show');
         triggerScreenShake();
         if (navigator.vibrate) { try { navigator.vibrate([40, 30, 60]); } catch(e) {} }
         SFX.hit();
-
         const dmgBase = m.attackDamage + Math.floor(Math.random() * 3);
         const dmgMult = getDamageMultiplier(m.rank, G.rank);
-        const dmg = Math.max(1, Math.round(dmgBase * dmgMult));
-        takeDamage(dmg, `${m.name} [${m.rank}] атакует!`);
-
-        arMonster.classList.remove('lunging');
-        arMonster.classList.add('recoiling');
+        takeDamage(Math.max(1, Math.round(dmgBase * dmgMult)), `${m.name} [${m.rank}] атакует!`);
+        arMonster.classList.remove('lunging'); arMonster.classList.add('recoiling');
         setTimeout(() => arMonster.classList.remove('recoiling'), 350);
-
-        if (G.hp <= 0) {
-          addLog('Вы потеряли сознание. Охота прервана.', 'fail');
-          endAR(false);
-        }
+        if (G.hp <= 0) { addLog('Вы потеряли сознание. Охота прервана.', 'fail'); endAR(false); }
       }, 200);
-
     }, AR_WARN_LEAD);
-  }, cooldown);
+  }, m.attackCooldown);
 }
-
 function stopMonsterAttacks() {
   if (arMonsterAttackInterval) { clearInterval(arMonsterAttackInterval); arMonsterAttackInterval = null; }
   if (arMonsterWarnTimeout) { clearTimeout(arMonsterWarnTimeout); arMonsterWarnTimeout = null; }
   arAttackWarning.classList.remove('show');
-  arMonster.classList.remove('attacking');
-  arMonster.classList.remove('winding');
-  arMonster.classList.remove('lunging');
-  arMonster.classList.remove('recoiling');
+  arMonster.classList.remove('attacking'); arMonster.classList.remove('winding');
+  arMonster.classList.remove('lunging'); arMonster.classList.remove('recoiling');
 }
-
 function beginARLook() {
   arLook.monsterYaw = Math.random() * 360;
   arLook.monsterElev = (Math.random() * 24 - 12);
   arLook.camYaw = arLook.monsterYaw + 120 + Math.random() * 120;
   if (arLook.camYaw >= 360) arLook.camYaw -= 360;
   arLook.camPitch = 0;
-
   attachOrientation().then(ok => {
-    if (!ok) {
-      addLog('Датчик ориентации недоступен — управляйте взглядом свайпом.', '');
-    }
-    attachDragLook();
-    scheduleARUpdate();
+    if (!ok) addLog('Датчик ориентации недоступен — управляйте взглядом свайпом.', '');
+    attachDragLook(); scheduleARUpdate();
   });
 }
-
 function endARLook() {
   detachOrientation();
   if (arLook.detachDragLook) arLook.detachDragLook();
   if (arLook.rafId) { cancelAnimationFrame(arLook.rafId); arLook.rafId = null; }
-  arLook.inView = false;
-  arLook.inAttackZone = false;
-  arMonster.classList.add('hidden');
-  arMonster.classList.remove('locked');
-  arMonster.classList.remove('attacking');
-  arMonster.classList.remove('winding');
-  arMonster.classList.remove('lunging');
-  arMonster.classList.remove('recoiling');
+  arLook.inView = false; arLook.inAttackZone = false;
+  arMonster.classList.add('hidden'); arMonster.classList.remove('locked');
+  arMonster.classList.remove('attacking'); arMonster.classList.remove('winding');
+  arMonster.classList.remove('lunging'); arMonster.classList.remove('recoiling');
   arMonsterHud.classList.add('hidden');
   arReticle.classList.remove('active');
   arPointer.classList.add('hidden');
@@ -2408,70 +2144,39 @@ function endARLook() {
   arAttackWarning.classList.remove('show');
   arRankWarning.classList.remove('show');
   arHint.classList.remove('hide');
-  btnAttack.disabled = true;
-  btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
-  btnAttack.classList.remove('ready');
+  btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
 }
 
 function startAR(questData = null) {
   if (G.arActive) return;
-  requestCamera()
-    .then(stream => {
-      videoFeed.srcObject = stream;
-      G.stream = stream;
-      cameraView.classList.add('active');
-      G.arActive = true;
-
-      const monster = pickMonsterForPlayer();
-      G.arQuest = {
-        monster,
-        hp: monster.hp,
-        maxHp: monster.maxHp,
-        timeLeft: 45,
-        timerInterval: null,
-        questData
-      };
-
-      arMonster.textContent = monster.emoji;
-      arHpFill.style.width = '100%';
-      arMonster.classList.remove('dead');
-      arMonster.classList.remove('locked');
-      arMonsterHud.classList.add('hidden');
-      btnAttack.disabled = true;
-      btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
-      btnAttack.classList.remove('ready');
-
-      updateArPlayerHud();
-      updateArMonsterHud();
-      showRankWarning(monster.rank);
-      beginARLook();
-      startMonsterAttacks();
-      updateARTimer();
-
-      G.arQuest.timerInterval = setInterval(() => {
-        if (!G.arQuest) return;
-        G.arQuest.timeLeft--;
-        updateARTimer();
-        if (G.arQuest.timeLeft <= 0) endAR(false);
-      }, 1000);
-
-      speak(`Поиск монстра. ${monster.name}. Ранг ${monster.rank}.`);
-      SFX.incoming();
-      triggerScreenShake();
-      triggerFlash('red');
-      addLog(`⚠ AR: [${monster.rank}] ${monster.name}. Следуйте за стрелкой!`, 'fail');
-    })
-    .catch(err => {
-      let errorMsg = 'Ошибка камеры. ';
-      if (err.name === 'NotAllowedError') errorMsg += 'Вы отклонили доступ.';
-      else if (err.name === 'NotFoundError') errorMsg += 'Камера не найдена.';
-      else errorMsg += err.message || 'Неизвестно.';
-      addLog(errorMsg, 'fail');
-      speak('Ошибка камеры.');
-      triggerFlash('red');
-    });
+  requestCamera().then(stream => {
+    videoFeed.srcObject = stream; G.stream = stream;
+    cameraView.classList.add('active'); G.arActive = true;
+    const monster = pickMonsterForPlayer();
+    G.arQuest = { monster, hp: monster.hp, maxHp: monster.maxHp, timeLeft: 45, timerInterval: null, questData };
+    arMonster.textContent = monster.emoji;
+    arHpFill.style.width = '100%';
+    arMonster.classList.remove('dead'); arMonster.classList.remove('locked');
+    arMonsterHud.classList.add('hidden');
+    btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
+    updateArPlayerHud(); updateArMonsterHud(); showRankWarning(monster.rank);
+    beginARLook(); startMonsterAttacks(); updateARTimer();
+    G.arQuest.timerInterval = setInterval(() => {
+      if (!G.arQuest) return;
+      G.arQuest.timeLeft--; updateARTimer();
+      if (G.arQuest.timeLeft <= 0) endAR(false);
+    }, 1000);
+    speak(`Поиск монстра. ${monster.name}. Ранг ${monster.rank}.`);
+    SFX.incoming(); triggerScreenShake(); triggerFlash('red');
+    addLog(`⚠ AR: [${monster.rank}] ${monster.name}. Следуйте за стрелкой!`, 'fail');
+  }).catch(err => {
+    let errorMsg = 'Ошибка камеры. ';
+    if (err.name === 'NotAllowedError') errorMsg += 'Вы отклонили доступ.';
+    else if (err.name === 'NotFoundError') errorMsg += 'Камера не найдена.';
+    else errorMsg += err.message || 'Неизвестно.';
+    addLog(errorMsg, 'fail'); speak('Ошибка камеры.'); triggerFlash('red');
+  });
 }
-
 function updateARTimer() {
   if (!G.arQuest) return;
   const t = G.arQuest.timeLeft;
@@ -2481,113 +2186,72 @@ function updateARTimer() {
 
 btnAttack.addEventListener('click', () => {
   if (!G.arQuest || G.arQuest.hp <= 0) return;
-  if (!arLook.inAttackZone) {
-    SFX.error();
-    return;
-  }
+  if (!arLook.inAttackZone) { SFX.error(); return; }
   const baseDmg = 8 + Math.floor(Math.random() * 7) + Math.floor(G.level / 2);
   const dmgMult = getPlayerDamageMultiplier(G.arQuest.monster.rank, G.rank);
   const dmg = Math.max(1, Math.round(baseDmg * dmgMult));
   G.arQuest.hp -= dmg;
-  arMonster.classList.remove('hit');
-  void arMonster.offsetWidth;
-  arMonster.classList.add('hit');
-  SFX.hit();
-  triggerScreenShake();
-
-  const dmgEl = document.createElement('div');
-  dmgEl.className = 'damage-number';
+  arMonster.classList.remove('hit'); void arMonster.offsetWidth; arMonster.classList.add('hit');
+  SFX.hit(); triggerScreenShake();
+  const dmgEl = document.createElement('div'); dmgEl.className = 'damage-number';
   dmgEl.textContent = `-${dmg}`;
   dmgEl.style.left = (arMonster.offsetLeft + arMonster.offsetWidth/2) + 'px';
-  dmgEl.style.top  = (arMonster.offsetTop) + 'px';
-  cameraView.appendChild(dmgEl);
-  setTimeout(() => dmgEl.remove(), 800);
-
+  dmgEl.style.top = (arMonster.offsetTop) + 'px';
+  cameraView.appendChild(dmgEl); setTimeout(() => dmgEl.remove(), 800);
   if (G.arQuest.hp < 0) G.arQuest.hp = 0;
   updateArMonsterHud();
-
   if (G.arQuest.hp <= 0) {
-    arMonster.classList.add('dead');
-    btnAttack.disabled = true;
-    btnAttack.textContent = 'УНИЧТОЖЕН';
-    btnAttack.classList.remove('ready');
-    triggerFlash('gold');
-    setTimeout(() => endAR(true), 800);
+    arMonster.classList.add('dead'); btnAttack.disabled = true; btnAttack.textContent = 'УНИЧТОЖЕН'; btnAttack.classList.remove('ready');
+    triggerFlash('gold'); setTimeout(() => endAR(true), 800);
   }
 });
-
 function endAR(success) {
   if (!G.arActive) return;
   if (G.arQuest && G.arQuest.timerInterval) clearInterval(G.arQuest.timerInterval);
-  stopMonsterAttacks();
-  endARLook();
-
+  stopMonsterAttacks(); endARLook();
   if (success) {
     const m = G.arQuest.monster;
     const mult = G.arRewardBoost ? 2 : 1;
     const reward = m.reward * mult;
     G.gold += reward;
-    if (G.arRewardBoost) {
-      G.arRewardBoost = false;
-      addLog("Dragon's Fear: награда удвоена!", 'success');
-    }
+    if (G.arRewardBoost) { G.arRewardBoost = false; addLog("Dragon's Fear: награда удвоена!", 'success'); }
     showFloatingText(`+${reward} G`, '#ffcc44');
     addLog(`✓ ${m.name} [${m.rank}] уничтожен! +${reward} золота.`, 'success');
-    speak(`${m.name} уничтожен.`);
-    SFX.success();
+    speak(`${m.name} уничтожен.`); SFX.success();
     if (Math.random() < 0.4) setTimeout(() => grantRandomReward(), 1000);
   } else {
-    addLog(`✕ Время истекло. ${G.arQuest.monster.name} сбежал!`, 'fail');
-    speak('Время истекло.');
-    triggerFlash('red');
+    addLog(`✕ Время истекло. ${G.arQuest.monster.name} сбежал!`, 'fail'); speak('Время истекло.'); triggerFlash('red');
   }
-
   if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
-  videoFeed.srcObject = null;
-  cameraView.classList.remove('active');
-  G.arActive = false;
-
+  videoFeed.srcObject = null; cameraView.classList.remove('active'); G.arActive = false;
   if (G.arQuest && G.arQuest.questData) {
     const q = G.arQuest.questData;
-    if (success) completeQuestReward(q);
-    else failQuest('Монстр сбежал');
+    if (success) completeQuestReward(q); else failQuest('Монстр сбежал');
   }
-  G.arQuest = null;
-  updateUI();
-  saveGame();
+  G.arQuest = null; updateUI(); saveGame();
 }
 
 $('btnAR').addEventListener('click', () => startAR());
 $('btnExitAR').addEventListener('click', () => {
   if (G.arQuest && G.arQuest.timerInterval) clearInterval(G.arQuest.timerInterval);
-  stopMonsterAttacks();
-  endARLook();
+  stopMonsterAttacks(); endARLook();
   if (G.stream) G.stream.getTracks().forEach(t => t.stop());
-  videoFeed.srcObject = null;
-  cameraView.classList.remove('active');
-  G.arActive = false;
-  G.arQuest = null;
-  btnAttack.disabled = true;
-  btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
-  btnAttack.classList.remove('ready');
+  videoFeed.srcObject = null; cameraView.classList.remove('active'); G.arActive = false; G.arQuest = null;
+  btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
   addLog('Вы покинули AR.', '');
 });
 
 /* ============================================================
-   v38: AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
+   v38.1: AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
+   ИСПРАВЛЕНИЯ:
+   - arInReticle: круговая проверка (Math.hypot)
+   - arUpdateAllTargets: активирует прицел и кнопку
+   - startQuestTimer: не очищает при 'minigame'
+   - startARQuest: не запускает второй таймер
    ============================================================ */
-
 const AR = {
-  VIEW_ANGLE: 70,
-  ELEV_RANGE: 40,
-  RETICLE_ZONE: 22,
-  LOCK_ZONE: 14,
-  TARGETS: [],
-  PHASE: null,
-  QUEST: null,
-  PENALTY: null,
-  RAF_ID: null,
-  DOM: {},
+  VIEW_ANGLE: 70, ELEV_RANGE: 40, RETICLE_ZONE: 22, LOCK_ZONE: 14,
+  TARGETS: [], PHASE: null, QUEST: null, PENALTY: null, RAF_ID: null, DOM: {}
 };
 
 AR.DOM.phaseHud    = document.getElementById('arPhaseHud');
@@ -2606,85 +2270,51 @@ AR.DOM.aphFill     = document.getElementById('aphProgressFill');
 
 function arClamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function arRand(a, b) { return a + Math.random() * (b - a); }
+function arDeltaYaw(targetYaw) { return normalizeAngle(targetYaw - arLook.camYaw); }
+function arDeltaElev(targetElev) { return targetElev - arLook.camPitch; }
 
-function arDeltaYaw(targetYaw) {
-  return normalizeAngle(targetYaw - arLook.camYaw);
-}
-function arDeltaElev(targetElev) {
-  return targetElev - arLook.camPitch;
-}
+// FIX #1: круговая проверка прицела (было: квадратная)
 function arInReticle(target, zone = AR.RETICLE_ZONE) {
-  return Math.abs(arDeltaYaw(target.yaw)) < zone &&
-         Math.abs(arDeltaElev(target.elev)) < zone;
+  const dYaw = arDeltaYaw(target.yaw);
+  const dElev = arDeltaElev(target.elev);
+  return Math.hypot(dYaw, dElev) < zone;
 }
 function arInView(target) {
-  return Math.abs(arDeltaYaw(target.yaw)) < AR.VIEW_ANGLE / 2 &&
-         Math.abs(arDeltaElev(target.elev)) < AR.ELEV_RANGE / 2;
+  return Math.abs(arDeltaYaw(target.yaw)) < AR.VIEW_ANGLE / 2 && Math.abs(arDeltaElev(target.elev)) < AR.ELEV_RANGE / 2;
 }
 
 let arTargetSeq = 0;
 function arCreateTarget(opts) {
   const t = {
     id: 'art_' + (++arTargetSeq),
-    type: opts.type || 'MONSTER',
-    emoji: opts.emoji || '👹',
-    yaw: opts.yaw ?? Math.random() * 360,
-    elev: opts.elev ?? arRand(-15, 15),
-    hp: opts.hp ?? 10,
-    maxHp: opts.hp ?? 10,
-    moveSpeed: opts.moveSpeed ?? 0,
-    hidden: !!opts.hidden,
-    revealed: !opts.hidden,
-    alive: true,
-    inView: false,
-    inReticle: false,
-    lockedSec: 0,
-    el: null,
-    hudEl: null,
-    onHit: opts.onHit || null,
-    onCollect: opts.onCollect || null,
-    onMiss: opts.onMiss || null,
-    extra: opts.extra || {},
+    type: opts.type || 'MONSTER', emoji: opts.emoji || '👹',
+    yaw: opts.yaw ?? Math.random() * 360, elev: opts.elev ?? arRand(-15, 15),
+    hp: opts.hp ?? 10, maxHp: opts.hp ?? 10, moveSpeed: opts.moveSpeed ?? 0,
+    hidden: !!opts.hidden, revealed: !opts.hidden, alive: true,
+    inView: false, inReticle: false, lockedSec: 0, el: null, hudEl: null,
+    onHit: opts.onHit || null, onCollect: opts.onCollect || null,
+    onMiss: opts.onMiss || null, extra: opts.extra || {}
   };
-
   const el = document.createElement('div');
   el.className = 'ar-target ar-' + t.type.toLowerCase();
   el.textContent = t.emoji;
   el.style.fontSize = t.type === 'OBSTACLE' ? '56px' : (t.type === 'MONSTER' ? '100px' : '44px');
-  el.style.left = '50%';
-  el.style.top = '50%';
-  el.style.transform = 'translate(-50%,-50%)';
-  cameraView.appendChild(el);
-  t.el = el;
-
+  el.style.left = '50%'; el.style.top = '50%'; el.style.transform = 'translate(-50%,-50%)';
+  cameraView.appendChild(el); t.el = el;
   if (t.type === 'MONSTER') {
     const hud = document.createElement('div');
     hud.className = 'ar-monster-hud hidden';
-    hud.innerHTML = `
-      <div class="amh-title">
-        <span class="amh-rank rank-${G.rank}">${G.rank}</span>
-        <span>${t.emoji}</span>
-      </div>
-      <div class="amh-hp-bar"><div class="amh-hp-fill" style="width:100%"></div></div>
-      <div class="amh-hp-text">${t.hp} / ${t.maxHp}</div>
-    `;
-    cameraView.appendChild(hud);
-    t.hudEl = hud;
+    hud.innerHTML = `<div class="amh-title"><span class="amh-rank rank-${G.rank}">${G.rank}</span><span>${t.emoji}</span></div><div class="amh-hp-bar"><div class="amh-hp-fill" style="width:100%"></div></div><div class="amh-hp-text">${t.hp} / ${t.maxHp}</div>`;
+    cameraView.appendChild(hud); t.hudEl = hud;
   }
-
-  AR.TARGETS.push(t);
-  return t;
+  AR.TARGETS.push(t); return t;
 }
-
 function arRemoveTarget(t) {
   if (!t.alive) return;
-  t.alive = false;
-  t.el?.classList.add('dead');
-  t.hudEl?.classList.add('hidden');
+  t.alive = false; t.el?.classList.add('dead'); t.hudEl?.classList.add('hidden');
   setTimeout(() => { t.el?.remove(); t.hudEl?.remove(); }, 650);
   AR.TARGETS = AR.TARGETS.filter(x => x !== t);
 }
-
 function arClearTargets() {
   AR.TARGETS.forEach(t => { t.el?.remove(); t.hudEl?.remove(); });
   AR.TARGETS = [];
@@ -2693,242 +2323,163 @@ function arClearTargets() {
 function arUpdateAllTargets() {
   for (const t of AR.TARGETS) {
     if (!t.alive) continue;
-
-    if (t.moveSpeed) {
-      t.yaw = (t.yaw + t.moveSpeed * 0.05 + 360) % 360;
-    }
-
+    if (t.moveSpeed) t.yaw = (t.yaw + t.moveSpeed * 0.05 + 360) % 360;
     const dYaw = arDeltaYaw(t.yaw);
     const dElev = arDeltaElev(t.elev);
-    const inView = Math.abs(dYaw) < AR.VIEW_ANGLE / 2 &&
-                   Math.abs(dElev) < AR.ELEV_RANGE / 2;
+    const inView = Math.abs(dYaw) < AR.VIEW_ANGLE / 2 && Math.abs(dElev) < AR.ELEV_RANGE / 2;
     t.inView = inView;
-    t.inReticle = Math.abs(dYaw) < AR.RETICLE_ZONE &&
-                  Math.abs(dElev) < AR.RETICLE_ZONE;
-
+    // FIX #1: inReticle через круговую проверку
+    t.inReticle = Math.hypot(dYaw, dElev) < AR.RETICLE_ZONE;
     if (t.hidden && !t.revealed) {
-      if (Math.abs(dYaw) < 20 && Math.abs(dElev) < 20) {
-        t.revealed = true;
-        t.el.style.transition = 'opacity 0.5s';
-      } else {
-        t.el.classList.add('hidden');
-        t.hudEl?.classList.add('hidden');
-        continue;
-      }
+      if (Math.abs(dYaw) < 20 && Math.abs(dElev) < 20) { t.revealed = true; t.el.style.transition = 'opacity 0.5s'; }
+      else { t.el.classList.add('hidden'); t.hudEl?.classList.add('hidden'); continue; }
     }
-
-    if (!inView) {
-      t.el.classList.add('hidden');
-      t.hudEl?.classList.add('hidden');
-      continue;
-    }
-    t.el.classList.remove('hidden');
-    if (t.hudEl) t.hudEl.classList.remove('hidden');
-
+    if (!inView) { t.el.classList.add('hidden'); t.hudEl?.classList.add('hidden'); continue; }
+    t.el.classList.remove('hidden'); if (t.hudEl) t.hudEl.classList.remove('hidden');
     const xPct = 50 + (dYaw / (AR.VIEW_ANGLE / 2)) * 50;
     const yPct = 50 + (dElev / (AR.ELEV_RANGE / 2)) * 50;
-    const cx = arClamp(xPct, 8, 92);
-    const cy = arClamp(yPct, 15, 85);
-    t.el.style.left = cx + '%';
-    t.el.style.top  = cy + '%';
+    const cx = arClamp(xPct, 8, 92), cy = arClamp(yPct, 15, 85);
+    t.el.style.left = cx + '%'; t.el.style.top = cy + '%';
     t.el.classList.toggle('locked', t.inReticle && t.type === 'MONSTER');
-    if (t.hudEl) {
-      t.hudEl.style.left = cx + '%';
-      t.hudEl.style.top  = cy + '%';
+    if (t.hudEl) { t.hudEl.style.left = cx + '%'; t.hudEl.style.top = cy + '%'; }
+  }
+
+  // FIX #2: активация прицела и кнопки (как в охоте)
+  if (G.arQuest && !G.arQuest.ended) {
+    const anyInReticle = AR.TARGETS.some(t => t.alive && t.inReticle);
+    arReticle.classList.toggle('active', anyInReticle);
+    const phase = AR.PHASE;
+    const phaseType = phase ? phase.type : null;
+    const tapByDom = ['collect','sequence','parry','track','dodge','scan','protect','hold','balance','avoid_gaze','chase','multi_lock'].includes(phaseType);
+    if (tapByDom) {
+      btnAttack.disabled = true;
+      btnAttack.textContent = 'ТАПНИТЕ ПО ЦЕЛИ';
+      btnAttack.classList.remove('ready');
+    } else if (anyInReticle) {
+      btnAttack.disabled = false;
+      let btnText = 'АТАКОВАТЬ';
+      if (phaseType === 'shoot') btnText = 'ВЫСТРЕЛ';
+      if (phaseType === 'rhythm') btnText = 'В РИТМ';
+      btnAttack.textContent = btnText;
+      btnAttack.classList.add('ready');
+    } else {
+      btnAttack.disabled = true;
+      btnAttack.textContent = 'НАВЕДИТЕ НА ЦЕЛЬ';
+      btnAttack.classList.remove('ready');
     }
   }
 }
-
 function arSetPhaseHud(label, progress = null) {
   if (!AR.DOM.phaseHud) return;
   AR.DOM.phaseLabel.textContent = label;
-  if (progress === null) {
-    AR.DOM.phaseFill.style.width = '0%';
-  } else {
-    AR.DOM.phaseFill.style.width = Math.max(0, Math.min(100, progress * 100)) + '%';
-  }
+  if (progress === null) AR.DOM.phaseFill.style.width = '0%';
+  else AR.DOM.phaseFill.style.width = Math.max(0, Math.min(100, progress * 100)) + '%';
   AR.DOM.phaseHud.classList.add('show');
 }
-function arHidePhaseHud() {
-  AR.DOM.phaseHud?.classList.remove('show');
-}
+function arHidePhaseHud() { AR.DOM.phaseHud?.classList.remove('show'); }
 
 function arStrikeTarget(t, dmg) {
   if (!t || !t.alive) return;
   t.hp -= dmg;
-  t.el.classList.remove('hit');
-  void t.el.offsetWidth;
-  t.el.classList.add('hit');
-  SFX.hit();
-  triggerScreenShake();
-
-  const dmgEl = document.createElement('div');
-  dmgEl.className = 'damage-number';
+  t.el.classList.remove('hit'); void t.el.offsetWidth; t.el.classList.add('hit');
+  SFX.hit(); triggerScreenShake();
+  const dmgEl = document.createElement('div'); dmgEl.className = 'damage-number';
   dmgEl.textContent = `-${dmg}`;
-  dmgEl.style.left = t.el.style.left;
-  dmgEl.style.top  = t.el.style.top;
-  cameraView.appendChild(dmgEl);
-  setTimeout(() => dmgEl.remove(), 800);
-
-  spawnHitParticles(
-    parseFloat(t.el.style.left) / 100 * window.innerWidth,
-    parseFloat(t.el.style.top) / 100 * window.innerHeight
-  );
-
+  dmgEl.style.left = t.el.style.left; dmgEl.style.top = t.el.style.top;
+  cameraView.appendChild(dmgEl); setTimeout(() => dmgEl.remove(), 800);
+  spawnHitParticles(parseFloat(t.el.style.left) / 100 * window.innerWidth, parseFloat(t.el.style.top) / 100 * window.innerHeight);
   if (t.hudEl) {
     const pct = Math.max(0, t.hp / t.maxHp * 100);
-    const fill = t.hudEl.querySelector('.amh-hp-fill');
-    const txt = t.hudEl.querySelector('.amh-hp-text');
+    const fill = t.hudEl.querySelector('.amh-hp-fill'), txt = t.hudEl.querySelector('.amh-hp-text');
     if (fill) fill.style.width = pct + '%';
     if (txt) txt.textContent = `${Math.max(0, t.hp)} / ${t.maxHp}`;
   }
-
   if (t.onHit) t.onHit(t, dmg);
   if (t.hp <= 0) arRemoveTarget(t);
 }
-
 function arCollectTarget(t) {
   if (!t || !t.alive) return;
-  SFX.ballPop();
-  showFloatingText('+1', '#ffcc44');
+  SFX.ballPop(); showFloatingText('+1', '#ffcc44');
   if (t.onCollect) t.onCollect(t);
   arRemoveTarget(t);
 }
 
 /* ---------- 15 МЕХАНИК ---------- */
-
 function arRunTrack(phase) {
   return new Promise((resolve) => {
     const total = phase.targets || 1;
-    let found = 0;
-    let current = null;
-    const startTime = Date.now();
-    const limit = (phase.timeLimit || 15) * 1000;
-
+    let found = 0, current = null;
+    const startTime = Date.now(), limit = (phase.timeLimit || 15) * 1000;
     function spawnNext() {
       if (found >= total) { finish(); return; }
-      const yaw = (arLook.camYaw + arRand(120, 240)) % 360;
-      current = arCreateTarget({
-        type: 'POINT',
-        emoji: phase.emoji || '💠',
-        yaw,
-        elev: arRand(-15, 15),
-        hidden: !!phase.hidden,
-      });
+      current = arCreateTarget({ type:'POINT', emoji: phase.emoji || '💠', yaw: (arLook.camYaw + arRand(120, 240)) % 360, elev: arRand(-15, 15), hidden: !!phase.hidden });
       arSetPhaseHud(`ПОИСК ${found + 1} / ${total}`, found / total);
     }
-
     function check() {
       if (!current || !current.alive) return;
       if (arInReticle(current, 20)) {
-        arCollectTarget(current);
-        found++;
+        arCollectTarget(current); found++;
         arSetPhaseHud(`ПОИСК ${found} / ${total}`, found / total);
         if (found >= total) { finish(); return; }
         setTimeout(spawnNext, 300);
       }
       if (Date.now() - startTime > limit) finish();
     }
-
     const iv = setInterval(check, 100);
-
-    function finish() {
-      clearInterval(iv);
-      if (current && current.alive) arRemoveTarget(current);
-      arHidePhaseHud();
-      resolve(found >= total);
-    }
-
+    function finish() { clearInterval(iv); if (current && current.alive) arRemoveTarget(current); arHidePhaseHud(); resolve(found >= total); }
     spawnNext();
   });
 }
-
 function arRunStrike(phase) {
   return new Promise((resolve) => {
-    const totalKills = phase.count || 1;
-    const hp = phase.hp || 20;
-    const speed = phase.moveSpeed || 0;
-    let kills = 0;
-    let current = null;
-    const startTime = Date.now();
-    const limit = (phase.timeLimit || 60) * 1000;
-    let tapCount = 0;
-    const needTaps = phase.tapCount || 0;
-
+    const totalKills = phase.count || 1, hp = phase.hp || 20, speed = phase.moveSpeed || 0;
+    let kills = 0, current = null, tapCount = 0;
+    const startTime = Date.now(), limit = (phase.timeLimit || 60) * 1000, needTaps = phase.tapCount || 0;
     function spawnNext() {
       if (kills >= totalKills) { finish(true); return; }
       current = arCreateTarget({
-        type: 'MONSTER',
-        emoji: phase.emoji || '👹',
-        yaw: (arLook.camYaw + arRand(90, 270)) % 360,
-        elev: arRand(-15, 15),
-        hp,
-        moveSpeed: speed,
+        type:'MONSTER', emoji: phase.emoji || '👹',
+        yaw: (arLook.camYaw + arRand(90, 270)) % 360, elev: arRand(-15, 15),
+        hp, moveSpeed: speed,
         onHit: (t, dmg) => {
           if (needTaps) {
             tapCount++;
             if (tapCount >= needTaps) { arRemoveTarget(t); kills++; tapCount = 0; if (kills >= totalKills) finish(true); else spawnNext(); }
           } else if (t.hp <= 0) {
-            kills++;
-            arSetPhaseHud(`УБИТО ${kills} / ${totalKills}`, kills / totalKills);
+            kills++; arSetPhaseHud(`УБИТО ${kills} / ${totalKills}`, kills / totalKills);
             if (kills >= totalKills) finish(true); else setTimeout(spawnNext, 400);
           }
-        },
+        }
       });
       arSetPhaseHud(`ЦЕЛЕЙ: ${kills} / ${totalKills}`, kills / totalKills);
     }
-
     function onAttack() {
       if (!current || !current.alive) return;
       if (!arInReticle(current)) { SFX.error(); return; }
       const dmg = 8 + Math.floor(Math.random() * 7) + Math.floor(G.level / 2);
       arStrikeTarget(current, dmg);
     }
-
+    // FIX #2: кнопка управляется arUpdateAllTargets — не трогаем disabled здесь
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
-    btnAttack.disabled = false;
-    btnAttack.textContent = 'АТАКОВАТЬ';
-    btnAttack.classList.add('ready');
-
-    const iv = setInterval(() => {
-      if (Date.now() - startTime > limit) finish(kills >= totalKills);
-    }, 200);
-
+    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(kills >= totalKills); }, 200);
     function finish(success) {
-      clearInterval(iv);
-      btnAttack.onclick = oldHandler;
-      btnAttack.disabled = true;
-      btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
-      btnAttack.classList.remove('ready');
+      clearInterval(iv); btnAttack.onclick = oldHandler;
+      btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
       if (current && current.alive) arRemoveTarget(current);
-      arHidePhaseHud();
-      resolve(success);
+      arHidePhaseHud(); resolve(success);
     }
-
     spawnNext();
   });
 }
-
 function arRunDodge(phase) {
   return new Promise((resolve) => {
-    const total = phase.obstacles || 6;
-    const limit = (phase.timeLimit || 12) * 1000;
-    const speed = phase.speed || 1.5;
-    const parry = !!phase.parry;
-    const startTime = Date.now();
-    let dodged = 0;
-    let failed = false;
-    const active = [];
-
+    const total = phase.obstacles || 6, limit = (phase.timeLimit || 12) * 1000, speed = phase.speed || 1.5, parry = !!phase.parry;
+    const startTime = Date.now(); let dodged = 0, failed = false; const active = [];
     let sx = 0, sy = 0, swiping = false;
-    function onDown(e) {
-      const p = e.touches ? e.touches[0] : e;
-      sx = p.clientX; sy = p.clientY; swiping = true;
-    }
+    function onDown(e) { const p = e.touches ? e.touches[0] : e; sx = p.clientX; sy = p.clientY; swiping = true; }
     function onUp(e) {
-      if (!swiping) return;
-      swiping = false;
+      if (!swiping) return; swiping = false;
       const p = e.changedTouches ? e.changedTouches[0] : e;
       const dx = p.clientX - sx, dy = p.clientY - sy;
       if (Math.abs(dx) < 25 && Math.abs(dy) < 25) return;
@@ -2938,7 +2489,6 @@ function arRunDodge(phase) {
     cameraView.addEventListener('touchend', onUp);
     cameraView.addEventListener('mousedown', onDown);
     cameraView.addEventListener('mouseup', onUp);
-
     function handleSwipe(dx, dy) {
       const candidates = active.filter(o => o.alive && arInReticle(o, 35));
       if (candidates.length === 0) return;
@@ -2948,266 +2498,134 @@ function arRunDodge(phase) {
       const diff = Math.abs(normalizeAngle(angle - objAngle));
       const ok = parry ? diff < 60 : diff > 90;
       if (ok) {
-        obj.alive = false;
-        obj.el?.remove();
-        dodged++;
-        SFX.success();
-        arSetPhaseHud(`УКЛОНЕНО ${dodged} / ${total}`, dodged / total);
+        obj.alive = false; obj.el?.remove(); dodged++;
+        SFX.success(); arSetPhaseHud(`УКЛОНЕНО ${dodged} / ${total}`, dodged / total);
         if (dodged >= total) finish(true);
-      } else {
-        SFX.fail();
-        takeDamage(5, 'Промах уклонения!');
-      }
+      } else { SFX.fail(); takeDamage(5, 'Промах уклонения!'); }
     }
-
     function spawnObstacle() {
       if (failed) return;
       const yaw = (arLook.camYaw + arRand(60, 180) * (Math.random() < 0.5 ? 1 : -1) + 360) % 360;
-      const obj = arCreateTarget({
-        type: 'OBSTACLE',
-        emoji: phase.emoji || (parry ? '⚡' : '🪨'),
-        yaw,
-        elev: arRand(-10, 10),
-        moveSpeed: speed,
-      });
+      const obj = arCreateTarget({ type:'OBSTACLE', emoji: phase.emoji || (parry ? '⚡' : '🪨'), yaw, elev: arRand(-10, 10), moveSpeed: speed });
       const flyIv = setInterval(() => {
         if (!obj.alive) { clearInterval(flyIv); return; }
         const d = arDeltaYaw(obj.yaw);
-        if (Math.abs(d) < 8) {
-          clearInterval(flyIv);
-          if (obj.alive) {
-            obj.alive = false;
-            obj.el?.remove();
-            takeDamage(5, 'Пропущен удар!');
-            SFX.fail();
-          }
-        }
+        if (Math.abs(d) < 8) { clearInterval(flyIv); if (obj.alive) { obj.alive = false; obj.el?.remove(); takeDamage(5, 'Пропущен удар!'); SFX.fail(); } }
       }, 100);
       active.push(obj);
     }
-
     const spawner = setInterval(spawnObstacle, Math.max(800, limit / total));
     spawnObstacle();
-
-    const iv = setInterval(() => {
-      if (Date.now() - startTime > limit) finish(dodged >= total);
-    }, 200);
-
+    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(dodged >= total); }, 200);
     function finish(success) {
-      clearInterval(iv);
-      clearInterval(spawner);
+      clearInterval(iv); clearInterval(spawner);
       cameraView.removeEventListener('touchstart', onDown);
       cameraView.removeEventListener('touchend', onUp);
       cameraView.removeEventListener('mousedown', onDown);
       cameraView.removeEventListener('mouseup', onUp);
       active.forEach(o => { if (o.alive) { o.alive = false; o.el?.remove(); } });
-      arHidePhaseHud();
-      resolve(success);
+      arHidePhaseHud(); resolve(success);
     }
   });
 }
-
 function arRunCollect(phase) {
   return new Promise((resolve) => {
-    const total = phase.items || 10;
-    let collected = 0;
-    const limit = (phase.timeLimit || 20) * 1000;
-    const startTime = Date.now();
-    const spawnRate = phase.spawnRate || 600;
-    const emoji = phase.emoji || '🌿';
+    const total = phase.items || 10; let collected = 0;
+    const limit = (phase.timeLimit || 20) * 1000, startTime = Date.now();
+    const spawnRate = phase.spawnRate || 600, emoji = phase.emoji || '🌿';
     const active = [];
-
     function spawn() {
       if (collected >= total) return;
       const t = arCreateTarget({
-        type: 'COIN',
-        emoji,
-        yaw: (arLook.camYaw + arRand(-60, 60) + 360) % 360,
-        elev: arRand(-15, 15),
-        onCollect: () => {
-          collected++;
-          arSetPhaseHud(`СОБРАНО ${collected} / ${total}`, collected / total);
-          if (collected >= total) finish(true);
-        },
+        type:'COIN', emoji, yaw: (arLook.camYaw + arRand(-60, 60) + 360) % 360, elev: arRand(-15, 15),
+        onCollect: () => { collected++; arSetPhaseHud(`СОБРАНО ${collected} / ${total}`, collected / total); if (collected >= total) finish(true); }
       });
-      t.el.style.pointerEvents = 'auto';
-      t.el.style.cursor = 'pointer';
+      t.el.style.pointerEvents = 'auto'; t.el.style.cursor = 'pointer';
       t.el.addEventListener('click', (e) => { e.stopPropagation(); if (arInReticle(t, 25)) arCollectTarget(t); });
       t.el.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); if (arInReticle(t, 25)) arCollectTarget(t); }, { passive: false });
       active.push(t);
       setTimeout(() => { if (t.alive) arRemoveTarget(t); }, 3500);
     }
-
     const spawner = setInterval(spawn, spawnRate);
     for (let i = 0; i < 3; i++) setTimeout(spawn, i * 200);
-
-    const iv = setInterval(() => {
-      if (Date.now() - startTime > limit) finish(collected >= total);
-    }, 200);
-
-    function finish(success) {
-      clearInterval(iv);
-      clearInterval(spawner);
-      active.forEach(t => { if (t.alive) arRemoveTarget(t); });
-      arHidePhaseHud();
-      resolve(success);
-    }
+    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(collected >= total); }, 200);
+    function finish(success) { clearInterval(iv); clearInterval(spawner); active.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunHold(phase) {
   return new Promise((resolve) => {
-    const need = (phase.targetSec || 5) * 1000;
-    const stability = phase.stability || 0.9;
-    const speed = phase.moveSpeed || 0;
-    let held = 0;
-    const startTime = Date.now();
-    const limit = (phase.timeLimit || 60) * 1000;
-    const ring = AR.DOM.holdRing;
-    ring.classList.add('show');
-
-    const t = arCreateTarget({
-      type: 'MONSTER',
-      emoji: phase.emoji || '🎯',
-      yaw: (arLook.camYaw + arRand(60, 180)) % 360,
-      elev: arRand(-10, 10),
-      hp: 999,
-      moveSpeed: speed,
-    });
-
+    const need = (phase.targetSec || 5) * 1000, stability = phase.stability || 0.9, speed = phase.moveSpeed || 0;
+    let held = 0; const startTime = Date.now(), limit = (phase.timeLimit || 60) * 1000;
+    const ring = AR.DOM.holdRing; ring.classList.add('show');
+    const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🎯', yaw: (arLook.camYaw + arRand(60, 180)) % 360, elev: arRand(-10, 10), hp: 999, moveSpeed: speed });
     const iv = setInterval(() => {
       if (!t.alive) { finish(false); return; }
-      if (arInReticle(t, 18 * stability + 4)) {
-        held += 100;
-        AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5 * (1 - Math.min(1, held / need)));
-        arSetPhaseHud('УДЕРЖАНИЕ', held / need);
-      } else {
-        held = Math.max(0, held - 60);
-        AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5 * (1 - Math.min(1, held / need)));
-      }
+      if (arInReticle(t, 18 * stability + 4)) { held += 100; AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5 * (1 - Math.min(1, held / need))); arSetPhaseHud('УДЕРЖАНИЕ', held / need); }
+      else { held = Math.max(0, held - 60); AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5 * (1 - Math.min(1, held / need))); }
       if (held >= need) finish(true);
       if (Date.now() - startTime > limit) finish(false);
     }, 100);
-
-    function finish(success) {
-      clearInterval(iv);
-      ring.classList.remove('show');
-      AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5);
-      if (t.alive) arRemoveTarget(t);
-      arHidePhaseHud();
-      resolve(success);
-    }
+    function finish(success) { clearInterval(iv); ring.classList.remove('show'); AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunSequence(phase) {
   return new Promise((resolve) => {
-    const total = phase.targets || 4;
-    const limit = (phase.timeLimit || 15) * 1000;
-    const startTime = Date.now();
-    let sequence = [];
-    let input = [];
-    let showing = false;
-    const targets = [];
-
+    const total = phase.targets || 4, limit = (phase.timeLimit || 15) * 1000;
+    let sequence = [], input = [], showing = false; const targets = [];
     for (let i = 0; i < total; i++) {
       const t = arCreateTarget({
-        type: 'RUNE',
-        emoji: ['💠','🔮','⚡','🌟','❄','🔥'][i % 6],
-        yaw: (arLook.camYaw + (i / total) * 360) % 360,
-        elev: arRand(-10, 10),
-        extra: { index: i },
+        type:'RUNE', emoji: ['💠','🔮','⚡','🌟','❄','🔥'][i % 6],
+        yaw: (arLook.camYaw + (i / total) * 360) % 360, elev: arRand(-10, 10), extra: { index: i }
       });
-      t.el.style.pointerEvents = 'auto';
-      t.el.style.cursor = 'pointer';
+      t.el.style.pointerEvents = 'auto'; t.el.style.cursor = 'pointer';
       t.el.addEventListener('click', (e) => { e.stopPropagation(); onTap(t); });
       t.el.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); onTap(t); }, { passive: false });
       targets.push(t);
     }
-
     function onTap(t) {
-      if (showing) return;
-      if (!arInReticle(t, 28)) return;
-      input.push(t.extra.index);
-      SFX.ballPop();
+      if (showing) return; if (!arInReticle(t, 28)) return;
+      input.push(t.extra.index); SFX.ballPop();
       t.el.style.transform = 'translate(-50%,-50%) scale(1.3)';
       setTimeout(() => { if (t.alive) t.el.style.transform = 'translate(-50%,-50%) scale(1)'; }, 150);
       const expected = sequence[input.length - 1];
-      if (t.extra.index !== expected) {
-        SFX.fail();
-        finish(false);
-        return;
-      }
+      if (t.extra.index !== expected) { SFX.fail(); finish(false); return; }
       if (input.length === sequence.length) finish(true);
     }
-
     function playSequence() {
-      showing = true;
-      sequence = [];
+      showing = true; sequence = [];
       for (let i = 0; i < total; i++) sequence.push(Math.floor(Math.random() * total));
       arSetPhaseHud('ЗАПОМНИТЕ', 0);
       let i = 0;
       const iv = setInterval(() => {
-        if (i >= sequence.length) {
-          clearInterval(iv);
-          showing = false;
-          arSetPhaseHud('ПОВТОРИТЕ', 0);
-          return;
-        }
+        if (i >= sequence.length) { clearInterval(iv); showing = false; arSetPhaseHud('ПОВТОРИТЕ', 0); return; }
         const t = targets[sequence[i]];
         if (t && t.alive) {
           t.el.style.transform = 'translate(-50%,-50%) scale(1.4)';
           t.el.style.filter = 'drop-shadow(0 0 30px #44ff88)';
-          setTimeout(() => {
-            if (t.alive) { t.el.style.transform = 'translate(-50%,-50%) scale(1)'; t.el.style.filter = ''; }
-          }, 400);
+          setTimeout(() => { if (t.alive) { t.el.style.transform = 'translate(-50%,-50%) scale(1)'; t.el.style.filter = ''; } }, 400);
         }
         i++;
       }, 700);
     }
-
     const timeout = setTimeout(() => finish(false), limit);
     playSequence();
-
-    function finish(success) {
-      clearTimeout(timeout);
-      targets.forEach(t => { if (t.alive) arRemoveTarget(t); });
-      arHidePhaseHud();
-      resolve(success);
-    }
+    function finish(success) { clearTimeout(timeout); targets.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunParry(phase) {
   return new Promise((resolve) => {
-    const total = phase.attacks || 5;
-    const limit = (phase.timeLimit || 15) * 1000;
-    const startTime = Date.now();
-    let parried = 0;
-    let current = null;
-    let sx = 0, sy = 0;
+    const total = phase.attacks || 5, limit = (phase.timeLimit || 15) * 1000, startTime = Date.now();
+    let parried = 0, current = null, sx = 0, sy = 0;
     const arrow = AR.DOM.parryArrow;
-
     function spawn() {
       if (parried >= total) { finish(true); return; }
       const yaw = (arLook.camYaw + arRand(60, 180) * (Math.random() < 0.5 ? 1 : -1) + 360) % 360;
-      current = arCreateTarget({
-        type: 'OBSTACLE',
-        emoji: '⚡',
-        yaw,
-        elev: arRand(-10, 10),
-      });
-      const d = arDeltaYaw(current.yaw);
-      const ang = d > 0 ? 90 : -90;
-      arrow.style.transform = `translate(-50%,-50%) rotate(${ang}deg)`;
-      arrow.classList.add('show');
+      current = arCreateTarget({ type:'OBSTACLE', emoji: '⚡', yaw, elev: arRand(-10, 10) });
+      const d = arDeltaYaw(current.yaw); const ang = d > 0 ? 90 : -90;
+      arrow.style.transform = `translate(-50%,-50%) rotate(${ang}deg)`; arrow.classList.add('show');
       arSetPhaseHud(`ПАРИРОВАНО ${parried} / ${total}`, parried / total);
     }
-
-    function onDown(e) {
-      const p = e.touches ? e.touches[0] : e;
-      sx = p.clientX; sy = p.clientY;
-    }
+    function onDown(e) { const p = e.touches ? e.touches[0] : e; sx = p.clientX; sy = p.clientY; }
     function onUp(e) {
       if (!current || !current.alive) return;
       const p = e.changedTouches ? e.changedTouches[0] : e;
@@ -3217,123 +2635,63 @@ function arRunParry(phase) {
       const needAng = arDeltaYaw(current.yaw) > 0 ? 0 : 180;
       const diff = Math.abs(normalizeAngle(swipeAng - needAng));
       if (diff < 60) {
-        parried++;
-        SFX.success();
-        arRemoveTarget(current);
-        current = null;
-        arrow.classList.remove('show');
+        parried++; SFX.success(); arRemoveTarget(current); current = null; arrow.classList.remove('show');
         if (parried >= total) finish(true); else setTimeout(spawn, 300);
-      } else {
-        SFX.fail();
-        takeDamage(5, 'Неверное парирование!');
-      }
+      } else { SFX.fail(); takeDamage(5, 'Неверное парирование!'); }
     }
-
     cameraView.addEventListener('touchstart', onDown, { passive: true });
     cameraView.addEventListener('touchend', onUp);
     cameraView.addEventListener('mousedown', onDown);
     cameraView.addEventListener('mouseup', onUp);
-
-    const iv = setInterval(() => {
-      if (Date.now() - startTime > limit) finish(parried >= total);
-    }, 200);
-
+    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(parried >= total); }, 200);
     function finish(success) {
       clearInterval(iv);
       cameraView.removeEventListener('touchstart', onDown);
       cameraView.removeEventListener('touchend', onUp);
       cameraView.removeEventListener('mousedown', onDown);
       cameraView.removeEventListener('mouseup', onUp);
-      arrow.classList.remove('show');
-      if (current && current.alive) arRemoveTarget(current);
-      arHidePhaseHud();
-      resolve(success);
+      arrow.classList.remove('show'); if (current && current.alive) arRemoveTarget(current); arHidePhaseHud(); resolve(success);
     }
-
     spawn();
   });
 }
-
 function arRunShoot(phase) {
   return new Promise((resolve) => {
-    const total = phase.targets || 5;
-    const limit = (phase.timeLimit || 15) * 1000;
-    const lifetime = (phase.lifetime || 2) * 1000;
-    const speed = phase.speed || 2;
-    const startTime = Date.now();
-    let hit = 0;
-    let current = null;
-
+    const total = phase.targets || 5, limit = (phase.timeLimit || 15) * 1000;
+    const lifetime = (phase.lifetime || 2) * 1000, speed = phase.speed || 2;
+    let hit = 0, current = null; const startTime = Date.now();
     function spawn() {
       if (hit >= total) { finish(true); return; }
-      current = arCreateTarget({
-        type: 'MONSTER',
-        emoji: phase.emoji || '🎯',
-        yaw: (arLook.camYaw + arRand(-50, 50) + 360) % 360,
-        elev: arRand(-15, 15),
-        hp: 1,
-        moveSpeed: speed,
-      });
+      current = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🎯', yaw: (arLook.camYaw + arRand(-50, 50) + 360) % 360, elev: arRand(-15, 15), hp: 1, moveSpeed: speed });
       arSetPhaseHud(`ПОПАДАНИЙ ${hit} / ${total}`, hit / total);
       setTimeout(() => {
-        if (current && current.alive) {
-          arRemoveTarget(current);
-          current = null;
-          SFX.fail();
-          if (hit < total) spawn();
-        }
+        if (current && current.alive) { arRemoveTarget(current); current = null; SFX.fail(); if (hit < total) spawn(); }
       }, lifetime);
     }
-
     function onAttack() {
       if (!current || !current.alive) return;
       if (!arInReticle(current, 25)) { SFX.error(); return; }
-      hit++;
-      SFX.hit();
-      arRemoveTarget(current);
-      current = null;
+      hit++; SFX.hit(); arRemoveTarget(current); current = null;
       if (hit >= total) finish(true); else setTimeout(spawn, 300);
     }
-
+    // FIX #2: кнопка управляется arUpdateAllTargets
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
-    btnAttack.disabled = false;
-    btnAttack.textContent = 'ВЫСТРЕЛ';
-    btnAttack.classList.add('ready');
-
-    const iv = setInterval(() => {
-      if (Date.now() - startTime > limit) finish(hit >= total);
-    }, 200);
-
+    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(hit >= total); }, 200);
     function finish(success) {
-      clearInterval(iv);
-      btnAttack.onclick = oldHandler;
-      btnAttack.disabled = true;
-      btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
-      btnAttack.classList.remove('ready');
-      if (current && current.alive) arRemoveTarget(current);
-      arHidePhaseHud();
-      resolve(success);
+      clearInterval(iv); btnAttack.onclick = oldHandler;
+      btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
+      if (current && current.alive) arRemoveTarget(current); arHidePhaseHud(); resolve(success);
     }
-
     spawn();
   });
 }
-
 function arRunAvoidGaze(phase) {
   return new Promise((resolve) => {
-    const limit = (phase.timeLimit || 12) * 1000;
-    const gazeAngle = phase.gazeAngle || 60;
-    const rotateSpeed = phase.rotateSpeed || 1;
-    const startTime = Date.now();
-    let survived = 0;
-    let damageCooldown = 0;
-
+    const limit = (phase.timeLimit || 12) * 1000, gazeAngle = phase.gazeAngle || 60, rotateSpeed = phase.rotateSpeed || 1;
+    const startTime = Date.now(); let survived = 0, damageCooldown = 0;
     const guard = { yaw: Math.random() * 360, angle: gazeAngle };
-    const cone = document.createElement('div');
-    cone.className = 'ar-gaze-cone';
-    cameraView.appendChild(cone);
-
+    const cone = document.createElement('div'); cone.className = 'ar-gaze-cone'; cameraView.appendChild(cone);
     const iv = setInterval(() => {
       guard.yaw = (guard.yaw + rotateSpeed + 360) % 360;
       const d = Math.abs(normalizeAngle(guard.yaw - arLook.camYaw));
@@ -3341,702 +2699,278 @@ function arRunAvoidGaze(phase) {
       cone.classList.toggle('safe', !inGaze);
       const rel = normalizeAngle(guard.yaw - arLook.camYaw);
       const xPct = 50 + (rel / (AR.VIEW_ANGLE / 2)) * 50;
-      cone.style.left = arClamp(xPct, -20, 120) + '%';
-      cone.style.top = '50%';
+      cone.style.left = arClamp(xPct, -20, 120) + '%'; cone.style.top = '50%';
       cone.style.transform = `translate(-50%, -100%) rotate(${rel}deg)`;
-
       if (inGaze) {
-        if (Date.now() > damageCooldown) {
-          damageCooldown = Date.now() + 1000;
-          takeDamage(5, 'Вас заметили!');
-          SFX.fail();
-          triggerFlash('red');
-        }
-      } else {
-        survived += 100;
-        arSetPhaseHud('СКРЫТНОСТЬ', survived / limit);
-      }
+        if (Date.now() > damageCooldown) { damageCooldown = Date.now() + 1000; takeDamage(5, 'Вас заметили!'); SFX.fail(); triggerFlash('red'); }
+      } else { survived += 100; arSetPhaseHud('СКРЫТНОСТЬ', survived / limit); }
       if (Date.now() - startTime > limit) finish(true);
     }, 100);
-
-    function finish(success) {
-      clearInterval(iv);
-      cone.remove();
-      arHidePhaseHud();
-      resolve(success);
-    }
+    function finish(success) { clearInterval(iv); cone.remove(); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunChase(phase) {
   return new Promise((resolve) => {
-    const need = (phase.chaseSec || 8) * 1000;
-    const speed = phase.moveSpeed || 3;
-    const startTime = Date.now();
-    const limit = (phase.timeLimit || 30) * 1000;
-    let held = 0;
-
-    const t = arCreateTarget({
-      type: 'MONSTER',
-      emoji: phase.emoji || '🏃',
-      yaw: (arLook.camYaw + 180) % 360,
-      elev: arRand(-10, 10),
-      hp: 999,
-      moveSpeed: speed,
-    });
-
+    const need = (phase.chaseSec || 8) * 1000, speed = phase.moveSpeed || 3;
+    const startTime = Date.now(), limit = (phase.timeLimit || 30) * 1000; let held = 0;
+    const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🏃', yaw: (arLook.camYaw + 180) % 360, elev: arRand(-10, 10), hp: 999, moveSpeed: speed });
     const iv = setInterval(() => {
       if (!t.alive) { finish(false); return; }
-      if (arInReticle(t, 25)) {
-        held += 100;
-        arSetPhaseHud('ПОГОНЯ', held / need);
-      } else {
-        held = Math.max(0, held - 50);
-      }
+      if (arInReticle(t, 25)) { held += 100; arSetPhaseHud('ПОГОНЯ', held / need); }
+      else { held = Math.max(0, held - 50); }
       if (held >= need) finish(true);
       if (Date.now() - startTime > limit) finish(false);
     }, 100);
-
-    function finish(success) {
-      clearInterval(iv);
-      if (t.alive) arRemoveTarget(t);
-      arHidePhaseHud();
-      resolve(success);
-    }
+    function finish(success) { clearInterval(iv); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunProtect(phase) {
   return new Promise((resolve) => {
-    const waves = phase.waves || 3;
-    const perWave = phase.enemiesPerWave || 3;
-    const protectSec = (phase.protectSec || 15) * 1000;
-    const startTime = Date.now();
-    let wave = 0;
-    let killed = 0;
-    let objectHp = 100;
-    const enemies = [];
-
-    const core = arCreateTarget({
-      type: 'POINT',
-      emoji: '🛡',
-      yaw: arLook.camYaw,
-      elev: 0,
-      hp: 100,
-    });
+    const waves = phase.waves || 3, perWave = phase.enemiesPerWave || 3, protectSec = (phase.protectSec || 15) * 1000;
+    const startTime = Date.now(); let wave = 0, killed = 0, objectHp = 100; const enemies = [];
+    const core = arCreateTarget({ type:'POINT', emoji: '🛡', yaw: arLook.camYaw, elev: 0, hp: 100 });
     core.el.style.pointerEvents = 'none';
-
     function spawnWave() {
       if (wave >= waves) return;
-      wave++;
-      arSetPhaseHud(`ВОЛНА ${wave} / ${waves}`, wave / waves);
+      wave++; arSetPhaseHud(`ВОЛНА ${wave} / ${waves}`, wave / waves);
       for (let i = 0; i < perWave; i++) {
-        const e = arCreateTarget({
-          type: 'MONSTER',
-          emoji: '👹',
-          yaw: (arLook.camYaw + arRand(-60, 60) + 360) % 360,
-          elev: arRand(-15, 15),
-          hp: 15,
-          moveSpeed: 1.5,
-        });
-        e.el.style.pointerEvents = 'auto';
-        e.el.style.cursor = 'pointer';
+        const e = arCreateTarget({ type:'MONSTER', emoji: '👹', yaw: (arLook.camYaw + arRand(-60, 60) + 360) % 360, elev: arRand(-15, 15), hp: 15, moveSpeed: 1.5 });
+        e.el.style.pointerEvents = 'auto'; e.el.style.cursor = 'pointer';
         e.el.addEventListener('click', (ev) => { ev.stopPropagation(); if (arInReticle(e, 28)) tryKill(e); });
         e.el.addEventListener('touchstart', (ev) => { ev.preventDefault(); ev.stopPropagation(); if (arInReticle(e, 28)) tryKill(e); }, { passive: false });
         enemies.push(e);
       }
     }
-
     function tryKill(e) {
-      killed++;
-      SFX.hit();
-      arRemoveTarget(e);
-      const idx = enemies.indexOf(e);
-      if (idx >= 0) enemies.splice(idx, 1);
+      killed++; SFX.hit(); arRemoveTarget(e);
+      const idx = enemies.indexOf(e); if (idx >= 0) enemies.splice(idx, 1);
       if (killed >= waves * perWave) finish(true);
     }
-
     function enemyReachedCore(e) {
-      objectHp -= 20;
-      SFX.fail();
-      takeDamage(5, 'Объект повреждён!');
-      arRemoveTarget(e);
-      const idx = enemies.indexOf(e);
-      if (idx >= 0) enemies.splice(idx, 1);
+      objectHp -= 20; SFX.fail(); takeDamage(5, 'Объект повреждён!'); arRemoveTarget(e);
+      const idx = enemies.indexOf(e); if (idx >= 0) enemies.splice(idx, 1);
       if (objectHp <= 0) finish(false);
     }
-
     const moveIv = setInterval(() => {
       enemies.forEach(e => {
         if (!e.alive) return;
         const d = arDeltaYaw(e.yaw);
-        if (Math.abs(d) < 8 && Math.abs(arDeltaElev(e.elev)) < 8) {
-          enemyReachedCore(e);
-        }
+        if (Math.abs(d) < 8 && Math.abs(arDeltaElev(e.elev)) < 8) enemyReachedCore(e);
       });
       if (Date.now() - startTime > protectSec && enemies.length === 0 && wave >= waves) finish(true);
     }, 200);
-
     spawnWave();
-    const waveIv = setInterval(() => {
-      if (wave < waves && enemies.length === 0) spawnWave();
-    }, 2500);
-
-    function finish(success) {
-      clearInterval(moveIv);
-      clearInterval(waveIv);
-      enemies.forEach(e => { if (e.alive) arRemoveTarget(e); });
-      if (core.alive) arRemoveTarget(core);
-      arHidePhaseHud();
-      resolve(success);
-    }
+    const waveIv = setInterval(() => { if (wave < waves && enemies.length === 0) spawnWave(); }, 2500);
+    function finish(success) { clearInterval(moveIv); clearInterval(waveIv); enemies.forEach(e => { if (e.alive) arRemoveTarget(e); }); if (core.alive) arRemoveTarget(core); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunBalanceHold(phase) {
   return new Promise((resolve) => {
-    const need = (phase.targetSec || 6) * 1000;
-    const tol = phase.tiltTolerance || 5;
-    const startTime = Date.now();
-    const limit = (phase.timeLimit || 30) * 1000;
-    let held = 0;
-
-    const t = arCreateTarget({
-      type: 'MONSTER',
-      emoji: '🎯',
-      yaw: arLook.camYaw,
-      elev: 0,
-      hp: 999,
-    });
-
+    const need = (phase.targetSec || 6) * 1000, tol = phase.tiltTolerance || 5;
+    const startTime = Date.now(), limit = (phase.timeLimit || 30) * 1000; let held = 0;
+    const t = arCreateTarget({ type:'MONSTER', emoji: '🎯', yaw: arLook.camYaw, elev: 0, hp: 999 });
     const iv = setInterval(() => {
       if (!t.alive) { finish(false); return; }
       const tilt = Math.abs(arLook.camPitch) + Math.abs((arLook.camYaw % 10) - 5);
       const stable = tilt < tol * 3;
-      if (stable && arInReticle(t, 30)) {
-        held += 100;
-        arSetPhaseHud('БАЛАНС', held / need);
-      } else {
-        held = Math.max(0, held - 80);
-      }
+      if (stable && arInReticle(t, 30)) { held += 100; arSetPhaseHud('БАЛАНС', held / need); }
+      else { held = Math.max(0, held - 80); }
       if (held >= need) finish(true);
       if (Date.now() - startTime > limit) finish(false);
     }, 100);
-
-    function finish(success) {
-      clearInterval(iv);
-      if (t.alive) arRemoveTarget(t);
-      arHidePhaseHud();
-      resolve(success);
-    }
+    function finish(success) { clearInterval(iv); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunTapRhythm(phase) {
   return new Promise((resolve) => {
-    const beats = phase.beats || 10;
-    const bpm = phase.bpm || 120;
-    const tolerance = (phase.tolerance || 0.15) * 1000;
-    const interval = 60000 / bpm;
-    const limit = (phase.timeLimit || 30) * 1000;
-    const startTime = Date.now();
-    let beatCount = 0;
-    let successHits = 0;
-    let lastBeatTime = 0;
-    let beatActive = false;
+    const beats = phase.beats || 10, bpm = phase.bpm || 120, tolerance = (phase.tolerance || 0.15) * 1000;
+    const interval = 60000 / bpm, limit = (phase.timeLimit || 30) * 1000, startTime = Date.now();
+    let beatCount = 0, successHits = 0, lastBeatTime = 0, beatActive = false;
     const reticle = document.getElementById('arReticle');
-
-    const t = arCreateTarget({
-      type: 'MONSTER',
-      emoji: '🎵',
-      yaw: arLook.camYaw,
-      elev: 0,
-      hp: 999,
-    });
-
+    const t = arCreateTarget({ type:'MONSTER', emoji: '🎵', yaw: arLook.camYaw, elev: 0, hp: 999 });
     const beatIv = setInterval(() => {
       if (beatCount >= beats) { clearInterval(beatIv); return; }
-      beatCount++;
-      beatActive = true;
-      lastBeatTime = Date.now();
-      reticle.classList.add('rhythm-beat');
-      SFX.incoming();
+      beatCount++; beatActive = true; lastBeatTime = Date.now();
+      reticle.classList.add('rhythm-beat'); SFX.incoming();
       arSetPhaseHud(`РИТМ ${successHits} / ${beats}`, successHits / beats);
-      setTimeout(() => {
-        beatActive = false;
-        reticle.classList.remove('rhythm-beat');
-      }, tolerance);
+      setTimeout(() => { beatActive = false; reticle.classList.remove('rhythm-beat'); }, tolerance);
     }, interval);
-
     function onAttack() {
       if (!beatActive) { SFX.fail(); return; }
       const dt = Date.now() - lastBeatTime;
       if (dt <= tolerance) {
-        successHits++;
-        SFX.hit();
-        arSetPhaseHud(`РИТМ ${successHits} / ${beats}`, successHits / beats);
+        successHits++; SFX.hit(); arSetPhaseHud(`РИТМ ${successHits} / ${beats}`, successHits / beats);
         if (successHits >= beats) finish(true);
-      } else {
-        SFX.fail();
-      }
+      } else { SFX.fail(); }
     }
-
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
-    btnAttack.disabled = false;
-    btnAttack.textContent = 'В РИТМ';
-    btnAttack.classList.add('ready');
-
-    const iv = setInterval(() => {
-      if (Date.now() - startTime > limit) finish(successHits >= beats);
-    }, 200);
-
+    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(successHits >= beats); }, 200);
     function finish(success) {
-      clearInterval(iv);
-      clearInterval(beatIv);
-      btnAttack.onclick = oldHandler;
-      btnAttack.disabled = true;
-      btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
-      btnAttack.classList.remove('ready');
+      clearInterval(iv); clearInterval(beatIv);
+      btnAttack.onclick = oldHandler; btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
       reticle.classList.remove('rhythm-beat');
-      if (t.alive) arRemoveTarget(t);
-      arHidePhaseHud();
-      resolve(success);
+      if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success);
     }
   });
 }
-
 function arRunMultiLock(phase) {
   return new Promise((resolve) => {
-    const total = phase.targets || 3;
-    const need = (phase.lockSec || 5) * 1000;
-    const spread = phase.spread || 30;
-    const startTime = Date.now();
-    const limit = (phase.timeLimit || 20) * 1000;
-    let locked = 0;
-    const targets = [];
-
+    const total = phase.targets || 3, need = (phase.lockSec || 5) * 1000, spread = phase.spread || 30;
+    const startTime = Date.now(), limit = (phase.timeLimit || 20) * 1000; let locked = 0; const targets = [];
     const baseYaw = (arLook.camYaw + 180) % 360;
     for (let i = 0; i < total; i++) {
-      const t = arCreateTarget({
-        type: 'MONSTER',
-        emoji: '🎯',
-        yaw: (baseYaw + (i - total/2) * spread / total + 360) % 360,
-        elev: arRand(-10, 10),
-        hp: 999,
-      });
+      const t = arCreateTarget({ type:'MONSTER', emoji: '🎯', yaw: (baseYaw + (i - total/2) * spread / total + 360) % 360, elev: arRand(-10, 10), hp: 999 });
       targets.push(t);
     }
-
     const iv = setInterval(() => {
       let allIn = true;
-      targets.forEach(t => {
-        if (!t.alive) { allIn = false; return; }
-        if (!arInReticle(t, 30)) allIn = false;
-      });
-      if (allIn) {
-        locked += 100;
-        arSetPhaseHud('ЗАХВАТ', locked / need);
-      } else {
-        locked = Math.max(0, locked - 80);
-      }
+      targets.forEach(t => { if (!t.alive) { allIn = false; return; } if (!arInReticle(t, 30)) allIn = false; });
+      if (allIn) { locked += 100; arSetPhaseHud('ЗАХВАТ', locked / need); }
+      else { locked = Math.max(0, locked - 80); }
       if (locked >= need) finish(true);
       if (Date.now() - startTime > limit) finish(false);
     }, 100);
-
-    function finish(success) {
-      clearInterval(iv);
-      targets.forEach(t => { if (t.alive) arRemoveTarget(t); });
-      arHidePhaseHud();
-      resolve(success);
-    }
+    function finish(success) { clearInterval(iv); targets.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunScan(phase) {
   return new Promise((resolve) => {
-    const total = phase.hiddenPoints || 5;
-    const limit = (phase.timeLimit || 20) * 1000;
-    const scanRadius = phase.scanRadius || 15;
-    const startTime = Date.now();
-    let found = 0;
-    const points = [];
-
-    for (let i = 0; i < total; i++) {
-      points.push({
-        yaw: Math.random() * 360,
-        elev: arRand(-15, 15),
-        found: false,
-      });
-    }
-
+    const total = phase.hiddenPoints || 5, limit = (phase.timeLimit || 20) * 1000, scanRadius = phase.scanRadius || 15;
+    const startTime = Date.now(); let found = 0; const points = [];
+    for (let i = 0; i < total; i++) points.push({ yaw: Math.random() * 360, elev: arRand(-15, 15), found: false });
     AR.DOM.scanBeam.classList.add('show');
-
     const iv = setInterval(() => {
       points.forEach(p => {
         if (p.found) return;
-        const dYaw = Math.abs(arDeltaYaw(p.yaw));
-        const dElev = Math.abs(arDeltaElev(p.elev));
+        const dYaw = Math.abs(arDeltaYaw(p.yaw)), dElev = Math.abs(arDeltaElev(p.elev));
         if (dYaw < scanRadius && dElev < scanRadius) {
-          p.found = true;
-          found++;
-          SFX.ballPop();
-          const el = document.createElement('div');
-          el.className = 'ar-target ar-point';
-          el.textContent = '💠';
+          p.found = true; found++; SFX.ballPop();
+          const el = document.createElement('div'); el.className = 'ar-target ar-point'; el.textContent = '💠';
           el.style.left = (50 + (arDeltaYaw(p.yaw) / (AR.VIEW_ANGLE/2)) * 50) + '%';
           el.style.top  = (50 + (arDeltaElev(p.elev) / (AR.ELEV_RANGE/2)) * 50) + '%';
           el.style.transform = 'translate(-50%,-50%)';
-          cameraView.appendChild(el);
-          setTimeout(() => el.remove(), 1500);
+          cameraView.appendChild(el); setTimeout(() => el.remove(), 1500);
           arSetPhaseHud(`НАЙДЕНО ${found} / ${total}`, found / total);
           if (found >= total) finish(true);
         }
       });
       if (Date.now() - startTime > limit) finish(found >= total);
     }, 100);
-
-    function finish(success) {
-      clearInterval(iv);
-      AR.DOM.scanBeam.classList.remove('show');
-      arHidePhaseHud();
-      resolve(success);
-    }
+    function finish(success) { clearInterval(iv); AR.DOM.scanBeam.classList.remove('show'); arHidePhaseHud(); resolve(success); }
   });
 }
 
 const AR_MECHANICS = {
-  track:      arRunTrack,
-  strike:     arRunStrike,
-  dodge:      arRunDodge,
-  collect:    arRunCollect,
-  hold:       arRunHold,
-  sequence:   arRunSequence,
-  parry:      arRunParry,
-  shoot:      arRunShoot,
-  avoid_gaze: arRunAvoidGaze,
-  chase:      arRunChase,
-  protect:    arRunProtect,
-  balance:    arRunBalanceHold,
-  rhythm:     arRunTapRhythm,
-  multi_lock: arRunMultiLock,
-  scan:       arRunScan,
+  track: arRunTrack, strike: arRunStrike, dodge: arRunDodge, collect: arRunCollect,
+  hold: arRunHold, sequence: arRunSequence, parry: arRunParry, shoot: arRunShoot,
+  avoid_gaze: arRunAvoidGaze, chase: arRunChase, protect: arRunProtect,
+  balance: arRunBalanceHold, rhythm: arRunTapRhythm, multi_lock: arRunMultiLock, scan: arRunScan
 };
 
+// QUEST_AR_SCENARIO — 80 квестов (сокращено для читаемости, полный набор ниже)
 const QUEST_AR_SCENARIO = {
-  'Зачистить подземелье ранга E': [
-    { type:'track', targets:1, timeLimit:10 },
-    { type:'strike', hp:20, emoji:'👹' },
-    { type:'track', targets:1, timeLimit:10 },
-    { type:'strike', hp:20, emoji:'👺' },
-    { type:'track', targets:1, timeLimit:10 },
-    { type:'strike', hp:20, emoji:'🐺' },
-  ],
-  'Победить гоблинов-разведчиков': [
-    { type:'strike', hp:15, emoji:'👹', moveSpeed:1.5, count:3 },
-  ],
-  'Зачистить заброшенную шахту': [
-    { type:'scan', hiddenPoints:2, timeLimit:12 },
-    { type:'strike', hp:22, emoji:'🐀' },
-    { type:'scan', hiddenPoints:2, timeLimit:12 },
-    { type:'strike', hp:22, emoji:'🕷' },
-  ],
-  'Победить скелета-лучника': [
-    { type:'shoot', targets:3, timeLimit:12, emoji:'💀' },
-    { type:'strike', hp:30, emoji:'💀', moveSpeed:2, dodgeChance:0.4 },
-  ],
+  'Зачистить подземелье ранга E': [{ type:'track', targets:1, timeLimit:10 },{ type:'strike', hp:20, emoji:'👹' },{ type:'track', targets:1, timeLimit:10 },{ type:'strike', hp:20, emoji:'👺' },{ type:'track', targets:1, timeLimit:10 },{ type:'strike', hp:20, emoji:'🐺' }],
+  'Победить гоблинов-разведчиков': [{ type:'strike', hp:15, emoji:'👹', moveSpeed:1.5, count:3 }],
+  'Зачистить заброшенную шахту': [{ type:'scan', hiddenPoints:2, timeLimit:12 },{ type:'strike', hp:22, emoji:'🐀' },{ type:'scan', hiddenPoints:2, timeLimit:12 },{ type:'strike', hp:22, emoji:'🕷' }],
+  'Победить скелета-лучника': [{ type:'shoot', targets:3, timeLimit:12, emoji:'💀' },{ type:'strike', hp:30, emoji:'💀', moveSpeed:2, dodgeChance:0.4 }],
   'Выполнить 100 отжиманий': [{ type:'rhythm', beats:10, bpm:120 }],
   'Выполнить 100 приседаний': [{ type:'rhythm', beats:10, bpm:110 }],
   'Выполнить 100 скручиваний': [{ type:'rhythm', beats:8, bpm:100 }],
-  'Удержать планку 3 минуты': [
-    { type:'balance', targetSec:5, tiltTolerance:5 },
-    { type:'hold', targetSec:5, stability:0.9 },
-  ],
-  'Пробежать 5 километров': [
-    { type:'track', targets:3, timeLimit:15 },
-    { type:'dodge', obstacles:3, timeLimit:10 },
-    { type:'track', targets:2, timeLimit:10 },
-  ],
+  'Удержать планку 3 минуты': [{ type:'balance', targetSec:5, tiltTolerance:5 },{ type:'hold', targetSec:5, stability:0.9 }],
+  'Пробежать 5 километров': [{ type:'track', targets:3, timeLimit:15 },{ type:'dodge', obstacles:3, timeLimit:10 },{ type:'track', targets:2, timeLimit:10 }],
   'Удержать груз 5 минут': [{ type:'hold', targetSec:6, stability:0.85 }],
   'Медитировать 10 минут': [{ type:'balance', targetSec:6, tiltTolerance:4 }],
-  'Пробраться через лес': [
-    { type:'sequence', targets:4, timeLimit:15 },
-    { type:'avoid_gaze', timeLimit:8, gazeAngle:60 },
-  ],
+  'Пробраться через лес': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'avoid_gaze', timeLimit:8, gazeAngle:60 }],
   'Убежать от волков': [{ type:'dodge', obstacles:8, timeLimit:12 }],
-  'Переплыть реку': [
-    { type:'balance', targetSec:4, tiltTolerance:6 },
-    { type:'dodge', obstacles:3, timeLimit:8 },
-  ],
+  'Переплыть реку': [{ type:'balance', targetSec:4, tiltTolerance:6 },{ type:'dodge', obstacles:3, timeLimit:8 }],
   'Пройти через болото': [{ type:'dodge', obstacles:6, timeLimit:12 }],
   'Разведать подземелье': [{ type:'scan', hiddenPoints:3, timeLimit:15 }],
   'Найти скрытый проход': [{ type:'scan', hiddenPoints:1, timeLimit:12, scanRadius:10 }],
   'Отследить лазутчика': [{ type:'chase', chaseSec:5, moveSpeed:2 }],
   'Собрать редкие травы': [{ type:'collect', items:10, timeLimit:20, spawnRate:600, emoji:'🌿' }],
-  'Защитить караван': [
-    { type:'protect', waves:2, enemiesPerWave:2, protectSec:12 },
-    { type:'strike', hp:15, emoji:'👹', moveSpeed:1, count:2 },
-  ],
+  'Защитить караван': [{ type:'protect', waves:2, enemiesPerWave:2, protectSec:12 },{ type:'strike', hp:15, emoji:'👹', moveSpeed:1, count:2 }],
   'Пережить видение': [{ type:'hold', targetSec:5, stability:0.85 }],
   'Ответить на зов': [{ type:'sequence', targets:3, timeLimit:12 }],
   'Поговорить с духом': [{ type:'sequence', targets:4, timeLimit:15 }],
   'Пройти испытание страхом': [{ type:'dodge', obstacles:6, timeLimit:15 }],
   'Вспомнить прошлое': [{ type:'sequence', targets:4, timeLimit:15 }],
-  'Пробудить скрытый навык': [
-    { type:'sequence', targets:4, timeLimit:15 },
-    { type:'hold', targetSec:3, stability:0.9 },
-  ],
-  'Уклониться от 100 стрел': [
-    { type:'dodge', obstacles:10, timeLimit:15 },
-    { type:'parry', attacks:3, timeLimit:10 },
-  ],
+  'Пробудить скрытый навык': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'hold', targetSec:3, stability:0.9 }],
+  'Уклониться от 100 стрел': [{ type:'dodge', obstacles:10, timeLimit:15 },{ type:'parry', attacks:3, timeLimit:10 }],
   'Поймать 50 монет': [{ type:'collect', items:15, timeLimit:20, spawnRate:500, emoji:'🪙' }],
-  'Ударить 100 раз за минуту': [
-    { type:'rhythm', beats:15, bpm:180 },
-    { type:'strike', hp:100, emoji:'👹', tapCount:30 },
-  ],
-  'Успеть до заката': [
-    { type:'track', targets:1, timeLimit:10 },
-    { type:'strike', hp:15, emoji:'👺', moveSpeed:1 },
-  ],
-  'Уничтожить гнездо пауков': [
-    { type:'strike', hp:12, emoji:'🕷', moveSpeed:1, count:4 },
-    { type:'collect', items:5, timeLimit:12, spawnRate:600, emoji:'🥚' },
-  ],
-  'Отбить атаку волков': [
-    { type:'parry', attacks:3, timeLimit:10 },
-    { type:'dodge', obstacles:4, timeLimit:10 },
-    { type:'strike', hp:25, emoji:'🐺', moveSpeed:2, count:3 },
-  ],
-  'Победить орка-воина': [
-    { type:'strike', hp:40, emoji:'👺', moveSpeed:1 },
-    { type:'hold', targetSec:3, stability:0.9 },
-    { type:'strike', hp:40, emoji:'👺', moveSpeed:1 },
-  ],
-  'Уничтожить призрака': [
-    { type:'scan', hiddenPoints:1, timeLimit:10 },
-    { type:'strike', hp:35, emoji:'👻', moveSpeed:2 },
-  ],
-  'Пробежать 10 километров': [
-    { type:'track', targets:6, timeLimit:20 },
-    { type:'dodge', obstacles:4, timeLimit:10 },
-  ],
+  'Ударить 100 раз за минуту': [{ type:'rhythm', beats:15, bpm:180 },{ type:'strike', hp:100, emoji:'👹', tapCount:30 }],
+  'Успеть до заката': [{ type:'track', targets:1, timeLimit:10 },{ type:'strike', hp:15, emoji:'👺', moveSpeed:1 }],
+  'Уничтожить гнездо пауков': [{ type:'strike', hp:12, emoji:'🕷', moveSpeed:1, count:4 },{ type:'collect', items:5, timeLimit:12, spawnRate:600, emoji:'🥚' }],
+  'Отбить атаку волков': [{ type:'parry', attacks:3, timeLimit:10 },{ type:'dodge', obstacles:4, timeLimit:10 },{ type:'strike', hp:25, emoji:'🐺', moveSpeed:2, count:3 }],
+  'Победить орка-воина': [{ type:'strike', hp:40, emoji:'👺', moveSpeed:1 },{ type:'hold', targetSec:3, stability:0.9 },{ type:'strike', hp:40, emoji:'👺', moveSpeed:1 }],
+  'Уничтожить призрака': [{ type:'scan', hiddenPoints:1, timeLimit:10 },{ type:'strike', hp:35, emoji:'👻', moveSpeed:2 }],
+  'Пробежать 10 километров': [{ type:'track', targets:6, timeLimit:20 },{ type:'dodge', obstacles:4, timeLimit:10 }],
   '50 отжиманий на одной руке': [{ type:'rhythm', beats:12, bpm:130 }],
   '50 подтягиваний': [{ type:'rhythm', beats:10, bpm:120 }],
   '100 приседаний с весом': [{ type:'rhythm', beats:12, bpm:110 }],
-  'Контроль маны': [
-    { type:'sequence', targets:4, timeLimit:15 },
-    { type:'hold', targetSec:3, stability:0.9 },
-  ],
-  'Выжить в зоне наказания': [
-    { type:'dodge', obstacles:10, timeLimit:15 },
-    { type:'avoid_gaze', timeLimit:5, gazeAngle:50 },
-  ],
+  'Контроль маны': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'hold', targetSec:3, stability:0.9 }],
+  'Выжить в зоне наказания': [{ type:'dodge', obstacles:10, timeLimit:15 },{ type:'avoid_gaze', timeLimit:5, gazeAngle:50 }],
   'Скрыться от преследования': [{ type:'avoid_gaze', timeLimit:8, gazeAngle:50 }],
-  'Взобраться на скалу': [
-    { type:'track', targets:5, timeLimit:15 },
-    { type:'dodge', obstacles:4, timeLimit:10 },
-  ],
-  'Найти выход из подземелья': [
-    { type:'sequence', targets:5, timeLimit:18 },
-    { type:'scan', hiddenPoints:2, timeLimit:10 },
-  ],
+  'Взобраться на скалу': [{ type:'track', targets:5, timeLimit:15 },{ type:'dodge', obstacles:4, timeLimit:10 }],
+  'Найти выход из подземелья': [{ type:'sequence', targets:5, timeLimit:18 },{ type:'scan', hiddenPoints:2, timeLimit:10 }],
   'Обследовать руины': [{ type:'scan', hiddenPoints:4, timeLimit:15 }],
-  'Найти источник маны': [
-    { type:'scan', hiddenPoints:1, timeLimit:12 },
-    { type:'hold', targetSec:3, stability:0.9 },
-  ],
+  'Найти источник маны': [{ type:'scan', hiddenPoints:1, timeLimit:12 },{ type:'hold', targetSec:3, stability:0.9 }],
   'Найти пропавшего охотника': [{ type:'track', targets:1, timeLimit:12 }],
-  'Защитить деревню': [
-    { type:'protect', waves:2, enemiesPerWave:3, protectSec:12 },
-    { type:'strike', hp:20, emoji:'👹', moveSpeed:1, count:3 },
-  ],
-  'Удержать мост': [
-    { type:'protect', waves:2, enemiesPerWave:3, protectSec:12 },
-    { type:'hold', targetSec:5, stability:0.85 },
-  ],
-  'Охранять сокровищницу': [
-    { type:'protect', waves:2, enemiesPerWave:2, protectSec:12 },
-    { type:'collect', items:8, timeLimit:15, spawnRate:600, emoji:'🪙' },
-  ],
-  'Открыть врата': [
-    { type:'sequence', targets:4, timeLimit:15 },
-    { type:'rhythm', beats:5, bpm:100 },
-  ],
-  'Сломать печать': [
-    { type:'strike', hp:25, emoji:'🔮', count:5 },
-    { type:'rhythm', beats:5, bpm:120 },
-  ],
-  'Закрыть разлом': [
-    { type:'hold', targetSec:8, stability:0.85 },
-    { type:'balance', targetSec:4, tiltTolerance:6 },
-  ],
-  'Пробежать полосу препятствий': [
-    { type:'track', targets:5, timeLimit:15 },
-    { type:'dodge', obstacles:4, timeLimit:10 },
-  ],
-  'Парировать 50 атак': [
-    { type:'parry', attacks:5, timeLimit:15 },
-    { type:'dodge', obstacles:5, timeLimit:10 },
-  ],
-  'Выжить в ловушке': [
-    { type:'dodge', obstacles:10, timeLimit:15 },
-    { type:'avoid_gaze', timeLimit:5, gazeAngle:50 },
-  ],
-  'Зачистить логово гоблинов': [
-    { type:'strike', hp:15, emoji:'👹', moveSpeed:1, count:5 },
-    { type:'collect', items:3, timeLimit:10, spawnRate:600, emoji:'🪙' },
-  ],
-  'Сразить каменного голема': [
-    { type:'strike', hp:60, emoji:'🗿' },
-    { type:'hold', targetSec:4, stability:0.85 },
-    { type:'strike', hp:60, emoji:'🗿' },
-  ],
-  'Уничтожить летающего змея': [
-    { type:'shoot', targets:3, timeLimit:12, speed:3, emoji:'🐍' },
-    { type:'strike', hp:40, emoji:'🐍', moveSpeed:3, dodgeChance:0.3 },
-  ],
-  'Сразить минотавра': [
-    { type:'strike', hp:70, emoji:'🐂', moveSpeed:2, dodgeChance:0.4 },
-    { type:'dodge', obstacles:4, timeLimit:10 },
-  ],
-  '200 бёрпи': [
-    { type:'rhythm', beats:20, bpm:140 },
-    { type:'hold', targetSec:5, stability:0.8 },
-  ],
-  'Закартировать подземелье': [
-    { type:'sequence', targets:6, timeLimit:20 },
-    { type:'scan', hiddenPoints:2, timeLimit:10 },
-  ],
-  'Оборонять лагерь': [
-    { type:'protect', waves:3, enemiesPerWave:3, protectSec:15 },
-    { type:'strike', hp:20, emoji:'👺', moveSpeed:1, count:4 },
-  ],
-  'Удержать ворота': [
-    { type:'protect', waves:3, enemiesPerWave:3, protectSec:15 },
-    { type:'hold', targetSec:6, stability:0.85 },
-  ],
-  'Сразить вожака стаи': [
-    { type:'strike', hp:80, emoji:'🐺', moveSpeed:2 },
-    { type:'dodge', obstacles:4, timeLimit:10 },
-    { type:'parry', attacks:2, timeLimit:8 },
-  ],
-  'Принять силу тени': [
-    { type:'sequence', targets:5, timeLimit:18 },
-    { type:'multi_lock', targets:2, lockSec:3, spread:20 },
-  ],
-  'Победить на арене': [
-    { type:'strike', hp:70, emoji:'👹', moveSpeed:2, dodgeChance:0.4 },
-    { type:'parry', attacks:3, timeLimit:10 },
-  ],
-  'Победить тёмного рыцаря': [
-    { type:'track', targets:1, timeLimit:10 },
-    { type:'strike', hp:100, emoji:'🛡', moveSpeed:1, dodgeChance:0.3 },
-    { type:'parry', attacks:3, timeLimit:10 },
-    { type:'strike', hp:100, emoji:'🛡', moveSpeed:1, dodgeChance:0.3 },
-  ],
-  'Победить ледяного элементаля': [
-    { type:'strike', hp:120, emoji:'❄', moveSpeed:1, dodgeChance:0.4 },
-    { type:'dodge', obstacles:5, timeLimit:12 },
-    { type:'shoot', targets:3, timeLimit:10, emoji:'❄' },
-  ],
-  'Победить короля гоблинов': [
-    { type:'strike', hp:100, emoji:'👑', moveSpeed:1 },
-    { type:'collect', items:10, timeLimit:15, spawnRate:600, emoji:'👺' },
-    { type:'strike', hp:100, emoji:'👑', moveSpeed:1 },
-  ],
-  'Сразить королеву пауков': [
-    { type:'strike', hp:120, emoji:'🕷', moveSpeed:1, dodgeChance:0.3 },
-    { type:'collect', items:8, timeLimit:15, spawnRate:600, emoji:'🥚' },
-    { type:'dodge', obstacles:5, timeLimit:12 },
-  ],
-  'Победить тёмного мага': [
-    { type:'sequence', targets:5, timeLimit:18 },
-    { type:'strike', hp:100, emoji:'🧙', moveSpeed:1, dodgeChance:0.4 },
-    { type:'parry', attacks:3, timeLimit:10 },
-  ],
-  'Уничтожить демона': [
-    { type:'dodge', obstacles:6, timeLimit:12 },
-    { type:'hold', targetSec:5, stability:0.8 },
-    { type:'strike', hp:150, emoji:'😈', moveSpeed:2, dodgeChance:0.4 },
-    { type:'parry', attacks:3, timeLimit:10 },
-  ],
-  'Уничтожить некроманта': [
-    { type:'strike', hp:130, emoji:'💀', moveSpeed:1, dodgeChance:0.4 },
-    { type:'collect', items:8, timeLimit:15, spawnRate:600, emoji:'💠' },
-    { type:'sequence', targets:3, timeLimit:12 },
-  ],
-  'Победить командира орков': [
-    { type:'strike', hp:160, emoji:'👺', moveSpeed:2, dodgeChance:0.4 },
-    { type:'dodge', obstacles:6, timeLimit:12 },
-    { type:'parry', attacks:3, timeLimit:10 },
-  ],
-  'Сразить повелителя демонов': [
-    { type:'sequence', targets:5, timeLimit:15 },
-    { type:'dodge', obstacles:6, timeLimit:12 },
-    { type:'strike', hp:180, emoji:'😈', moveSpeed:2, dodgeChance:0.4 },
-    { type:'multi_lock', targets:2, lockSec:4, spread:20 },
-  ],
-  'Победить древнего голема': [
-    { type:'strike', hp:200, emoji:'🗿', dodgeChance:0.3 },
-    { type:'hold', targetSec:5, stability:0.85 },
-    { type:'balance', targetSec:4, tiltTolerance:6 },
-  ],
-  'Уничтожить архилича': [
-    { type:'sequence', targets:5, timeLimit:15 },
-    { type:'dodge', obstacles:6, timeLimit:12 },
-    { type:'strike', hp:180, emoji:'💀', moveSpeed:1, dodgeChance:0.4 },
-    { type:'multi_lock', targets:3, lockSec:4, spread:25 },
-  ],
-  'Сразить дракона': [
-    { type:'track', targets:1, timeLimit:12 },
-    { type:'dodge', obstacles:8, timeLimit:15 },
-    { type:'strike', hp:250, emoji:'🐉', moveSpeed:2, dodgeChance:0.4 },
-    { type:'hold', targetSec:5, stability:0.8 },
-    { type:'multi_lock', targets:3, lockSec:4, spread:25 },
-  ],
-  'Победить теневого монарха': [
-    { type:'sequence', targets:6, timeLimit:18 },
-    { type:'dodge', obstacles:8, timeLimit:15 },
-    { type:'strike', hp:300, emoji:'🦁', moveSpeed:2, dodgeChance:0.5 },
-    { type:'multi_lock', targets:3, lockSec:5, spread:20 },
-  ],
-  'Уничтожить ледяную королеву': [
-    { type:'strike', hp:280, emoji:'❄', moveSpeed:1, dodgeChance:0.4 },
-    { type:'dodge', obstacles:8, timeLimit:15 },
-    { type:'collect', items:10, timeLimit:15, spawnRate:600, emoji:'❄' },
-    { type:'parry', attacks:4, timeLimit:12 },
-  ],
+  'Защитить деревню': [{ type:'protect', waves:2, enemiesPerWave:3, protectSec:12 },{ type:'strike', hp:20, emoji:'👹', moveSpeed:1, count:3 }],
+  'Удержать мост': [{ type:'protect', waves:2, enemiesPerWave:3, protectSec:12 },{ type:'hold', targetSec:5, stability:0.85 }],
+  'Охранять сокровищницу': [{ type:'protect', waves:2, enemiesPerWave:2, protectSec:12 },{ type:'collect', items:8, timeLimit:15, spawnRate:600, emoji:'🪙' }],
+  'Открыть врата': [{ type:'sequence', targets:4, timeLimit:15 },{ type:'rhythm', beats:5, bpm:100 }],
+  'Сломать печать': [{ type:'strike', hp:25, emoji:'🔮', count:5 },{ type:'rhythm', beats:5, bpm:120 }],
+  'Закрыть разлом': [{ type:'hold', targetSec:8, stability:0.85 },{ type:'balance', targetSec:4, tiltTolerance:6 }],
+  'Пробежать полосу препятствий': [{ type:'track', targets:5, timeLimit:15 },{ type:'dodge', obstacles:4, timeLimit:10 }],
+  'Парировать 50 атак': [{ type:'parry', attacks:5, timeLimit:15 },{ type:'dodge', obstacles:5, timeLimit:10 }],
+  'Выжить в ловушке': [{ type:'dodge', obstacles:10, timeLimit:15 },{ type:'avoid_gaze', timeLimit:5, gazeAngle:50 }],
+  'Зачистить логово гоблинов': [{ type:'strike', hp:15, emoji:'👹', moveSpeed:1, count:5 },{ type:'collect', items:3, timeLimit:10, spawnRate:600, emoji:'🪙' }],
+  'Сразить каменного голема': [{ type:'strike', hp:60, emoji:'🗿' },{ type:'hold', targetSec:4, stability:0.85 },{ type:'strike', hp:60, emoji:'🗿' }],
+  'Уничтожить летающего змея': [{ type:'shoot', targets:3, timeLimit:12, speed:3, emoji:'🐍' },{ type:'strike', hp:40, emoji:'🐍', moveSpeed:3, dodgeChance:0.3 }],
+  'Сразить минотавра': [{ type:'strike', hp:70, emoji:'🐂', moveSpeed:2, dodgeChance:0.4 },{ type:'dodge', obstacles:4, timeLimit:10 }],
+  '200 бёрпи': [{ type:'rhythm', beats:20, bpm:140 },{ type:'hold', targetSec:5, stability:0.8 }],
+  'Закартировать подземелье': [{ type:'sequence', targets:6, timeLimit:20 },{ type:'scan', hiddenPoints:2, timeLimit:10 }],
+  'Оборонять лагерь': [{ type:'protect', waves:3, enemiesPerWave:3, protectSec:15 },{ type:'strike', hp:20, emoji:'👺', moveSpeed:1, count:4 }],
+  'Удержать ворота': [{ type:'protect', waves:3, enemiesPerWave:3, protectSec:15 },{ type:'hold', targetSec:6, stability:0.85 }],
+  'Сразить вожака стаи': [{ type:'strike', hp:80, emoji:'🐺', moveSpeed:2 },{ type:'dodge', obstacles:4, timeLimit:10 },{ type:'parry', attacks:2, timeLimit:8 }],
+  'Принять силу тени': [{ type:'sequence', targets:5, timeLimit:18 },{ type:'multi_lock', targets:2, lockSec:3, spread:20 }],
+  'Победить на арене': [{ type:'strike', hp:70, emoji:'👹', moveSpeed:2, dodgeChance:0.4 },{ type:'parry', attacks:3, timeLimit:10 }],
+  'Победить тёмного рыцаря': [{ type:'track', targets:1, timeLimit:10 },{ type:'strike', hp:100, emoji:'🛡', moveSpeed:1, dodgeChance:0.3 },{ type:'parry', attacks:3, timeLimit:10 },{ type:'strike', hp:100, emoji:'🛡', moveSpeed:1, dodgeChance:0.3 }],
+  'Победить ледяного элементаля': [{ type:'strike', hp:120, emoji:'❄', moveSpeed:1, dodgeChance:0.4 },{ type:'dodge', obstacles:5, timeLimit:12 },{ type:'shoot', targets:3, timeLimit:10, emoji:'❄' }],
+  'Победить короля гоблинов': [{ type:'strike', hp:100, emoji:'👑', moveSpeed:1 },{ type:'collect', items:10, timeLimit:15, spawnRate:600, emoji:'👺' },{ type:'strike', hp:100, emoji:'👑', moveSpeed:1 }],
+  'Сразить королеву пауков': [{ type:'strike', hp:120, emoji:'🕷', moveSpeed:1, dodgeChance:0.3 },{ type:'collect', items:8, timeLimit:15, spawnRate:600, emoji:'🥚' },{ type:'dodge', obstacles:5, timeLimit:12 }],
+  'Победить тёмного мага': [{ type:'sequence', targets:5, timeLimit:18 },{ type:'strike', hp:100, emoji:'🧙', moveSpeed:1, dodgeChance:0.4 },{ type:'parry', attacks:3, timeLimit:10 }],
+  'Уничтожить демона': [{ type:'dodge', obstacles:6, timeLimit:12 },{ type:'hold', targetSec:5, stability:0.8 },{ type:'strike', hp:150, emoji:'😈', moveSpeed:2, dodgeChance:0.4 },{ type:'parry', attacks:3, timeLimit:10 }],
+  'Уничтожить некроманта': [{ type:'strike', hp:130, emoji:'💀', moveSpeed:1, dodgeChance:0.4 },{ type:'collect', items:8, timeLimit:15, spawnRate:600, emoji:'💠' },{ type:'sequence', targets:3, timeLimit:12 }],
+  'Победить командира орков': [{ type:'strike', hp:160, emoji:'👺', moveSpeed:2, dodgeChance:0.4 },{ type:'dodge', obstacles:6, timeLimit:12 },{ type:'parry', attacks:3, timeLimit:10 }],
+  'Сразить повелителя демонов': [{ type:'sequence', targets:5, timeLimit:15 },{ type:'dodge', obstacles:6, timeLimit:12 },{ type:'strike', hp:180, emoji:'😈', moveSpeed:2, dodgeChance:0.4 },{ type:'multi_lock', targets:2, lockSec:4, spread:20 }],
+  'Победить древнего голема': [{ type:'strike', hp:200, emoji:'🗿', dodgeChance:0.3 },{ type:'hold', targetSec:5, stability:0.85 },{ type:'balance', targetSec:4, tiltTolerance:6 }],
+  'Уничтожить архилича': [{ type:'sequence', targets:5, timeLimit:15 },{ type:'dodge', obstacles:6, timeLimit:12 },{ type:'strike', hp:180, emoji:'💀', moveSpeed:1, dodgeChance:0.4 },{ type:'multi_lock', targets:3, lockSec:4, spread:25 }],
+  'Сразить дракона': [{ type:'track', targets:1, timeLimit:12 },{ type:'dodge', obstacles:8, timeLimit:15 },{ type:'strike', hp:250, emoji:'🐉', moveSpeed:2, dodgeChance:0.4 },{ type:'hold', targetSec:5, stability:0.8 },{ type:'multi_lock', targets:3, lockSec:4, spread:25 }],
+  'Победить теневого монарха': [{ type:'sequence', targets:6, timeLimit:18 },{ type:'dodge', obstacles:8, timeLimit:15 },{ type:'strike', hp:300, emoji:'🦁', moveSpeed:2, dodgeChance:0.5 },{ type:'multi_lock', targets:3, lockSec:5, spread:20 }],
+  'Уничтожить ледяную королеву': [{ type:'strike', hp:280, emoji:'❄', moveSpeed:1, dodgeChance:0.4 },{ type:'dodge', obstacles:8, timeLimit:15 },{ type:'collect', items:10, timeLimit:15, spawnRate:600, emoji:'❄' },{ type:'parry', attacks:4, timeLimit:12 }]
 };
 
+// FIX #3: startARQuest — НЕ запускает второй таймер (использует q.remaining от startQuestTimer)
 async function startARQuest(q) {
   if (G.arActive) return;
-
   try {
     const stream = await requestCamera();
-    videoFeed.srcObject = stream;
-    G.stream = stream;
-    cameraView.classList.add('active');
-    G.arActive = true;
+    videoFeed.srcObject = stream; G.stream = stream;
+    cameraView.classList.add('active'); G.arActive = true;
     G.arQuest = { quest: q, scenario: QUEST_AR_SCENARIO[q.name] || [{ type:'strike', hp:20, emoji:'👹' }], ended: false };
-    arClearTargets();
-    AR.QUEST = G.arQuest;
-
+    arClearTargets(); AR.QUEST = G.arQuest;
     await attachOrientation().catch(() => false);
-    attachDragLook();
-    scheduleARUpdate();
+    attachDragLook(); scheduleARUpdate();
 
-    q.remaining = q.duration;
-    $('arTimer').textContent = formatShort(q.duration);
+    // FIX #3: не перезаписываем q.remaining — его уже тикает startQuestTimer
+    $('arTimer').textContent = formatShort(Math.max(0, q.remaining));
     const timerIv = setInterval(() => {
-      if (!G.arActive || G.arQuest.ended) { clearInterval(timerIv); return; }
-      q.remaining--;
+      if (!G.arActive || !G.arQuest || G.arQuest.ended) { clearInterval(timerIv); return; }
       $('arTimer').textContent = formatShort(Math.max(0, q.remaining));
-      if (q.remaining <= 0) {
-        clearInterval(timerIv);
-        finishARQuest(false);
-      }
-    }, 1000);
+      if (q.remaining <= 0) { clearInterval(timerIv); finishARQuest(false); }
+    }, 500);
     G.arQuest.timerIv = timerIv;
 
     let allSuccess = true;
@@ -4047,117 +2981,78 @@ async function startARQuest(q) {
       arSetPhaseHud(`ФАЗА ${i+1} / ${G.arQuest.scenario.length}`, 0);
       addLog(`Фаза ${i+1}: ${phase.type.toUpperCase()}`, '');
       const fn = AR_MECHANICS[phase.type];
-      if (!fn) { allSuccess = false; break; }
+      if (!fn) { addLog(`Неизвестная механика: ${phase.type}`, 'fail'); allSuccess = false; break; }
       const ok = await fn(phase);
       if (!ok) { allSuccess = false; break; }
     }
     finishARQuest(allSuccess);
   } catch (err) {
     addLog('Ошибка AR: ' + (err.message || err), 'fail');
-    finishARQuest(false);
+    speak('Ошибка камеры.'); triggerFlash('red');
+    G.arActive = false; AR.PHASE = null; AR.QUEST = null;
+    arClearTargets(); arHidePhaseHud();
+    if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
+    videoFeed.srcObject = null; cameraView.classList.remove('active');
+    detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
+    const busyQuest = G.arQuest ? G.arQuest.quest : q;
+    G.arQuest = null;
+    if (G.timerInterval) { clearInterval(G.timerInterval); G.timerInterval = null; }
+    G.failed++;
+    addLog(`✕ AR-задание «${busyQuest.name}» провалено: камера недоступна.`, 'fail');
+    speak('Задание провалено.');
+    takeDamage(10 + Math.floor((busyQuest.reward||10)/5), 'Провал AR.');
+    G.busy = false; G.activeQuest = null; G.questPhase = 'inactive'; G.pendingReward = false;
+    $('questOverlay').classList.remove('show');
+    updateUI(); saveGame(); scheduleNextQuest();
   }
 }
-
 function finishARQuest(success) {
   if (!G.arQuest || G.arQuest.ended) return;
   G.arQuest.ended = true;
   clearInterval(G.arQuest.timerIv);
-  arClearTargets();
-  arHidePhaseHud();
-  AR.PHASE = null;
-
+  arClearTargets(); arHidePhaseHud(); AR.PHASE = null;
   if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
-  videoFeed.srcObject = null;
-  cameraView.classList.remove('active');
-  G.arActive = false;
-  detachOrientation();
-  if (arLook.detachDragLook) arLook.detachDragLook();
-
-  const q = G.arQuest.quest;
-  G.arQuest = null;
-
-  if (success) {
-    addLog(`✓ AR-задание «${q.name}» выполнено!`, 'success');
-    speak('Задание выполнено.');
-    completeQuestReward(q);
-  } else {
-    addLog(`✕ AR-задание «${q.name}» провалено.`, 'fail');
-    speak('Задание провалено.');
-    failQuest('AR-провал');
-  }
-  updateUI();
-  saveGame();
+  videoFeed.srcObject = null; cameraView.classList.remove('active'); G.arActive = false;
+  detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
+  const q = G.arQuest.quest; G.arQuest = null;
+  if (success) { addLog(`✓ AR-задание «${q.name}» выполнено!`, 'success'); speak('Задание выполнено.'); completeQuestReward(q); }
+  else { addLog(`✕ AR-задание «${q.name}» провалено.`, 'fail'); speak('Задание провалено.'); failQuest('AR-провал'); }
+  updateUI(); saveGame();
 }
 
 async function startARPenalty() {
   if (AR.PENALTY) return;
   try {
     const stream = await requestCamera();
-    videoFeed.srcObject = stream;
-    G.stream = stream;
-    cameraView.classList.add('active');
-    G.arActive = true;
-    G.inPenalty = true;
-
+    videoFeed.srcObject = stream; G.stream = stream;
+    cameraView.classList.add('active'); G.arActive = true; G.inPenalty = true;
     const rankIdx = RANK_ORDER.indexOf(G.rank);
-    const hpTable = [10, 15, 20, 25, 30, 40];
-    const speedTable = [0, 0.5, 1, 1.5, 2, 3];
-    const hp = hpTable[rankIdx];
-    const speed = speedTable[rankIdx];
-
-    AR.PENALTY = {
-      killed: 0,
-      total: 10,
-      timeLeft: 60,
-      monsters: [],
-      ended: false,
-      timerIv: null,
-    };
-
+    const hpTable = [10, 15, 20, 25, 30, 40], speedTable = [0, 0.5, 1, 1.5, 2, 3];
+    const hp = hpTable[rankIdx], speed = speedTable[rankIdx];
+    AR.PENALTY = { killed: 0, total: 10, timeLeft: 60, monsters: [], ended: false, timerIv: null };
     for (let i = 0; i < 10; i++) {
-      const m = arCreateTarget({
-        type: 'MONSTER',
-        emoji: ['👹','👺','🐺','💀','👻','🕷','🦇','🐍','🦂','🧟'][i],
-        yaw: Math.random() * 360,
-        elev: arRand(-20, 20),
-        hp,
-        moveSpeed: speed,
-        extra: { penalty: true },
-      });
-      m.el.style.pointerEvents = 'auto';
-      m.el.style.cursor = 'pointer';
+      const m = arCreateTarget({ type:'MONSTER', emoji: ['👹','👺','🐺','💀','👻','🕷','🦇','🐍','🦂','🧟'][i], yaw: Math.random() * 360, elev: arRand(-20, 20), hp, moveSpeed: speed, extra: { penalty: true } });
+      m.el.style.pointerEvents = 'auto'; m.el.style.cursor = 'pointer';
       m.el.addEventListener('click', (e) => { e.stopPropagation(); arPenaltyStrike(m); });
       m.el.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); arPenaltyStrike(m); }, { passive: false });
       AR.PENALTY.monsters.push(m);
     }
-
     await attachOrientation().catch(() => false);
-    attachDragLook();
-    scheduleARUpdate();
-
+    attachDragLook(); scheduleARUpdate();
     AR.DOM.penaltyHud.classList.add('show');
-    AR.DOM.aphTimer.textContent = '01:00';
-    AR.DOM.aphKilled.textContent = '0';
-    AR.DOM.aphFill.style.width = '0%';
-
+    AR.DOM.aphTimer.textContent = '01:00'; AR.DOM.aphKilled.textContent = '0'; AR.DOM.aphFill.style.width = '0%';
     speak('Зона наказания. Уничтожьте 10 монстров.');
-
     AR.PENALTY.timerIv = setInterval(() => {
       if (!AR.PENALTY || AR.PENALTY.ended) return;
       AR.PENALTY.timeLeft--;
       AR.DOM.aphTimer.textContent = formatShort(Math.max(0, AR.PENALTY.timeLeft));
       if (AR.PENALTY.timeLeft <= 0) finishARPenalty(false);
     }, 1000);
-
-    btnAttack.disabled = false;
-    btnAttack.textContent = 'АТАКОВАТЬ';
-    btnAttack.classList.add('ready');
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = () => {
       if (!AR.PENALTY) return;
       const t = AR.TARGETS.find(x => x.alive && x.inReticle && x.type === 'MONSTER');
-      if (t) arPenaltyStrike(t);
-      else SFX.error();
+      if (t) arPenaltyStrike(t); else SFX.error();
     };
     AR.PENALTY.oldBtnHandler = oldHandler;
   } catch (err) {
@@ -4165,7 +3060,6 @@ async function startARPenalty() {
     finishARPenalty(false);
   }
 }
-
 function arPenaltyStrike(m) {
   if (!AR.PENALTY || !m.alive) return;
   if (!arInReticle(m)) { SFX.error(); return; }
@@ -4179,191 +3073,74 @@ function arPenaltyStrike(m) {
     if (AR.PENALTY.killed >= AR.PENALTY.total) finishARPenalty(true);
   }
 }
-
 function finishARPenalty(success) {
   if (!AR.PENALTY || AR.PENALTY.ended) return;
   AR.PENALTY.ended = true;
   clearInterval(AR.PENALTY.timerIv);
   AR.PENALTY.monsters.forEach(m => { if (m.alive) arRemoveTarget(m); });
   arClearTargets();
-
   if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
-  videoFeed.srcObject = null;
-  cameraView.classList.remove('active');
-  G.arActive = false;
-  G.inPenalty = false;
-  detachOrientation();
-  if (arLook.detachDragLook) arLook.detachDragLook();
-
+  videoFeed.srcObject = null; cameraView.classList.remove('active');
+  G.arActive = false; G.inPenalty = false;
+  detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
   if (AR.PENALTY.oldBtnHandler) btnAttack.onclick = AR.PENALTY.oldBtnHandler;
-  btnAttack.disabled = true;
-  btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
-  btnAttack.classList.remove('ready');
-  AR.DOM.penaltyHud.classList.remove('show');
-  AR.PENALTY = null;
-
+  btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
+  AR.DOM.penaltyHud.classList.remove('show'); AR.PENALTY = null;
   if (success) {
-    G.hp = Math.min(G.maxHp, G.hp + 20);
-    G.gold += 10;
+    G.hp = Math.min(G.maxHp, G.hp + 20); G.gold += 10;
     addLog('✓ Вырвались из зоны наказания! +20 HP, +10 G.', 'success');
-    showFloatingText('+20 HP', '#44ff88');
-    showFloatingText('+10 G', '#ffcc44');
-    SFX.penaltyWin();
-    speak('Вы вырвались.');
+    showFloatingText('+20 HP', '#44ff88'); showFloatingText('+10 G', '#ffcc44');
+    SFX.penaltyWin(); speak('Вы вырвались.');
   } else {
-    G.gold = Math.max(0, G.gold - 30);
-    applyDebuff();
+    G.gold = Math.max(0, G.gold - 30); applyDebuff();
     addLog('✕ Провал в зоне наказания. -30 G, дебафф.', 'fail');
-    showFloatingText('-30 G', '#ff4444');
-    SFX.penaltyLose();
-    speak('Провал.');
+    showFloatingText('-30 G', '#ff4444'); SFX.penaltyLose(); speak('Провал.');
   }
   G.penaltyCooldown = Date.now() + 60000;
-  updateUI();
-  saveGame();
+  updateUI(); saveGame();
   G.busy = false;
   setTimeout(() => { if (!G.busy && !G.inPenalty && !G.mgActive) scheduleNextQuest(); }, 2000);
 }
 
-/* ================== /v38 AR ================== */
-
+/* ================== Старая зона наказания (не используется) ================== */
 const penaltyZone = $('penaltyZone');
 const penaltyField = $('penaltyField');
 const penaltyTimerEl = $('penaltyTimer');
 const penaltyScoreEl = $('penaltyScore');
 const btnSurrender = $('btnSurrender');
-let penaltyActive = false;
-let penaltyTimeLeft = 60;
-let penaltyCollected = 0;
-let penaltyTimerInterval = null;
-let penaltySpawnInterval = null;
-
-function getBallLifetime(rank) {
-  const base = {E:1500,D:1300,C:1100,B:900,A:800,S:700};
-  return base[rank]||1500;
-}
-function startPenaltyZone() {
-  if(penaltyActive) return;
-  penaltyActive = true;
-  G.inPenalty = true;
-  penaltyTimeLeft = 60;
-  penaltyCollected = 0;
-  penaltyField.innerHTML = '';
-  penaltyScoreEl.textContent = '0';
-  penaltyTimerEl.textContent = '01:00';
-  penaltyZone.classList.add('active');
-  SFX.penaltyStart();
-  speak('Зона наказания.');
-  addLog('⚠ ЗОНА НАКАЗАНИЯ!','penalty');
-  penaltyTimerInterval = setInterval(() => {
-    penaltyTimeLeft--;
-    penaltyTimerEl.textContent = formatShort(penaltyTimeLeft);
-    if(penaltyTimeLeft<=0) endPenaltyZone(false);
-  }, 1000);
-  const lifetime = getBallLifetime(G.rank);
-  function spawnBall() {
-    if(!penaltyActive || penaltyCollected >= 55) return;
-    const ball = document.createElement('div');
-    ball.className = 'penalty-ball';
-    const size = 30+Math.random()*30;
-    const color = ['#ff4444','#ffaa44','#44aaff','#aa44ff','#44ff88'][Math.floor(Math.random()*5)];
-    ball.style.width = size+'px';
-    ball.style.height = size+'px';
-    ball.style.background = color;
-    ball.style.color = color;
-    ball.style.left = (Math.random()*(penaltyField.clientWidth-size))+'px';
-    ball.style.top = (Math.random()*(penaltyField.clientHeight-size))+'px';
-    ball.addEventListener('touchstart', e => { e.preventDefault(); collectBall(ball); }, {passive:false});
-    ball.addEventListener('click', e => { e.stopPropagation(); collectBall(ball); });
-    penaltyField.appendChild(ball);
-    setTimeout(() => { if(ball.parentNode && !ball.classList.contains('collected')) ball.remove(); }, lifetime);
-  }
-  penaltySpawnInterval = setInterval(spawnBall, 300+Math.random()*200);
-  for(let i=0; i<5; i++) setTimeout(spawnBall, i*100);
-}
-function collectBall(ball) {
-  if(!penaltyActive || ball.classList.contains('collected')) return;
-  ball.classList.add('collected');
-  penaltyCollected++;
-  penaltyScoreEl.textContent = penaltyCollected;
-  SFX.ballPop();
-  if(penaltyCollected >= 55) endPenaltyZone(true);
-}
-function endPenaltyZone(success) {
-  if(!penaltyActive) return;
-  penaltyActive = false;
-  clearInterval(penaltyTimerInterval);
-  clearInterval(penaltySpawnInterval);
-  penaltyField.innerHTML = '';
-  setTimeout(() => penaltyZone.classList.remove('active'), 1500);
-  const resultDiv = document.createElement('div');
-  resultDiv.className = 'penalty-result';
-  if(success) {
-    G.hp = Math.min(G.maxHp, G.hp+20);
-    G.gold += 10;
-    resultDiv.innerHTML = '<div class="penalty-result-title" style="color:#44ff88;">ВЫ ВЫРВАЛИСЬ!</div><div class="penalty-result-sub">+20 HP, +10 золота</div>';
-    SFX.penaltyWin();
-    speak('Вы вырвались.');
-    addLog('✓ Вырвались! +20 HP, +10 G.','success');
-    showFloatingText('+20 HP','#44ff88');
-    showFloatingText('+10 G','#ffcc44');
-    G.inPenalty = false;
-  } else {
-    G.gold = Math.max(0, G.gold-30);
-    resultDiv.innerHTML = '<div class="penalty-result-title" style="color:#ff4444;">НАКАЗАНИЕ</div><div class="penalty-result-sub">-30 золота, дебафф</div>';
-    SFX.penaltyLose();
-    speak('Провал.');
-    addLog('✕ Провал. -30 G, дебафф.','fail');
-    showFloatingText('-30 G','#ff4444');
-    applyDebuff();
-    G.inPenalty = false;
-  }
-  penaltyZone.appendChild(resultDiv);
-  setTimeout(() => { if(resultDiv.parentNode) resultDiv.remove(); }, 2000);
-  G.penaltyCooldown = Date.now()+60000;
-  updateUI();
-  saveGame();
-  G.busy = false;
-  setTimeout(() => { if(!G.busy && !G.inPenalty && !G.mgActive) scheduleNextQuest(); }, 2000);
-}
+let penaltyActive = false, penaltyTimeLeft = 60, penaltyCollected = 0;
+let penaltyTimerInterval = null, penaltySpawnInterval = null;
+function getBallLifetime(rank) { const base = {E:1500,D:1300,C:1100,B:900,A:800,S:700}; return base[rank]||1500; }
+function startPenaltyZone() { /* v38.1: не используется, оставлено для совместимости */ }
+function collectBall(ball) { if(!penaltyActive || ball.classList.contains('collected')) return; ball.classList.add('collected'); penaltyCollected++; penaltyScoreEl.textContent = penaltyCollected; SFX.ballPop(); if(penaltyCollected >= 55) endPenaltyZone(true); }
+function endPenaltyZone(success) { if(!penaltyActive) return; penaltyActive = false; clearInterval(penaltyTimerInterval); clearInterval(penaltySpawnInterval); penaltyField.innerHTML = ''; setTimeout(() => penaltyZone.classList.remove('active'), 1500); }
 btnSurrender.addEventListener('click', () => { if(penaltyActive) endPenaltyZone(false); });
 
 function takeDamage(dmg, reason) {
   if (G.pendingDamageShield) {
     G.pendingDamageShield = false;
     addLog('Защита сработала: урон поглощён.', 'success');
-    speak('Защита поглотила урон');
-    saveGame();
-    return;
+    speak('Защита поглотила урон'); saveGame(); return;
   }
-  G.hp = Math.max(0, G.hp-dmg);
+  G.hp = Math.max(0, G.hp - dmg);
   if (G.arActive) updateArPlayerHud();
-  triggerFlash('red');
-  triggerScreenShake();
+  triggerFlash('red'); triggerScreenShake();
   addLog(`Вы получили ${dmg} урона. ${reason||''}`,'fail');
   showFloatingText(`-${dmg} HP`,'#ff4444');
-  updateUI();
-  saveGame();
-  if(G.hp <= 0) {
+  updateUI(); saveGame();
+  if (G.hp <= 0) {
     setTimeout(() => {
-      G.hp = Math.floor(G.maxHp*0.3);
-      G.gold = Math.max(0, G.gold-50);
+      G.hp = Math.floor(G.maxHp*0.3); G.gold = Math.max(0, G.gold-50);
       addLog('Вы потеряли сознание. -50 золота.','fail');
       showFloatingText('-50 G','#ff4444');
-      updateUI();
-      saveGame();
-      if(Date.now() > G.penaltyCooldown) {
-        setTimeout(() => startARPenalty(), 1500);
-      } else {
-        addLog('Зона на кулдауне.','penalty');
-      }
+      updateUI(); saveGame();
+      if (Date.now() > G.penaltyCooldown) setTimeout(() => startARPenalty(), 1500);
+      else addLog('Зона на кулдауне.','penalty');
     }, 800);
   }
 }
 
-function quest(name, desc, minMin, maxMin, reward, rank) {
-  return {name, desc, minTime:minMin*60, maxTime:maxMin*60, reward, rank};
-}
+function quest(name, desc, minMin, maxMin, reward, rank) { return {name, desc, minTime:minMin*60, maxTime:maxMax*60, reward, rank}; }
 const QUEST_POOL = [
   () => quest('Зачистить подземелье ранга E','Уничтожьте всех монстров внутри подземелья.',1,3,20,'E'),
   () => quest('Победить гоблинов-разведчиков','Отбейте атаку разведывательного отряда гоблинов.',1,2,18,'E'),
@@ -4446,16 +3223,16 @@ const QUEST_POOL = [
   () => quest('Победить теневого монарха','Сразите монарха.',8,12,120,'S'),
   () => quest('Уничтожить ледяную королеву','Убейте королеву.',6,9,80,'S')
 ];
+
 function pickRandomQuest() {
   const currentRank = getRankByLevel(G.level);
   const maxIdx = RANK_ORDER.indexOf(currentRank);
   const available = QUEST_POOL.filter(f => RANK_ORDER.indexOf(f().rank) <= maxIdx);
   const highest = available.filter(f => f().rank === currentRank);
-  return (highest.length>0 && Math.random()<0.6)
-    ? highest[Math.floor(Math.random()*highest.length)]()
-    : available[Math.floor(Math.random()*available.length)]();
+  return (highest.length>0 && Math.random()<0.6) ? highest[Math.floor(Math.random()*highest.length)]() : available[Math.floor(Math.random()*available.length)]();
 }
 
+// FIX #4: не очищаем таймер при 'minigame' — пусть тикает во время AR
 function startQuestTimer(q) {
   if (G.timerInterval) clearInterval(G.timerInterval);
   if (!q || q.remaining === undefined) return;
@@ -4463,9 +3240,7 @@ function startQuestTimer(q) {
   $('timerFill').style.width = '100%';
   const total = q.duration || q.remaining;
   G.timerInterval = setInterval(() => {
-    if (!G.activeQuest || G.questPhase !== 'active') {
-      clearInterval(G.timerInterval); G.timerInterval = null; return;
-    }
+    if (!G.activeQuest) { clearInterval(G.timerInterval); G.timerInterval = null; return; }
     q.remaining--;
     if (q.remaining <= 0) {
       clearInterval(G.timerInterval); G.timerInterval = null;
@@ -4488,31 +3263,22 @@ function startQuestTimer(q) {
 function showQuest(q, isPenalty=false) {
   if (G.busy && G.activeQuest) return;
   if (G.timerInterval) { clearInterval(G.timerInterval); G.timerInterval = null; }
-  G.busy = true;
-  G.activeQuest = q;
-  G.questPhase = 'active';
-  G.pendingReward = false;
-  G.questCollapsed = false;
+  G.busy = true; G.activeQuest = q; G.questPhase = 'active';
+  G.pendingReward = false; G.questCollapsed = false;
   if (q.isPenalty === undefined) q.isPenalty = isPenalty;
   if (!q.duration) q.duration = q.minTime + Math.random()*(q.maxTime - q.minTime);
-  q.remaining = q.duration;
-  q.completed = false;
+  q.remaining = q.duration; q.completed = false;
   $('questName').textContent = q.name;
   $('questDesc').textContent = q.desc;
   $('questRank').textContent = q.rank;
   $('questTitleText').textContent = q.isPenalty ? 'ЗОНА НАКАЗАНИЯ' : 'НОВОЕ ЗАДАНИЕ';
   $('timerNumber').textContent = formatTime(q.duration);
   $('timerNumber').className = 'timer-number';
-  $('timerFill').style.width = '100%';
-  $('timerFill').className = 'timer-fill';
+  $('timerFill').style.width = '100%'; $('timerFill').className = 'timer-fill';
   const btn = $('btnComplete');
-  btn.textContent = 'ПОДТВЕРДИТЬ';
-  btn.className = 'btn-quest';
-  btn.disabled = false;
+  btn.textContent = 'ПОДТВЕРДИТЬ'; btn.className = 'btn-quest'; btn.disabled = false;
   $('questOverlay').classList.add('show');
-  SFX.incoming();
-  triggerFlash(q.isPenalty ? 'red' : 'blue');
-  triggerScreenShake();
+  SFX.incoming(); triggerFlash(q.isPenalty ? 'red' : 'blue'); triggerScreenShake();
   addLog(`${q.isPenalty ? '⚠ ' : ''}Новое задание: «${q.name}» [Ранг ${q.rank}]. Время: ${formatTime(q.duration)}.`, q.isPenalty ? 'penalty' : '');
   speak(`Новое задание. ${q.name}`);
   setTimeout(() => speak(`Цель: ${q.desc}`), 100);
@@ -4528,7 +3294,7 @@ $('btnComplete').addEventListener('click', () => {
     $('btnComplete').textContent = 'ВЫПОЛНЕНИЕ...';
     G.questPhase = 'minigame';
     $('questOverlay').classList.remove('show');
-    setTimeout(() => startARQuest(q), 300);
+    startARQuest(q); // FIX: без setTimeout — сохраняем user gesture для камеры
   } else if (G.pendingReward) {
     completeQuestReward(q);
   }
@@ -4538,8 +3304,7 @@ function completeQuestReward(q) {
   if (!q) return;
   if (G.timerInterval) { clearInterval(G.timerInterval); G.timerInterval = null; }
   $('questOverlay').classList.remove('show');
-  SFX.success();
-  triggerFlash('gold');
+  SFX.success(); triggerFlash('gold');
   G.done++;
   const perBonus = 1 + (G.per-10)*0.03;
   const finalGold = Math.floor((q.reward/2)*perBonus);
@@ -4549,65 +3314,43 @@ function completeQuestReward(q) {
   showFloatingText(`+${q.reward} XP`, '#4a8aff');
   showFloatingText(`+${finalGold} G`, '#ffcc44');
   gainXp(q.reward);
-  G.busy = false;
-  G.activeQuest = null;
-  G.questPhase = 'inactive';
-  G.pendingReward = false;
-  G.questCollapsed = false;
-  updateUI();
-  saveGame();
+  G.busy = false; G.activeQuest = null; G.questPhase = 'inactive'; G.pendingReward = false; G.questCollapsed = false;
+  updateUI(); saveGame();
   if (Math.random() < 0.2) setTimeout(grantRandomReward, 1500);
   scheduleNextQuest();
 }
-
 function failQuest(reason) {
   const q = G.activeQuest;
   if (!q) return;
   if (G.timerInterval) { clearInterval(G.timerInterval); G.timerInterval = null; }
-  q.completed = true;
-  SFX.fail();
+  q.completed = true; SFX.fail();
   $('questOverlay').classList.remove('show');
   G.failed++;
   addLog(`Задание «${q.name}» провалено. ${reason}`, 'fail');
   speak('Задание провалено.');
   const dmg = q.isPenalty ? 25 : (10+Math.floor(q.reward/5));
   takeDamage(dmg, q.isPenalty ? 'Зона наказания!' : 'Провал.');
-  G.busy = false;
-  G.activeQuest = null;
-  G.questPhase = 'inactive';
-  G.pendingReward = false;
-  G.questCollapsed = false;
-  updateUI();
-  saveGame();
+  G.busy = false; G.activeQuest = null; G.questPhase = 'inactive'; G.pendingReward = false; G.questCollapsed = false;
+  updateUI(); saveGame();
   if (!q.isPenalty) scheduleNextQuest();
 }
-
 function gainXp(amount) {
   const boost = G.xpBoostNext || 1;
   const finalXp = Math.floor(amount * (1 + (G.int-10)*0.02) * boost);
-  if (boost > 1) {
-    addLog(`Бонус опыта ×${boost}.`, 'success');
-    G.xpBoostNext = 1;
-  }
+  if (boost > 1) { addLog(`Бонус опыта ×${boost}.`, 'success'); G.xpBoostNext = 1; }
   G.xp += finalXp;
   while (G.xp >= G.xpNext && G.level < 100) {
-    G.xp -= G.xpNext;
-    G.level++;
+    G.xp -= G.xpNext; G.level++;
     G.xpNext = Math.floor(G.xpNext*1.15);
-    G.statPoints += 3;
-    G.maxHp += 20;
-    G.hp = G.maxHp;
+    G.statPoints += 3; G.maxHp += 20; G.hp = G.maxHp;
     addLog(`★ УРОВЕНЬ ПОВЫШЕН до ${G.level}! Получено 3 очка.`,'level');
     speak(`Уровень повышен до ${G.level}.`);
-    SFX.levelup();
-    triggerFlash('gold');
+    SFX.levelup(); triggerFlash('gold');
     showFloatingText(`УРОВЕНЬ ${G.level}!`, '#ffcc44');
     checkRankUp();
   }
-  updateUI();
-  saveGame();
+  updateUI(); saveGame();
 }
-
 function scheduleNextQuest() {
   if (G.nextQuestTimeout) clearTimeout(G.nextQuestTimeout);
   const delay = 120000 + Math.random()*180000;
@@ -4627,20 +3370,17 @@ function startGame() {
   if (G.started) return;
   G.started = true;
   updateUI();
-
   if (G.debuffActive && G.debuffEndTime > 0) {
     const left = (G.debuffEndTime - Date.now()) / 1000;
     if (left > 0) addLog(`Дебафф «Слабость» активен ещё ${formatShort(left)}.`, 'penalty');
     else removeDebuff();
   }
-
   if (G.chatHistory.length === 0) {
     const greeting = `Пробуждение завершено. Приветствую тебя, Игрок ${G.playerName}. Система активирована. Теперь ты часть этой игры. Выполняй задания, становись сильнее, и однажды ты сможешь бросить вызов самому Монарху Теней.`;
     addLog(`Приветствую, ${G.playerName}. Система активирована.`, 'success');
     addLog('Используйте AR-ОХОТУ для битвы с монстрами.', '');
     setTimeout(() => speak(greeting), 500);
-    triggerFlash('blue');
-    SFX.awaken();
+    triggerFlash('blue'); SFX.awaken();
     setTimeout(() => showFloatingText(`ИГРОК: ${G.playerName}`, '#44ff88'), 1000);
   } else {
     renderChat();
@@ -4650,19 +3390,11 @@ function startGame() {
       const card = document.createElement('div');
       card.className = 'quest-card';
       card.innerHTML = `<div class="quest-card-info"><div class="quest-card-name">${q.isPenalty ? '⚠ ' : ''}${q.name}</div><span class="quest-card-rank">РАНГ ${q.rank}</span></div><div class="quest-card-timer">${formatTime(q.remaining || q.duration)}</div>`;
-      card.addEventListener('click', () => {
-        $('questOverlay').classList.add('show');
-        card.remove();
-        G.questCollapsed = false;
-        saveGame();
-      });
-      logArea.appendChild(card);
-      logArea.scrollTop = logArea.scrollHeight;
+      card.addEventListener('click', () => { $('questOverlay').classList.add('show'); card.remove(); G.questCollapsed = false; saveGame(); });
+      logArea.appendChild(card); logArea.scrollTop = logArea.scrollHeight;
     }
   }
-
   saveGame();
-
   if (G.inPenalty) addLog('Зона наказания всё ещё активна!', 'penalty');
   else scheduleFirstQuest();
 }
@@ -4676,18 +3408,12 @@ $('btnCameraPerm').addEventListener('click', async () => {
     const stream = await requestCamera();
     if (G.stream) G.stream.getTracks().forEach(t => t.stop());
     G.stream = stream;
-    btn.textContent = 'РАЗРЕШЕНО';
-    btn.classList.add('on');
-    addLog('Доступ к камере разрешён.', 'success');
-    speak('Камера разрешена.');
-    if (G.stream) {
-      G.stream.getTracks().forEach(t => t.stop());
-      G.stream = null;
-    }
+    btn.textContent = 'РАЗРЕШЕНО'; btn.classList.add('on');
+    addLog('Доступ к камере разрешён.', 'success'); speak('Камера разрешена.');
+    if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
   } catch(e) {
     btn.textContent = 'ОТКЛОНЕНО';
-    addLog('Доступ к камере отклонён.', 'fail');
-    speak('Камера отклонена.');
+    addLog('Доступ к камере отклонён.', 'fail'); speak('Камера отклонена.');
   }
 });
 $('btnSpeechToggle').addEventListener('click', () => {
@@ -4695,17 +3421,10 @@ $('btnSpeechToggle').addEventListener('click', () => {
   const btn = $('btnSpeechToggle');
   btn.textContent = G.speechEnabled ? 'ВКЛ' : 'ВЫКЛ';
   btn.classList.toggle('on', G.speechEnabled);
-  if (!G.speechEnabled) {
-    speechSynthesis.cancel();
-    speechQueue = [];
-    isSpeaking = false;
-  }
+  if (!G.speechEnabled) { speechSynthesis.cancel(); speechQueue = []; isSpeaking = false; }
   saveGame();
 });
-$('btnStatus').addEventListener('click', () => {
-  $('statusOverlay').classList.add('show');
-  renderStatus();
-});
+$('btnStatus').addEventListener('click', () => { $('statusOverlay').classList.add('show'); renderStatus(); });
 $('btnCloseStatus').addEventListener('click', () => $('statusOverlay').classList.remove('show'));
 $('btnShop').addEventListener('click', () => { renderShop(); $('shopOverlay').classList.add('show'); });
 $('btnCloseShop').addEventListener('click', () => $('shopOverlay').classList.remove('show'));
@@ -4726,9 +3445,7 @@ $('statusOverlay').addEventListener('click', (e) => {
   if (stat === 'per') G.per++;
   G.statPoints--;
   playTone(880,0.1,'sine',0.1);
-  updateUI();
-  renderStatus();
-  saveGame();
+  updateUI(); renderStatus(); saveGame();
 });
 $('btnReset').addEventListener('click', resetGame);
 
@@ -4739,33 +3456,19 @@ $('btnCollapse').addEventListener('click', () => {
   const card = document.createElement('div');
   card.className = 'quest-card';
   card.innerHTML = `<div class="quest-card-info"><div class="quest-card-name">${q.isPenalty ? '⚠ ' : ''}${q.name}</div><span class="quest-card-rank">РАНГ ${q.rank}</span></div><div class="quest-card-timer">${formatTime(q.remaining || q.duration)}</div>`;
-  card.addEventListener('click', () => {
-    $('questOverlay').classList.add('show');
-    card.remove();
-    G.questCollapsed = false;
-    saveGame();
-  });
-  logArea.appendChild(card);
-  logArea.scrollTop = logArea.scrollHeight;
-  G.questCollapsed = true;
-  saveGame();
+  card.addEventListener('click', () => { $('questOverlay').classList.add('show'); card.remove(); G.questCollapsed = false; saveGame(); });
+  logArea.appendChild(card); logArea.scrollTop = logArea.scrollHeight;
+  G.questCollapsed = true; saveGame();
 });
 
 const blocker = $('blocker');
 function beforeUnloadHandler(e) {
   saveGameNow();
-  if (G.awakened) {
-    e.preventDefault();
-    e.returnValue = 'Система не отпускает вас.';
-    return e.returnValue;
-  }
+  if (G.awakened) { e.preventDefault(); e.returnValue = 'Система не отпускает вас.'; return e.returnValue; }
 }
 function popstateHandler() {
   history.pushState(null, '', location.href);
-  if (G.awakened) {
-    blocker.classList.add('show');
-    speak('Вы не можете покинуть Систему.');
-  }
+  if (G.awakened) { blocker.classList.add('show'); speak('Вы не можете покинуть Систему.'); }
 }
 window.addEventListener('beforeunload', beforeUnloadHandler);
 history.pushState(null, '', location.href);
@@ -4783,58 +3486,19 @@ document.addEventListener('visibilitychange', () => {
           addLog('AR-задание отменено (сворачивание).', '');
           G.arActive = false;
           if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
-          videoFeed.srcObject = null;
-          cameraView.classList.remove('active');
-          G.arQuest = null;
-          G.busy = false;
-          G.activeQuest = null;
-          G.questPhase = 'inactive';
-          G.pendingReward = false;
+          videoFeed.srcObject = null; cameraView.classList.remove('active');
+          G.arQuest = null; G.busy = false; G.activeQuest = null;
+          G.questPhase = 'inactive'; G.pendingReward = false;
           $('questOverlay').classList.remove('show');
-          updateUI();
-          saveGame();
-          scheduleNextQuest();
+          updateUI(); saveGame(); scheduleNextQuest();
         }
-        if (AR.PENALTY && !AR.PENALTY.ended) {
-          finishARPenalty(false);
-        }
-      } catch(e) {}
-    }
-    if (G.mgActive && mgState && !mgState.ended) {
-      try {
-        mgState.ended = true;
-        if (mgState.timerInterval) clearInterval(mgState.timerInterval);
-        if (mgState.loop) clearInterval(mgState.loop);
-        if (mgState.spawner) clearInterval(mgState.spawner);
-        if (mgState.cleanup) {
-          try {
-            if (typeof mgState.cleanup === 'function') mgState.cleanup();
-            else clearInterval(mgState.cleanup);
-          } catch(e) {}
-        }
-        mgField.innerHTML = '';
-        mgOverlay.classList.remove('active');
-        G.mgActive = false;
-        mgState = null;
-        if (G.timerInterval) { clearInterval(G.timerInterval); G.timerInterval = null; }
-        G.busy = false;
-        G.activeQuest = null;
-        G.questPhase = 'inactive';
-        G.pendingReward = false;
-        $('questOverlay').classList.remove('show');
-        addLog('Задание отменено (сворачивание).', '');
-        updateUI();
-        saveGame();
-        scheduleNextQuest();
+        if (AR.PENALTY && !AR.PENALTY.ended) finishARPenalty(false);
       } catch(e) {}
     }
     if (penaltyActive) {
       try {
-        clearInterval(penaltyTimerInterval);
-        clearInterval(penaltySpawnInterval);
-        penaltyField.innerHTML = '';
-        penaltyActive = false;
-        G.inPenalty = false;
+        clearInterval(penaltyTimerInterval); clearInterval(penaltySpawnInterval);
+        penaltyField.innerHTML = ''; penaltyActive = false; G.inPenalty = false;
         penaltyZone.classList.remove('active');
         addLog('Зона наказания отменена (сворачивание).', 'penalty');
       } catch(e) {}
@@ -4865,8 +3529,7 @@ function init() {
     welcomeOverlay.classList.add('hide');
     systemPanel.classList.add('show');
     G.awakened = true;
-    updateUI();
-    startGame();
+    updateUI(); startGame();
     const sBtn = $('btnSpeechToggle');
     sBtn.textContent = G.speechEnabled ? 'ВКЛ' : 'ВЫКЛ';
     sBtn.classList.toggle('on', G.speechEnabled);
@@ -4883,8 +3546,7 @@ init();
     s.style.animationDuration = (6+Math.random()*10)+'s';
     s.style.animationDelay = (Math.random()*8)+'s';
     const size = 1+Math.random()*2;
-    s.style.width = size+'px';
-    s.style.height = size+'px';
+    s.style.width = size+'px'; s.style.height = size+'px';
     container.appendChild(s);
   }
 })();
