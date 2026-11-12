@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050a18">
-<title>Solo Leveling — Система (v38.6 unified AR)</title>
+<title>Solo Leveling — Система (v38.7 unified AR)</title>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
 html, body { width:100vw; height:100vh; height:100dvh; overflow:hidden; position:fixed; inset:0; background:#000; font-family:'Segoe UI',sans-serif; color:#b8d4ff; }
@@ -51,18 +51,12 @@ button:active, .header-btn:active, .btn-confirm:active, .btn-quest:active,
   box-shadow: 0 0 30px rgba(110,168,255,0.9), inset 0 0 20px rgba(255,255,255,0.2);
 }
 button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
-  transform: none;
-  filter: none;
-  box-shadow: none;
+  transform: none; filter: none; box-shadow: none;
 }
 .ripple-wave {
-  position: fixed;
-  border-radius: 50%;
-  pointer-events: none;
-  background: rgba(110,168,255,0.55);
-  transform: scale(0);
-  animation: rippleAnim 0.45s ease-out forwards;
-  z-index: 99999;
+  position: fixed; border-radius: 50%; pointer-events: none;
+  background: rgba(110,168,255,0.55); transform: scale(0);
+  animation: rippleAnim 0.45s ease-out forwards; z-index: 99999;
 }
 @keyframes rippleAnim { to { transform: scale(2.5); opacity: 0; } }
 
@@ -258,23 +252,15 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .damage-number { position:absolute; font-size:32px; color:#ff4444; font-weight:900; animation:damageAnim 0.8s forwards; z-index:9; pointer-events:none; }
 @keyframes damageAnim { 0%{opacity:0; transform:scale(0.5);} 20%{opacity:1; transform:scale(1.3);} 100%{opacity:0; transform:scale(1) translateY(-80px);} }
 
-.penalty-zone { position:fixed; inset:0; background:radial-gradient(circle at 50% 50%,#2a0000,#0a0000); z-index:6000; display:none; flex-direction:column; animation:zonePulse 2s infinite alternate; }
+.penalty-zone { position:fixed; inset:0; background:radial-gradient(circle at 50% 50%,#2a0000,#0a0000); z-index:6000; display:none; flex-direction:column; }
 .penalty-zone.active { display:flex; }
-@keyframes zonePulse { from{background:radial-gradient(circle at 50% 50%,#1a0000,#000);} to{background:radial-gradient(circle at 50% 50%,#4a0000,#0a0000);} }
 .penalty-header { padding:12px; text-align:center; border-bottom:1px solid rgba(255,0,0,0.3); }
 .penalty-title { font-size:18px; color:#ff4444; font-weight:800; letter-spacing:3px; text-shadow:0 0 15px #ff0000; }
 .penalty-info { display:flex; justify-content:space-between; padding:8px 16px; color:#ff8888; }
 .penalty-info b { color:#ff4444; }
 .penalty-field { flex:1; position:relative; overflow:hidden; }
-.penalty-ball { position:absolute; border-radius:50%; box-shadow:0 0 15px currentColor; cursor:pointer; animation:ballPop 0.1s; }
-@keyframes ballPop { from{transform:scale(0);} to{transform:scale(1);} }
-.penalty-ball.collected { animation:ballCollected 0.2s forwards; pointer-events:none; }
-@keyframes ballCollected { from{transform:scale(1);} to{transform:scale(2); opacity:0;} }
 .penalty-footer { padding:12px; display:flex; justify-content:center; }
 .penalty-surrender { padding:10px 24px; background:rgba(40,0,0,0.8); border:1px solid #ff4444; color:#ff8888; font-size:13px; cursor:pointer; }
-.penalty-result { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; z-index:10; }
-.penalty-result-title { font-size:32px; font-weight:900; margin-bottom:12px; }
-.penalty-result-sub { font-size:16px; color:#e0ecff; }
 
 .mg-overlay { position:fixed; inset:0; background:#050510; z-index:4500; display:none; flex-direction:column; }
 .mg-overlay.active { display:flex; }
@@ -288,34 +274,10 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .mg-field { flex:1; position:relative; overflow:hidden; }
 .mg-bottom { padding:10px; display:flex; justify-content:center; flex-shrink:0; }
 .mg-surrender { padding:10px 24px; background:rgba(120,20,20,0.7); border:1px solid #ff4444; color:#ffaaaa; font-size:13px; cursor:pointer; }
-.mg-target { position:absolute; border-radius:50%; box-shadow:0 0 15px currentColor; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-.mg-target.hit { animation:mgHit 0.2s forwards; pointer-events:none; }
-@keyframes mgHit { to{transform:scale(2); opacity:0;} }
-.mg-note { position:absolute; border-radius:50%; background:#4a8aff; box-shadow:0 0 15px #4a8aff; }
-.mg-line { position:absolute; left:0; right:0; height:3px; background:#ffcc44; box-shadow:0 0 10px #ffcc44; }
-.mg-player { position:absolute; bottom:20px; width:44px; height:44px; background:#44ff88; border-radius:50%; box-shadow:0 0 20px #44ff88; pointer-events:none; }
-.mg-obstacle { position:absolute; border-radius:50%; background:#ff4444; box-shadow:0 0 10px #ff4444; }
-.mg-card { position:absolute; border-radius:8px; background:#1a2a4a; border:2px solid #4a8aff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:28px; }
-.mg-card.correct { background:#44ff88; border-color:#44ff88; }
-.mg-card.wrong { background:#ff4444; border-color:#ff4444; }
-.mg-track { position:absolute; left:8%; right:8%; top:50%; height:40px; background:rgba(42,92,255,0.2); border:2px solid #4a8aff; transform:translateY(-50%); }
-.mg-zone { position:absolute; top:0; bottom:0; background:rgba(68,255,136,0.4); border:1px solid #44ff88; }
-.mg-marker { position:absolute; top:-4px; bottom:-4px; width:4px; background:#ffcc44; box-shadow:0 0 10px #ffcc44; }
-.mg-btn-big { position:absolute; left:50%; bottom:15%; transform:translateX(-50%); padding:16px 40px; background:linear-gradient(180deg,#2a5cff,#1a3a9a); border:1px solid #6ea8ff; color:#fff; font-size:16px; font-weight:800; cursor:pointer; }
-.mg-answer { display:block; width:100%; padding:14px; margin:8px 0; background:rgba(42,92,255,0.3); border:1px solid #4a8aff; color:#fff; font-size:14px; cursor:pointer; }
-.mg-question { text-align:center; font-size:18px; color:#e0ecff; padding:20px; }
-.mg-shield { position:absolute; font-size:36px; color:#4a8aff; cursor:pointer; padding:14px; background:rgba(42,92,255,0.2); border:1px solid #4a8aff; border-radius:50%; }
-.mg-attacker { position:absolute; font-size:36px; color:#ff4444; }
-.mg-bar { position:absolute; height:20px; background:rgba(42,92,255,0.3); border:2px solid #4a8aff; border-radius:10px; }
-.mg-bar-marker { position:absolute; top:-5px; width:30px; height:30px; background:#44ff88; border-radius:50%; box-shadow:0 0 20px #44ff88; }
-.mg-balance-zone { position:absolute; top:0; bottom:0; background:rgba(68,255,136,0.35); border:1px solid #44ff88; }
 
 .ar-monster {
-  position: absolute;
-  font-size: 120px;
-  pointer-events: none;
-  z-index: 5;
-  transition: opacity 0.25s, left 0.06s linear, top 0.06s linear, transform 0.15s;
+  position: absolute; font-size: 120px; pointer-events: none; z-index: 5;
+  transition: opacity 0.25s, transform 0.15s;
   filter: drop-shadow(0 0 18px rgba(255,68,68,0.8));
 }
 .ar-monster.hidden { opacity: 0; }
@@ -325,19 +287,13 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .ar-monster.dead { opacity:0; transition:opacity 0.6s; }
 
 .ar-player-bar {
-  position: absolute;
-  top: 56px; left: 0; right: 0;
-  padding: 0 14px;
-  z-index: 9;
+  position: absolute; top: 56px; left: 0; right: 0; padding: 0 14px; z-index: 9;
   display: flex; align-items: center; gap: 10px;
   background: linear-gradient(180deg, rgba(5,15,40,0.92), rgba(10,30,70,0.75));
-  border-top: 1px solid rgba(74,138,255,0.4);
-  border-bottom: 1px solid rgba(74,138,255,0.4);
+  border-top: 1px solid rgba(74,138,255,0.4); border-bottom: 1px solid rgba(74,138,255,0.4);
   box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 0 20px rgba(20,50,150,0.2);
-  font-size: 11px; color: #b8d4ff;
-  pointer-events: none;
-  min-height: 38px;
-  flex-wrap: nowrap; overflow: hidden;
+  font-size: 11px; color: #b8d4ff; pointer-events: none;
+  min-height: 38px; flex-wrap: nowrap; overflow: hidden;
 }
 .ar-player-bar .apb-name { font-weight: 800; color: #ffcc44; letter-spacing: 1px; text-shadow: 0 0 8px #ffcc44; white-space: nowrap; max-width: 80px; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
 .ar-player-bar .apb-rank { display: inline-block; padding: 1px 7px; font-size: 10px; font-weight: 800; border: 1px solid currentColor; border-radius: 2px; letter-spacing: 1px; flex-shrink: 0; }
@@ -361,15 +317,12 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 
 .ar-monster-hud {
   position: absolute; width: 180px; z-index: 9;
-  transform: translate(-50%, -100%);
-  margin-top: -72px;
+  transform: translate(-50%, -100%); margin-top: -72px;
   background: linear-gradient(135deg, rgba(40,0,0,0.94), rgba(80,10,10,0.88));
   border: 1px solid #ff4444; border-left: 3px solid #ff2222;
   padding: 6px 10px 8px;
   box-shadow: 0 0 20px rgba(255,68,68,0.5), inset 0 0 20px rgba(150,20,20,0.3);
-  pointer-events: none;
-  transition: left 0.06s linear, top 0.06s linear, opacity 0.25s;
-  text-align: center;
+  pointer-events: none; transition: opacity 0.25s; text-align: center;
 }
 .ar-monster-hud.hidden { opacity: 0; }
 .ar-monster-hud::before { content: ""; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 8px solid #ff2222; }
@@ -386,9 +339,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .ar-monster-hud .amh-hp-text { font-size: 10px; font-family: 'Courier New', monospace; color: #ffd0d0; font-weight: 700; }
 
 .ar-rank-warning {
-  position: absolute;
-  top: 108px; left: 50%;
-  transform: translateX(-50%);
+  position: absolute; top: 108px; left: 50%; transform: translateX(-50%);
   font-size: 11px; font-weight: 800; letter-spacing: 2px;
   padding: 5px 14px; border-radius: 12px;
   background: rgba(5,12,28,0.85);
@@ -408,8 +359,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   transform: translate(-50%,-50%);
   border: 2px dashed rgba(74,138,255,0.55);
   border-radius: 50%;
-  pointer-events: none;
-  z-index: 100;
+  pointer-events: none; z-index: 100;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 .ar-reticle.active {
@@ -430,9 +380,8 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 
 .ar-pointer {
   position: absolute; width: 0; height: 0;
-  z-index: 101;
-  pointer-events: none;
-  transition: opacity 0.25s, left 0.12s linear, top 0.12s linear;
+  z-index: 101; pointer-events: none;
+  transition: opacity 0.25s;
 }
 .ar-pointer.hidden { opacity: 0; }
 .ar-pointer-arrow {
@@ -467,8 +416,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   position: absolute; top: 50%; left: 50%;
   width: 240px; height: 240px;
   transform: translate(-50%,-50%) rotate(-90deg);
-  pointer-events: none;
-  z-index: 99;
+  pointer-events: none; z-index: 99;
   transition: opacity 0.2s;
 }
 .ar-progress-svg.hidden { opacity: 0; }
@@ -589,11 +537,12 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   100% { transform: translateY(-50%) rotate(-8deg) scaleX(1); opacity: 0; }
 }
 
+/* ИСПРАВЛЕНО: убраны transition left/top — rAF-цикл сам сглаживает */
 .ar-target {
   position: absolute;
   pointer-events: none;
   z-index: 5;
-  transition: opacity 0.25s, left 0.06s linear, top 0.06s linear, transform 0.15s;
+  transition: opacity 0.25s, transform 0.15s;
   filter: drop-shadow(0 0 18px rgba(74,138,255,0.8));
   will-change: left, top, transform;
 }
@@ -607,18 +556,13 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .ar-target.ar-obstacle { filter: drop-shadow(0 0 16px #ff4444); font-size: 56px; z-index: 6; }
 
 .ar-phase-hud {
-  position: absolute;
-  top: 100px; left: 50%;
-  transform: translateX(-50%);
+  position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
   z-index: 9;
   background: rgba(5,12,28,0.88);
-  border: 1px solid #4a8aff;
-  border-radius: 4px;
+  border: 1px solid #4a8aff; border-radius: 4px;
   padding: 5px 14px;
-  font-size: 11px; letter-spacing: 2px;
-  color: #9ec0ff;
-  pointer-events: none;
-  opacity: 0; transition: opacity 0.25s;
+  font-size: 11px; letter-spacing: 2px; color: #9ec0ff;
+  pointer-events: none; opacity: 0; transition: opacity 0.25s;
   white-space: nowrap; text-align: center;
   box-shadow: 0 0 16px rgba(42,92,255,0.4);
 }
@@ -630,8 +574,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   position: absolute; top: 50%; left: 50%;
   width: 200px; height: 200px;
   transform: translate(-50%,-50%);
-  pointer-events: none;
-  z-index: 98;
+  pointer-events: none; z-index: 98;
   opacity: 0; transition: opacity 0.2s;
 }
 .ar-hold-ring.show { opacity: 1; }
@@ -676,26 +619,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 }
 .ar-gaze-cone.safe { border-bottom-color: rgba(68,255,136,0.22); filter: drop-shadow(0 0 12px rgba(68,255,136,0.6)); }
 
-.ar-chase-trail {
-  position: absolute; width: 40px; height: 40px;
-  border-radius: 50%;
-  border: 2px dashed #ffaa44;
-  pointer-events: none; z-index: 4;
-  transform: translate(-50%,-50%);
-  opacity: 0.5;
-  animation: chaseTrail 0.6s linear infinite;
-}
-@keyframes chaseTrail { from{transform:translate(-50%,-50%) scale(0.6); opacity:0.6;} to{transform:translate(-50%,-50%) scale(1.3); opacity:0;} }
-
-.ar-multi-link {
-  position: absolute; height: 2px;
-  background: linear-gradient(90deg, rgba(68,255,136,0.1), #44ff88, rgba(68,255,136,0.1));
-  transform-origin: 0 50%;
-  pointer-events: none; z-index: 4;
-  box-shadow: 0 0 10px #44ff88;
-  opacity: 0.8;
-}
-
 .ar-reticle.rhythm-beat {
   border-color: #ffcc44 !important;
   box-shadow: 0 0 40px #ffcc44, inset 0 0 30px rgba(255,204,68,0.4) !important;
@@ -705,8 +628,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 
 .ar-penalty-hud {
   position: absolute; top: 56px; left: 0; right: 0;
-  padding: 8px 14px;
-  z-index: 9;
+  padding: 8px 14px; z-index: 9;
   background: linear-gradient(180deg, rgba(60,0,0,0.95), rgba(30,0,0,0.7));
   border-top: 1px solid #ff4444; border-bottom: 1px solid #ff4444;
   box-shadow: 0 0 20px rgba(255,68,68,0.4);
@@ -719,18 +641,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .ar-penalty-hud .aph-stats b { color: #ff8888; }
 .ar-penalty-hud .aph-progress { height: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,68,68,0.4); overflow: hidden; }
 .ar-penalty-hud .aph-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ff2222, #ff6666); transition: width 0.3s; box-shadow: 0 0 8px #ff4444; }
-
-.ar-quest-phase-indicator {
-  position: absolute; bottom: 120px; left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px; letter-spacing: 2px; color: #9ec0ff;
-  background: rgba(5,12,28,0.85);
-  border: 1px solid #4a8aff;
-  padding: 4px 12px; border-radius: 12px;
-  z-index: 9; pointer-events: none;
-  opacity: 0; transition: opacity 0.25s;
-}
-.ar-quest-phase-indicator.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -833,7 +743,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   </div>
 </div>
 
-<!-- Старые оверлеи (для совместимости, не используются в v38.6) -->
+<!-- Старые оверлеи (совместимость) -->
 <div class="penalty-zone" id="penaltyZone">
   <div class="penalty-header"><div class="penalty-title">⚠ ЗОНА НАКАЗАНИЯ ⚠</div></div>
   <div class="penalty-info">
@@ -976,6 +886,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 <div class="rankup-overlay" id="rankupOverlay"><div class="rankup-window"><div class="rankup-title">РАНГ ПОВЫШЕН</div><div class="rankup-sub" id="rankupText">—</div><button class="rankup-btn" id="btnRankupOk">ПРИНЯТЬ</button></div></div>
 <div class="reward-overlay" id="rewardOverlay"><div class="reward-window"><div class="reward-title" id="rewardTitle">ПОЛУЧЕН ПРЕДМЕТ</div><div class="reward-name" id="rewardName">—</div><div class="reward-desc" id="rewardDesc">—</div><button class="reward-btn" id="btnRewardOk">ЗАБРАТЬ</button></div></div>
 <div class="blocker" id="blocker"><div class="blocker-icon">🚫</div><div class="blocker-title">СИСТЕМА НЕ ОТПУСКАЕТ</div><div class="blocker-text">Вы не можете покинуть Систему.</div><button class="blocker-btn" id="blockerBtn">ВЕРНУТЬСЯ</button></div>
+
 <script>
 'use strict';
 
@@ -992,21 +903,15 @@ const G = {
   questPhase:'inactive', penaltyCooldown:0,
   debuffActive:false, debuffEndTime:0, baseStats:null,
   mgActive:false, mgQuest:null, pendingReward:false,
-  questCollapsed:false,
-  pendingDamageShield:false,
-  xpBoostNext:1,
-  arRewardBoost:false
+  questCollapsed:false, pendingDamageShield:false, xpBoostNext:1, arRewardBoost:false
 };
-const SAVE_KEY = 'solo_leveling_v386';
-const LEGACY_KEYS = ['solo_leveling_v385','solo_leveling_v384','solo_leveling_v383','solo_leveling_v382','solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36','solo_leveling_v35','solo_leveling_v34','solo_leveling_v33','solo_leveling_v31','solo_leveling_v30'];
+const SAVE_KEY = 'solo_leveling_v387';
+const LEGACY_KEYS = ['solo_leveling_v386','solo_leveling_v385','solo_leveling_v384','solo_leveling_v383','solo_leveling_v382','solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36','solo_leveling_v35','solo_leveling_v34','solo_leveling_v33','solo_leveling_v31','solo_leveling_v30'];
 
 let _saveTimer = null;
 function saveGame() {
   if (_saveTimer) clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => {
-    try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch(e) {}
-    _saveTimer = null;
-  }, 400);
+  _saveTimer = setTimeout(() => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch(e) {} _saveTimer = null; }, 400);
 }
 function saveGameNow() {
   if (_saveTimer) { clearTimeout(_saveTimer); _saveTimer = null; }
@@ -1018,12 +923,7 @@ function loadGame() {
     if (!raw) {
       for (const oldKey of LEGACY_KEYS) {
         const oldRaw = localStorage.getItem(oldKey);
-        if (oldRaw) {
-          raw = oldRaw;
-          try { localStorage.setItem(SAVE_KEY, oldRaw); } catch(e) {}
-          try { localStorage.removeItem(oldKey); } catch(e) {}
-          break;
-        }
+        if (oldRaw) { raw = oldRaw; try { localStorage.setItem(SAVE_KEY, oldRaw); } catch(e) {} try { localStorage.removeItem(oldKey); } catch(e) {} break; }
       }
     }
     if(!raw) return false;
@@ -1049,6 +949,7 @@ function resetGame() {
   if (G.arQuest && G.arQuest.timerInterval) { clearInterval(G.arQuest.timerInterval); G.arQuest.timerInterval = null; }
   if (G.arQuest && G.arQuest.timerIv) { clearInterval(G.arQuest.timerIv); G.arQuest.timerIv = null; }
   if (AR && AR.PENALTY && AR.PENALTY.timerIv) { clearInterval(AR.PENALTY.timerIv); AR.PENALTY.timerIv = null; }
+  stopARLoop();
   stopMonsterAttacks(); endARLook();
   window.removeEventListener('beforeunload', beforeUnloadHandler);
   window.removeEventListener('popstate', popstateHandler);
@@ -1081,15 +982,12 @@ const SFX = {
   rankup: () => { [440,554,659,880,1108].forEach((f,i) => setTimeout(() => playTone(f,0.3), i*150)); },
   awaken: () => { [220,330,440,554,659,880,1108,1320].forEach((f,i) => setTimeout(() => playTone(f,0.4,'sine',0.12), i*120)); },
   ballPop: () => { playTone(1200,0.05,'sine',0.1); },
-  penaltyStart: () => { [220,180,140,100].forEach((f,i) => setTimeout(() => playTone(f,0.4,'sawtooth',0.15), i*150)); },
   penaltyWin: () => { [523,659,784,1047,1319].forEach((f,i) => setTimeout(() => playTone(f,0.3,'sine',0.15), i*120)); },
   penaltyLose: () => { [330,260,200,130].forEach((f,i) => setTimeout(() => playTone(f,0.4,'sawtooth',0.15), i*150)); }
 };
 
 let voiceRu = null, speechQueue = [], isSpeaking = false;
-function initSpeech() {
-  try { const v = speechSynthesis.getVoices(); voiceRu = v.find(x => x.lang.startsWith('ru')) || v[0]; } catch(e) {}
-}
+function initSpeech() { try { const v = speechSynthesis.getVoices(); voiceRu = v.find(x => x.lang.startsWith('ru')) || v[0]; } catch(e) {} }
 if('speechSynthesis' in window) { initSpeech(); speechSynthesis.onvoiceschanged = initSpeech; }
 function processSpeechQueue() {
   if (!G.speechEnabled) { speechQueue = []; isSpeaking = false; return; }
@@ -1105,10 +1003,7 @@ function processSpeechQueue() {
     speechSynthesis.speak(u);
   } catch(e) { isSpeaking = false; }
 }
-function speak(t) {
-  if(!('speechSynthesis' in window) || !G.speechEnabled) return;
-  speechQueue.push(t); processSpeechQueue();
-}
+function speak(t) { if(!('speechSynthesis' in window) || !G.speechEnabled) return; speechQueue.push(t); processSpeechQueue(); }
 
 function triggerFlash(type) { const el = document.createElement('div'); el.className = `screen-flash-${type}`; document.body.appendChild(el); setTimeout(() => el.remove(), 700); }
 function triggerScreenShake() { document.body.classList.add('screen-shake'); setTimeout(() => document.body.classList.remove('screen-shake'), 400); }
@@ -1120,13 +1015,11 @@ function showFloatingText(text, color) {
 }
 
 function formatTime(s) {
-  if (!isFinite(s) || isNaN(s) || s < 0) s = 0;
-  s = Math.max(0, Math.ceil(s));
+  if (!isFinite(s) || isNaN(s) || s < 0) s = 0; s = Math.max(0, Math.ceil(s));
   return `${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 }
 function formatShort(s) {
-  if (!isFinite(s) || isNaN(s) || s < 0) s = 0;
-  s = Math.max(0, Math.ceil(s));
+  if (!isFinite(s) || isNaN(s) || s < 0) s = 0; s = Math.max(0, Math.ceil(s));
   return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
 const RANK_ORDER = ['E','D','C','B','A','S'];
@@ -1177,7 +1070,6 @@ function renderChat() {
   G.chatHistory.forEach(m => { const d = document.createElement('div'); d.className = 'sys-msg '+m.type; d.textContent = m.text; logArea.appendChild(d); });
   logArea.scrollTop = logArea.scrollHeight;
 }
-
 function updateUI() {
   $('lvlEl').textContent = G.level; $('goldEl').textContent = G.gold;
   $('rankEl').textContent = G.rank;
@@ -1405,43 +1297,43 @@ const arReticle = $('arReticle'); const arHint = $('arHint');
 const arPointer = $('arPointer'); const arPointerArrow = $('arPointerArrow'); const arPointerLabel = $('arPointerLabel');
 const arProgress = $('arProgress'); const arProgressFill = $('arProgressFill');
 const arAttackWarning = $('arAttackWarning'); const arDamageVignette = $('arDamageVignette'); const arSlash = $('arSlash');
-const arPlayerBar = $('arPlayerBar'); const arPlayerName = $('arPlayerName'); const arPlayerRank = $('arPlayerRank');
+const arPlayerName = $('arPlayerName'); const arPlayerRank = $('arPlayerRank');
 const arPlayerLevel = $('arPlayerLevel'); const arPlayerHpFill = $('arPlayerHpFill'); const arPlayerHpText = $('arPlayerHpText');
 const arPlayerAtk = $('arPlayerAtk'); const arPlayerDef = $('arPlayerDef');
 const arRankWarning = $('arRankWarning');
 
 const MONSTERS = [
-  {emoji:'👹', name:'ГНИЛЬНЫЙ ГОБЛИН',      baseRank:'E', hp:20,  reward:10, attackDamage:3,  attackCooldown:2600},
-  {emoji:'🕷', name:'ПЕПЕЛЬНЫЙ ПАУК',       baseRank:'E', hp:22,  reward:11, attackDamage:3,  attackCooldown:2500},
-  {emoji:'🐀', name:'КРЫСИНЫЙ ЛОРД',        baseRank:'E', hp:25,  reward:12, attackDamage:4,  attackCooldown:2450},
-  {emoji:'🐺', name:'ТЕНЕВОЙ ВОЛК',         baseRank:'E', hp:28,  reward:14, attackDamage:4,  attackCooldown:2400},
-  {emoji:'🦇', name:'КРОВОСОС',             baseRank:'E', hp:32,  reward:16, attackDamage:5,  attackCooldown:2300},
-  {emoji:'💀', name:'СКЕЛЕТ-СТРАЖ',         baseRank:'E', hp:36,  reward:18, attackDamage:5,  attackCooldown:2250},
-  {emoji:'👻', name:'СТЕНАЮЩИЙ ДУХ',        baseRank:'E', hp:40,  reward:20, attackDamage:6,  attackCooldown:2200},
-  {emoji:'👺', name:'ГОБЛИН-ПОЖИРАТЕЛЬ',    baseRank:'D', hp:60,  reward:25, attackDamage:7,  attackCooldown:2400},
-  {emoji:'🦂', name:'ЯДОВИТЫЙ СКОРПИОН',    baseRank:'D', hp:65,  reward:26, attackDamage:7,  attackCooldown:2350},
-  {emoji:'🐗', name:'КЛИНОКЛЫК',            baseRank:'D', hp:70,  reward:28, attackDamage:8,  attackCooldown:2300},
-  {emoji:'🕸', name:'ПАУК-ТКАЧ',            baseRank:'D', hp:75,  reward:30, attackDamage:8,  attackCooldown:2250},
-  {emoji:'🦎', name:'БОЛОТНЫЙ ЯЩЕР',        baseRank:'D', hp:80,  reward:32, attackDamage:9,  attackCooldown:2200},
-  {emoji:'🐍', name:'КОБРА БЕЗДНЫ',         baseRank:'D', hp:85,  reward:33, attackDamage:10, attackCooldown:2150},
-  {emoji:'👤', name:'ТЕНЕВОЙ КЛОН',         baseRank:'D', hp:90,  reward:35, attackDamage:11, attackCooldown:2100},
+  {emoji:'👹', name:'ГНИЛЬНЫЙ ГОБЛИН', baseRank:'E', hp:20, reward:10, attackDamage:3, attackCooldown:2600},
+  {emoji:'🕷', name:'ПЕПЕЛЬНЫЙ ПАУК', baseRank:'E', hp:22, reward:11, attackDamage:3, attackCooldown:2500},
+  {emoji:'🐀', name:'КРЫСИНЫЙ ЛОРД', baseRank:'E', hp:25, reward:12, attackDamage:4, attackCooldown:2450},
+  {emoji:'🐺', name:'ТЕНЕВОЙ ВОЛК', baseRank:'E', hp:28, reward:14, attackDamage:4, attackCooldown:2400},
+  {emoji:'🦇', name:'КРОВОСОС', baseRank:'E', hp:32, reward:16, attackDamage:5, attackCooldown:2300},
+  {emoji:'💀', name:'СКЕЛЕТ-СТРАЖ', baseRank:'E', hp:36, reward:18, attackDamage:5, attackCooldown:2250},
+  {emoji:'👻', name:'СТЕНАЮЩИЙ ДУХ', baseRank:'E', hp:40, reward:20, attackDamage:6, attackCooldown:2200},
+  {emoji:'👺', name:'ГОБЛИН-ПОЖИРАТЕЛЬ', baseRank:'D', hp:60, reward:25, attackDamage:7, attackCooldown:2400},
+  {emoji:'🦂', name:'ЯДОВИТЫЙ СКОРПИОН', baseRank:'D', hp:65, reward:26, attackDamage:7, attackCooldown:2350},
+  {emoji:'🐗', name:'КЛИНОКЛЫК', baseRank:'D', hp:70, reward:28, attackDamage:8, attackCooldown:2300},
+  {emoji:'🕸', name:'ПАУК-ТКАЧ', baseRank:'D', hp:75, reward:30, attackDamage:8, attackCooldown:2250},
+  {emoji:'🦎', name:'БОЛОТНЫЙ ЯЩЕР', baseRank:'D', hp:80, reward:32, attackDamage:9, attackCooldown:2200},
+  {emoji:'🐍', name:'КОБРА БЕЗДНЫ', baseRank:'D', hp:85, reward:33, attackDamage:10, attackCooldown:2150},
+  {emoji:'👤', name:'ТЕНЕВОЙ КЛОН', baseRank:'D', hp:90, reward:35, attackDamage:11, attackCooldown:2100},
   {emoji:'🐗', name:'МИНОТАВР-РАЗРУШИТЕЛЬ', baseRank:'C', hp:130, reward:45, attackDamage:13, attackCooldown:2200},
-  {emoji:'👹', name:'ОГР-МЯСНИК',           baseRank:'C', hp:145, reward:48, attackDamage:14, attackCooldown:2150},
-  {emoji:'🧟', name:'ПЛОТОЯДНЫЙ ЗОМБИ',     baseRank:'C', hp:160, reward:52, attackDamage:15, attackCooldown:2100},
-  {emoji:'🦇', name:'КРОВАВЫЙ ВАМПИР',      baseRank:'C', hp:175, reward:56, attackDamage:17, attackCooldown:2050},
-  {emoji:'🐎', name:'КОШМАРНЫЙ ЖЕРЕБЕЦ',    baseRank:'C', hp:190, reward:60, attackDamage:18, attackCooldown:2000},
-  {emoji:'🐉', name:'МОЛОДОЙ ДРАКОН',       baseRank:'B', hp:260, reward:75, attackDamage:20, attackCooldown:2000},
-  {emoji:'🦁', name:'ЛЕДЯНАЯ ЛЬВИЦА',       baseRank:'B', hp:285, reward:80, attackDamage:22, attackCooldown:1950},
-  {emoji:'👻', name:'ПРИЗРАК-ПОЖИРАТЕЛЬ',   baseRank:'B', hp:310, reward:85, attackDamage:24, attackCooldown:1900},
-  {emoji:'🦂', name:'КОРОЛЕВА СКОРПИОНОВ',  baseRank:'B', hp:335, reward:92, attackDamage:25, attackCooldown:1850},
-  {emoji:'🐺', name:'АЛЬФА-ВОЛК',           baseRank:'B', hp:360, reward:100,attackDamage:27, attackCooldown:1800},
-  {emoji:'👑', name:'КОРОЛЬ ГОБЛИНОВ',      baseRank:'A', hp:500, reward:130,attackDamage:30, attackCooldown:1800},
-  {emoji:'💀', name:'ЛИЧ-НЕКРОМАНТ',        baseRank:'A', hp:550, reward:140,attackDamage:33, attackCooldown:1750},
-  {emoji:'🐲', name:'ДРЕВНИЙ ВИВЕРН',       baseRank:'A', hp:620, reward:155,attackDamage:36, attackCooldown:1700},
-  {emoji:'👹', name:'ПОВЕЛИТЕЛЬ ДЕМОНОВ',   baseRank:'A', hp:700, reward:170,attackDamage:40, attackCooldown:1650},
-  {emoji:'🐉', name:'ДРАКОН-АРХОНТ',        baseRank:'S', hp:1000,reward:220,attackDamage:45, attackCooldown:1600},
-  {emoji:'🦁', name:'ТЕНЕВОЙ МОНАРХ',       baseRank:'S', hp:1250,reward:260,attackDamage:52, attackCooldown:1500},
-  {emoji:'😈', name:'ВЛАДЫКА БЕЗДНЫ',       baseRank:'S', hp:1500,reward:300,attackDamage:60, attackCooldown:1400}
+  {emoji:'👹', name:'ОГР-МЯСНИК', baseRank:'C', hp:145, reward:48, attackDamage:14, attackCooldown:2150},
+  {emoji:'🧟', name:'ПЛОТОЯДНЫЙ ЗОМБИ', baseRank:'C', hp:160, reward:52, attackDamage:15, attackCooldown:2100},
+  {emoji:'🦇', name:'КРОВАВЫЙ ВАМПИР', baseRank:'C', hp:175, reward:56, attackDamage:17, attackCooldown:2050},
+  {emoji:'🐎', name:'КОШМАРНЫЙ ЖЕРЕБЕЦ', baseRank:'C', hp:190, reward:60, attackDamage:18, attackCooldown:2000},
+  {emoji:'🐉', name:'МОЛОДОЙ ДРАКОН', baseRank:'B', hp:260, reward:75, attackDamage:20, attackCooldown:2000},
+  {emoji:'🦁', name:'ЛЕДЯНАЯ ЛЬВИЦА', baseRank:'B', hp:285, reward:80, attackDamage:22, attackCooldown:1950},
+  {emoji:'👻', name:'ПРИЗРАК-ПОЖИРАТЕЛЬ', baseRank:'B', hp:310, reward:85, attackDamage:24, attackCooldown:1900},
+  {emoji:'🦂', name:'КОРОЛЕВА СКОРПИОНОВ', baseRank:'B', hp:335, reward:92, attackDamage:25, attackCooldown:1850},
+  {emoji:'🐺', name:'АЛЬФА-ВОЛК', baseRank:'B', hp:360, reward:100,attackDamage:27, attackCooldown:1800},
+  {emoji:'👑', name:'КОРОЛЬ ГОБЛИНОВ', baseRank:'A', hp:500, reward:130,attackDamage:30, attackCooldown:1800},
+  {emoji:'💀', name:'ЛИЧ-НЕКРОМАНТ', baseRank:'A', hp:550, reward:140,attackDamage:33, attackCooldown:1750},
+  {emoji:'🐲', name:'ДРЕВНИЙ ВИВЕРН', baseRank:'A', hp:620, reward:155,attackDamage:36, attackCooldown:1700},
+  {emoji:'👹', name:'ПОВЕЛИТЕЛЬ ДЕМОНОВ', baseRank:'A', hp:700, reward:170,attackDamage:40, attackCooldown:1650},
+  {emoji:'🐉', name:'ДРАКОН-АРХОНТ', baseRank:'S', hp:1000,reward:220,attackDamage:45, attackCooldown:1600},
+  {emoji:'🦁', name:'ТЕНЕВОЙ МОНАРХ', baseRank:'S', hp:1250,reward:260,attackDamage:52, attackCooldown:1500},
+  {emoji:'😈', name:'ВЛАДЫКА БЕЗДНЫ', baseRank:'S', hp:1500,reward:300,attackDamage:60, attackCooldown:1400}
 ];
 
 const AR_VIEW_ANGLE = 70;
@@ -1465,8 +1357,7 @@ function arScreenY(deltaElev) {
   return 50 - (deltaElev / (AR_ELEV_RANGE / 2)) * 50;
 }
 
-/* ЕДИНЫЙ ЯКОРЬ СТРЕЛКИ: стрелка указывает НА цель.
-   deltaElev > 0 (цель выше) → atan2(-deltaElev, ...) → верхняя полуплоскость → стрелка вверх. */
+/* ЕДИНЫЙ ЯКОРЬ СТРЕЛКИ: стрелка указывает НА цель. */
 function pointerAnchor(deltaYaw, deltaElev) {
   const cx = window.innerWidth / 2;
   const cy = window.innerHeight / 2;
@@ -1486,7 +1377,7 @@ function attachOrientation() {
     if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) arLook.camYaw = e.webkitCompassHeading;
     else if (typeof e.alpha === 'number' && e.alpha !== null) arLook.camYaw = (360 - e.alpha) % 360;
     if (typeof e.beta === 'number' && e.beta !== null) arLook.camPitch = Math.max(-30, Math.min(30, (e.beta - 45) * 0.7));
-    scheduleARUpdate();
+    // rAF-цикл сам обновит; scheduleARUpdate не нужен, но оставим для совместимости
   };
   arLook.orientationHandler = handler;
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -1499,7 +1390,7 @@ function attachOrientation() {
 }
 function detachOrientation() { if (arLook.orientationHandler) { window.removeEventListener('deviceorientation', arLook.orientationHandler, true); arLook.orientationHandler = null; } }
 function attachDragLook() {
-  if (arLook.detachDragLook) return; // уже привязан — не дублируем
+  if (arLook.detachDragLook) return;
   let dragging = false, sx = 0, sy = 0, startYaw = 0, startPitch = 0;
   const down = (e) => { const p = e.touches ? e.touches[0] : e; dragging = true; sx = p.clientX; sy = p.clientY; startYaw = arLook.camYaw; startPitch = arLook.camPitch; };
   const move = (e) => {
@@ -1507,9 +1398,7 @@ function attachDragLook() {
     const p = e.touches ? e.touches[0] : e;
     arLook.camYaw = (startYaw + (p.clientX - sx) * 0.35) % 360;
     if (arLook.camYaw < 0) arLook.camYaw += 360;
-    // ИНВЕРСИЯ СВАЙПА: палец вверх (dy < 0) → camPitch растёт (смотрит вверх)
     arLook.camPitch = Math.max(-30, Math.min(30, startPitch + (p.clientY - sy) * 0.25));
-    scheduleARUpdate();
   };
   const up = () => { dragging = false; };
   cameraView.addEventListener('touchstart', down, { passive: true });
@@ -1528,14 +1417,30 @@ function attachDragLook() {
     arLook.detachDragLook = null;
   };
 }
-function scheduleARUpdate() {
-  if (arLook.rafId) return;
-  arLook.rafId = requestAnimationFrame(() => {
-    arLook.rafId = null;
+
+/* ===== ИСПРАВЛЕНО: постоянный rAF-цикл на время AR-сессии ===== */
+let _arLoopActive = false;
+let _arLastTick = 0;
+function scheduleARUpdate() { if (!_arLoopActive) startARLoop(); }
+function startARLoop() {
+  if (_arLoopActive) return;
+  _arLoopActive = true;
+  _arLastTick = performance.now();
+  function tick(now) {
+    if (!G.arActive && !AR.PENALTY && !AR.QUEST) { _arLoopActive = false; return; }
+    const dt = Math.min(0.1, (now - _arLastTick) / 1000);
+    _arLastTick = now;
     updateMonsterScreenPos();
-    arUpdateAllTargets();
-  });
+    arUpdateAllTargets(dt);
+    arLook.rafId = requestAnimationFrame(tick);
+  }
+  arLook.rafId = requestAnimationFrame(tick);
 }
+function stopARLoop() {
+  _arLoopActive = false;
+  if (arLook.rafId) { cancelAnimationFrame(arLook.rafId); arLook.rafId = null; }
+}
+
 function getDamageMultiplier(monsterRank, playerRank) {
   const diff = RANK_ORDER.indexOf(monsterRank) - RANK_ORDER.indexOf(playerRank);
   const table = { '-5':0.2, '-4':0.3, '-3':0.4, '-2':0.5, '-1':0.7, '0':1.0, '1':1.4, '2':1.9, '3':2.5, '4':3.2, '5':4.0 };
@@ -1644,13 +1549,13 @@ function beginARLook() {
   arLook.camPitch = 0;
   attachOrientation().then(ok => {
     if (!ok) addLog('Датчик ориентации недоступен — управляйте взглядом свайпом.', '');
-    attachDragLook(); scheduleARUpdate();
+    attachDragLook(); startARLoop();
   });
 }
 function endARLook() {
   detachOrientation();
   if (arLook.detachDragLook) arLook.detachDragLook();
-  if (arLook.rafId) { cancelAnimationFrame(arLook.rafId); arLook.rafId = null; }
+  stopARLoop();
   arLook.inView = false; arLook.inAttackZone = false;
   arMonster.classList.add('hidden'); arMonster.classList.remove('locked');
   arMonster.classList.remove('attacking'); arMonster.classList.remove('winding');
@@ -1677,7 +1582,7 @@ function startAR(questData = null) {
     arMonsterHud.classList.add('hidden');
     btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
     updateArPlayerHud(); updateArMonsterHud(); showRankWarning(monster.rank);
-    beginARLook(); startMonsterAttacks(); updateARTimer();
+    beginARLook(); startARLoop(); startMonsterAttacks(); updateARTimer();
     G.arQuest.timerInterval = setInterval(() => {
       if (!G.arQuest || !G.arQuest.monster) return;
       G.arQuest.timeLeft--; updateARTimer();
@@ -1745,11 +1650,7 @@ function endAR(success) {
 }
 $('btnAR').addEventListener('click', () => startAR());
 $('btnExitAR').addEventListener('click', () => {
-  if (G.arQuest && G.arQuest.quest) {         // AR-квест из задания — корректно завершаем
-    finishARQuest(false);
-    return;
-  }
-  // свободная охота
+  if (G.arQuest && G.arQuest.quest) { finishARQuest(false); return; }
   if (G.arQuest && G.arQuest.timerInterval) clearInterval(G.arQuest.timerInterval);
   stopMonsterAttacks(); endARLook();
   if (G.stream) G.stream.getTracks().forEach(t => t.stop());
@@ -1758,11 +1659,11 @@ $('btnExitAR').addEventListener('click', () => {
   addLog('Вы покинули AR.', '');
 });
 
-/* Заглушки для функций, определяемых в Части 4 (нужны уже здесь для порядка) */
+/* Заглушки — переопределяются в Части C */
 let AR = null;
-function finishARQuest(success) { if (typeof _finishARQuest === 'function') _finishARQuest(success); }
+let finishARQuest = (success) => { if (typeof _finishARQuest === 'function') _finishARQuest(success); };
 /* ============================================================
-   v38.6: НОВЫЙ AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
+   v38.7: НОВЫЙ AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
    ============================================================ */
 AR = {
   VIEW_ANGLE: 70, ELEV_RANGE: 40, RETICLE_ZONE: 22, LOCK_ZONE: 14, ATTACK_ZONE: 22,
@@ -1794,13 +1695,11 @@ function arCloseness(target) {
   const dist = Math.hypot(arDeltaYaw(target.yaw), arDeltaElev(target.elev));
   return Math.max(0, Math.min(1, 1 - dist / AR.RETICLE_ZONE));
 }
-function arAttackReady(target) {
-  return arCloseness(target) >= AR.ATTACK_THRESHOLD;
-}
+function arAttackReady(target) { return arCloseness(target) >= AR.ATTACK_THRESHOLD; }
 
-/* ---------- ЕДИНАЯ СИСТЕМА ПРИЦЕЛИВАНИЯ ----------
-   Одна точка обновления стрелки, кольца, прицела и кнопки.
-   mode: 'free' | 'quest' | 'penalty' */
+const AR_TAP_BY_DOM = ['collect','sequence','parry','track','dodge','scan','protect','hold','balance','avoid_gaze','chase','multi_lock'];
+
+/* ---------- ЕДИНАЯ СИСТЕМА ПРИЦЕЛИВАНИЯ ---------- */
 function arUpdateTargetUI(nearest, mode, phaseType) {
   if (!nearest) {
     arPointer.classList.add('hidden');
@@ -1816,19 +1715,20 @@ function arUpdateTargetUI(nearest, mode, phaseType) {
   const dElev = arDeltaElev(nearest.elev);
   const dist = Math.hypot(dYaw, dElev);
   const closeness = Math.max(0, Math.min(1, 1 - dist / AR.RETICLE_ZONE));
-  const inReticle = dist < AR.RETICLE_ZONE;
   const attackReady = closeness >= AR.ATTACK_THRESHOLD;
 
-  // Кольцо: заполняется от 0 до 100%; зелёным становится при >= 73% (совпадает с кнопкой)
+  // Кольцо: 0..100%; зелёное при >= 73%
   arProgressFill.setAttribute('stroke-dashoffset', (AR_ARC_LENGTH * (1 - closeness)).toFixed(1));
   arProgressFill.classList.toggle('close', attackReady);
   arProgress.classList.remove('hidden');
 
-  // Прицел подсвечивается зелёным при >= 73% (как кнопка)
+  // Прицел зелёный при >= 73%
   arReticle.classList.toggle('active', attackReady);
 
-  // Стрелка — только если цель ещё не в зоне атаки
-  if (!attackReady) {
+  const tapByDom = AR_TAP_BY_DOM.includes(phaseType);
+
+  // Стрелка: только для механик с кнопкой (strike/shoot/rhythm) или наказания
+  if (!attackReady && !tapByDom) {
     const anchor = pointerAnchor(dYaw, dElev);
     arPointer.classList.remove('hidden');
     arPointer.style.left = anchor.x + 'px';
@@ -1843,8 +1743,6 @@ function arUpdateTargetUI(nearest, mode, phaseType) {
     arPointerArrow.classList.remove('pulse');
   }
 
-  // Кнопка атаки — ЕДИНОЕ правило для всех режимов
-  const tapByDom = ['collect','sequence','parry','track','dodge','scan','protect','hold','balance','avoid_gaze','chase','multi_lock'].includes(phaseType);
   if (tapByDom) {
     btnAttack.disabled = true;
     btnAttack.textContent = 'ТАПНИТЕ ПО ЦЕЛИ';
@@ -1864,7 +1762,8 @@ function arCreateTarget(opts) {
   const t = {
     id: 'art_' + (++arTargetSeq), type: opts.type || 'MONSTER', emoji: opts.emoji || '👹',
     yaw: opts.yaw ?? Math.random() * 360, elev: opts.elev ?? arRand(-15, 15),
-    hp: opts.hp ?? 10, maxHp: opts.hp ?? 10, moveSpeed: opts.moveSpeed ?? 0,
+    hp: opts.hp ?? 10, maxHp: opts.hp ?? 10,
+    moveSpeed: (opts.moveSpeed ?? 0) * 3,   // конвертация: старые единицы → °/сек
     hidden: !!opts.hidden, revealed: !opts.hidden, alive: true,
     inView: false, inReticle: false, lockedSec: 0, el: null, hudEl: null,
     onHit: opts.onHit || null, onCollect: opts.onCollect || null, onMiss: opts.onMiss || null, extra: opts.extra || {}
@@ -1890,12 +1789,11 @@ function arRemoveTarget(t) {
 }
 function arClearTargets() { AR.TARGETS.forEach(t => { t.el?.remove(); t.hudEl?.remove(); }); AR.TARGETS = []; }
 
-/* ---------- ЕДИНОЕ ОБНОВЛЕНИЕ ВСЕХ ЦЕЛЕЙ ---------- */
-function arUpdateAllTargets() {
-  // 1. Позиции всех целей
+/* ---------- ЕДИНОЕ ОБНОВЛЕНИЕ ВСЕХ ЦЕЛЕЙ (движение по времени) ---------- */
+function arUpdateAllTargets(dt = 0.016) {
   for (const t of AR.TARGETS) {
     if (!t.alive) continue;
-    if (t.moveSpeed) t.yaw = (t.yaw + t.moveSpeed * 0.05 + 360) % 360;
+    if (t.moveSpeed) t.yaw = (t.yaw + t.moveSpeed * dt + 360) % 360;
     const dYaw = arDeltaYaw(t.yaw); const dElev = arDeltaElev(t.elev);
     const inView = Math.abs(dYaw) < AR.VIEW_ANGLE / 2 && Math.abs(dElev) < AR.ELEV_RANGE / 2;
     t.inView = inView;
@@ -1907,33 +1805,30 @@ function arUpdateAllTargets() {
     if (!inView) { t.el.classList.add('hidden'); t.hudEl?.classList.add('hidden'); continue; }
     t.el.classList.remove('hidden'); if (t.hudEl) t.hudEl.classList.remove('hidden');
     const xPct = 50 + (dYaw / (AR.VIEW_ANGLE / 2)) * 50;
-    const yPct = arScreenY(dElev);              // единая инверсия
+    const yPct = arScreenY(dElev);
     const cx = arClamp(xPct, 8, 92), cy = arClamp(yPct, 15, 85);
     t.el.style.left = cx + '%'; t.el.style.top = cy + '%';
     t.el.classList.toggle('locked', t.inReticle && t.type === 'MONSTER');
     if (t.hudEl) { t.hudEl.style.left = cx + '%'; t.hudEl.style.top = cy + '%'; }
   }
 
-  // 2. Определить режим и ближайшую цель
   let nearest = null, mode = 'quest', phaseType = AR.PHASE ? AR.PHASE.type : null;
 
-  // Свободная охота
   if (G.arQuest && G.arQuest.monster && !G.arQuest.scenario) {
     mode = 'free'; phaseType = 'strike';
     nearest = { yaw: arLook.monsterYaw, elev: arLook.monsterElev };
-  }
-  // AR-квест
-  else if (G.arQuest && !G.arQuest.ended && G.arQuest.scenario) {
+  } else if (G.arQuest && !G.arQuest.ended && G.arQuest.scenario) {
     mode = 'quest';
-    const visible = AR.TARGETS.filter(t => t.alive && !t.el.classList.contains('hidden'));
-    nearest = visible.sort((a, b) => {
-      const da = Math.hypot(arDeltaYaw(a.yaw), arDeltaElev(a.elev));
-      const db = Math.hypot(arDeltaYaw(b.yaw), arDeltaElev(b.elev));
-      return da - db;
-    })[0] || null;
-  }
-  // AR-наказание
-  else if (AR.PENALTY && !AR.PENALTY.ended) {
+    const tapByDom = AR_TAP_BY_DOM.includes(phaseType);
+    if (!tapByDom) {
+      const visible = AR.TARGETS.filter(t => t.alive && !t.el.classList.contains('hidden'));
+      nearest = visible.sort((a, b) => {
+        const da = Math.hypot(arDeltaYaw(a.yaw), arDeltaElev(a.elev));
+        const db = Math.hypot(arDeltaYaw(b.yaw), arDeltaElev(b.elev));
+        return da - db;
+      })[0] || null;
+    }
+  } else if (AR.PENALTY && !AR.PENALTY.ended) {
     mode = 'penalty';
     AR.DOM.aphTimer.textContent = formatShort(Math.max(0, AR.PENALTY.timeLeft));
     const visible = AR.TARGETS.filter(t => t.alive && t.type === 'MONSTER' && !t.el.classList.contains('hidden'));
@@ -1949,32 +1844,27 @@ function arUpdateAllTargets() {
 
 function updateMonsterScreenPos() {
   if (!G.arActive || !G.arQuest) return;
-  if (G.arQuest.scenario) return; // новый движок — позиции в arUpdateAllTargets
-
+  if (G.arQuest.scenario) return;
   const deltaYaw = normalizeAngle(arLook.monsterYaw - arLook.camYaw);
   const deltaElev = arLook.monsterElev - arLook.camPitch;
-  const inView = Math.abs(deltaYaw) < AR.VIEW_ANGLE / 2 && Math.abs(deltaElev) < AR.ELEV_RANGE / 2;
+  const inView = Math.abs(deltaYaw) < AR_VIEW_ANGLE / 2 && Math.abs(deltaElev) < AR_ELEV_RANGE / 2;
   arLook.inView = inView;
-  // Кнопка атаки — по порогу 73% (та же формула, что в arUpdateTargetUI)
   const closeness = Math.max(0, Math.min(1, 1 - Math.hypot(deltaYaw, deltaElev) / AR.RETICLE_ZONE));
   arLook.inAttackZone = closeness >= AR.ATTACK_THRESHOLD;
-
   if (!inView) { arMonster.classList.add('hidden'); arMonsterHud.classList.add('hidden'); return; }
   arMonster.classList.remove('hidden'); arMonsterHud.classList.remove('hidden');
   const xPct = 50 + (deltaYaw / (AR_VIEW_ANGLE / 2)) * 50;
   const yPct = arScreenY(deltaElev);
-  const clampedX = Math.max(8, Math.min(92, xPct));
-  const clampedY = Math.max(15, Math.min(85, yPct));
-  arMonster.style.left = clampedX + '%'; arMonster.style.top = clampedY + '%';
+  const cx = Math.max(8, Math.min(92, xPct)), cy = Math.max(15, Math.min(85, yPct));
+  arMonster.style.left = cx + '%'; arMonster.style.top = cy + '%';
   arMonster.style.transform = 'translate(-50%,-50%)';
-  arMonsterHud.style.left = clampedX + '%'; arMonsterHud.style.top = clampedY + '%';
+  arMonsterHud.style.left = cx + '%'; arMonsterHud.style.top = cy + '%';
 }
 
 function arSetPhaseHud(label, progress = null) {
   if (!AR.DOM.phaseHud) return;
   AR.DOM.phaseLabel.textContent = label;
-  if (progress === null) AR.DOM.phaseFill.style.width = '0%';
-  else AR.DOM.phaseFill.style.width = Math.max(0, Math.min(100, progress * 100)) + '%';
+  AR.DOM.phaseFill.style.width = progress === null ? '0%' : (Math.max(0, Math.min(100, progress * 100)) + '%');
   AR.DOM.phaseHud.classList.add('show');
 }
 function arHidePhaseHud() { AR.DOM.phaseHud?.classList.remove('show'); }
@@ -2004,8 +1894,7 @@ function arCollectTarget(t) {
   arRemoveTarget(t);
 }
 
-/* ---------- 15 МЕХАНИК (СМЯГЧЁННЫЕ ПАРАМЕТРЫ) ---------- */
-
+/* ---------- 15 МЕХАНИК (смягчённые, выполнимые) ---------- */
 function arRunTrack(phase) {
   return new Promise((resolve) => {
     const total = phase.targets || 1; let found = 0, current = null, finished = false;
@@ -2034,7 +1923,6 @@ function arRunTrack(phase) {
     spawnNext();
   });
 }
-
 function arRunStrike(phase) {
   return new Promise((resolve) => {
     const totalKills = phase.count || 1, hp = phase.hp || 20;
@@ -2063,8 +1951,7 @@ function arRunStrike(phase) {
     function onAttack() {
       if (finished || !current || !current.alive) return;
       if (!arInReticle(current)) { SFX.error(); return; }
-      const dmg = 8 + Math.floor(Math.random() * 7) + Math.floor(G.level / 2);
-      arStrikeTarget(current, dmg);
+      arStrikeTarget(current, 8 + Math.floor(Math.random() * 7) + Math.floor(G.level / 2));
     }
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
@@ -2079,12 +1966,10 @@ function arRunStrike(phase) {
     spawnNext();
   });
 }
-
 function arRunDodge(phase) {
   return new Promise((resolve) => {
     const total = phase.obstacles || 6, limit = (phase.timeLimit || 12) * 1000;
-    const speed = Math.min(phase.speed || 1.5, 1.5);
-    const parry = !!phase.parry;
+    const speed = Math.min(phase.speed || 1.5, 1.5), parry = !!phase.parry;
     const startTime = Date.now(); let dodged = 0, finished = false; const active = [];
     let sx = 0, sy = 0, swiping = false;
     function onDown(e) { const p = e.touches ? e.touches[0] : e; sx = p.clientX; sy = p.clientY; swiping = true; }
@@ -2113,7 +1998,7 @@ function arRunDodge(phase) {
         obj.alive = false; obj.el?.remove(); dodged++;
         SFX.success(); arSetPhaseHud(`УКЛОНЕНО ${dodged} / ${total}`, dodged / total);
         if (dodged >= total) finish(true);
-      } else { SFX.fail(); } // без урона
+      } else { SFX.fail(); }
     }
     function spawnObstacle() {
       if (finished) return;
@@ -2143,7 +2028,6 @@ function arRunDodge(phase) {
     }
   });
 }
-
 function arRunCollect(phase) {
   return new Promise((resolve) => {
     const total = Math.min(phase.items || 8, 10); let collected = 0, finished = false;
@@ -2160,7 +2044,6 @@ function arRunCollect(phase) {
       t.el.addEventListener('click', (e) => { e.stopPropagation(); if (arInReticle(t, 30)) arCollectTarget(t); });
       t.el.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); if (arInReticle(t, 30)) arCollectTarget(t); }, { passive: false });
       active.push(t);
-      // Автосбор при наведении 0.3с
       const startTimeLocal = Date.now();
       const check = setInterval(() => {
         if (!t.alive || finished) { clearInterval(check); return; }
@@ -2177,7 +2060,6 @@ function arRunCollect(phase) {
     }
   });
 }
-
 function arRunHold(phase) {
   return new Promise((resolve) => {
     const need = (phase.targetSec || 5) * 1000, stability = phase.stability || 0.9;
@@ -2199,13 +2081,11 @@ function arRunHold(phase) {
     }
   });
 }
-
 function arRunSequence(phase) {
   return new Promise((resolve) => {
     const total = phase.targets || 4, limit = (phase.timeLimit || 18) * 1000;
     let sequence = [], input = [], showing = false, finished = false; const targets = [];
     let seqIv = null;
-    // Руны в поле зрения: ±60° от центра
     for (let i = 0; i < total; i++) {
       const t = arCreateTarget({ type:'RUNE', emoji: ['💠','🔮','⚡','🌟','❄','🔥'][i % 6],
         yaw: (arLook.camYaw + (i - (total-1)/2) * 25 + 360) % 360,
@@ -2251,7 +2131,6 @@ function arRunSequence(phase) {
     }
   });
 }
-
 function arRunParry(phase) {
   return new Promise((resolve) => {
     const total = phase.attacks || 5, limit = (phase.timeLimit || 15) * 1000, startTime = Date.now();
@@ -2259,7 +2138,7 @@ function arRunParry(phase) {
     function spawn() {
       if (finished || parried >= total) { if (parried >= total) finish(true); return; }
       const yaw = (arLook.camYaw + arRand(60, 180) * (Math.random() < 0.5 ? 1 : -1) + 360) % 360;
-      current = arCreateTarget({ type:'OBSTACLE', emoji: '⚡', yaw, elev: arRand(-10, 10) }); // не двигается
+      current = arCreateTarget({ type:'OBSTACLE', emoji: '⚡', yaw, elev: arRand(-10, 10) });
       const d = arDeltaYaw(current.yaw); const ang = d > 0 ? 90 : -90;
       arrow.style.transform = `translate(-50%,-50%) rotate(${ang}deg)`; arrow.classList.add('show');
       arSetPhaseHud(`ПАРИРОВАНО ${parried} / ${total}`, parried / total);
@@ -2277,7 +2156,7 @@ function arRunParry(phase) {
       if (diff < 90) {
         parried++; SFX.success(); arRemoveTarget(current); current = null; arrow.classList.remove('show');
         if (parried >= total) finish(true); else setTimeout(spawn, 300);
-      } else { SFX.fail(); } // без урона
+      } else { SFX.fail(); }
     }
     cameraView.addEventListener('touchstart', onDown, { passive: true });
     cameraView.addEventListener('touchend', onUp);
@@ -2298,12 +2177,10 @@ function arRunParry(phase) {
     spawn();
   });
 }
-
 function arRunShoot(phase) {
   return new Promise((resolve) => {
     const total = phase.targets || 5, limit = (phase.timeLimit || 15) * 1000;
-    const lifetime = (phase.lifetime || 3) * 1000;
-    const speed = Math.min(phase.speed || 2, 2);
+    const lifetime = (phase.lifetime || 3) * 1000, speed = Math.min(phase.speed || 2, 2);
     let hit = 0, current = null, finished = false; const startTime = Date.now();
     function spawn() {
       if (finished || hit >= total) { if (hit >= total) finish(true); return; }
@@ -2331,7 +2208,6 @@ function arRunShoot(phase) {
     spawn();
   });
 }
-
 function arRunAvoidGaze(phase) {
   return new Promise((resolve) => {
     const limit = (phase.timeLimit || 12) * 1000, gazeAngle = phase.gazeAngle || 60, rotateSpeed = phase.rotateSpeed || 1;
@@ -2356,11 +2232,9 @@ function arRunAvoidGaze(phase) {
     function finish(success) { if (finished) return; finished = true; clearInterval(iv); cone.remove(); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunChase(phase) {
   return new Promise((resolve) => {
-    const need = (phase.chaseSec || 8) * 1000;
-    const speed = Math.min(phase.moveSpeed || 3, 1.2);
+    const need = (phase.chaseSec || 8) * 1000, speed = Math.min(phase.moveSpeed || 3, 1.2);
     const startTime = Date.now(), limit = (phase.timeLimit || 30) * 1000; let held = 0, finished = false;
     const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🏃', yaw: (arLook.camYaw + 180) % 360, elev: arRand(-10, 10), hp: 999, moveSpeed: speed });
     const iv = setInterval(() => {
@@ -2374,7 +2248,6 @@ function arRunChase(phase) {
     function finish(success) { if (finished) return; finished = true; clearInterval(iv); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunProtect(phase) {
   return new Promise((resolve) => {
     const waves = phase.waves || 3, perWave = Math.min(phase.enemiesPerWave || 2, 3);
@@ -2428,7 +2301,6 @@ function arRunProtect(phase) {
     }
   });
 }
-
 function arRunBalanceHold(phase) {
   return new Promise((resolve) => {
     const need = (phase.targetSec || 6) * 1000, tol = phase.tiltTolerance || 5;
@@ -2447,7 +2319,6 @@ function arRunBalanceHold(phase) {
     function finish(success) { if (finished) return; finished = true; clearInterval(iv); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunTapRhythm(phase) {
   return new Promise((resolve) => {
     const beats = Math.min(phase.beats || 10, 15), bpm = Math.min(phase.bpm || 120, 140);
@@ -2484,7 +2355,6 @@ function arRunTapRhythm(phase) {
     }
   });
 }
-
 function arRunMultiLock(phase) {
   return new Promise((resolve) => {
     const total = phase.targets || 3, need = (phase.lockSec || 2) * 1000;
@@ -2509,7 +2379,6 @@ function arRunMultiLock(phase) {
     function finish(success) { if (finished) return; finished = true; clearInterval(iv); targets.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success); }
   });
 }
-
 function arRunScan(phase) {
   return new Promise((resolve) => {
     const total = phase.hiddenPoints || 5, limit = (phase.timeLimit || 20) * 1000;
@@ -2546,7 +2415,7 @@ const AR_MECHANICS = {
   balance: arRunBalanceHold, rhythm: arRunTapRhythm, multi_lock: arRunMultiLock, scan: arRunScan
 };
 
-/* Сценарии: смягчённые параметры — все выполнимы */
+/* Сценарии — все выполнимы */
 const QUEST_AR_SCENARIO = {
   'Зачистить подземелье ранга E': [{ type:'track', targets:1, timeLimit:15 },{ type:'strike', hp:20, emoji:'👹' },{ type:'track', targets:1, timeLimit:15 },{ type:'strike', hp:20, emoji:'👺' },{ type:'strike', hp:20, emoji:'🐺' }],
   'Победить гоблинов-разведчиков': [{ type:'strike', hp:15, emoji:'👹', moveSpeed:1.2, count:3 }],
@@ -2643,10 +2512,9 @@ async function startARQuest(q) {
     G.arQuest = { quest: q, scenario: QUEST_AR_SCENARIO[q.name] || [{ type:'strike', hp:20, emoji:'👹' }], ended: false };
     arClearTargets(); AR.QUEST = G.arQuest;
     await attachOrientation().catch(() => false);
-    attachDragLook(); scheduleARUpdate();
+    attachDragLook(); startARLoop();
     $('arTimer').textContent = formatShort(Math.max(0, q.remaining));
 
-    // ЕДИНЫЙ ТАЙМЕР: q.remaining уменьшается каждые 250мс
     const timerIv = setInterval(() => {
       if (!G.arActive || !G.arQuest || G.arQuest.ended) { clearInterval(timerIv); return; }
       q.remaining = Math.max(0, q.remaining - 0.25);
@@ -2675,7 +2543,7 @@ async function startARQuest(q) {
     arClearTargets(); arHidePhaseHud();
     if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
     videoFeed.srcObject = null; cameraView.classList.remove('active');
-    detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
+    detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook(); stopARLoop();
     const busyQuest = G.arQuest ? G.arQuest.quest : q;
     G.arQuest = null;
     if (G.timerInterval) { clearInterval(G.timerInterval); G.timerInterval = null; }
@@ -2689,7 +2557,7 @@ async function startARQuest(q) {
   }
 }
 
-/* Переопределяем finishARQuest из части 3 (там была заглушка) */
+/* Переопределяем finishARQuest из Части B */
 function _finishARQuest(success) {
   if (!G.arQuest || G.arQuest.ended) return;
   G.arQuest.ended = true;
@@ -2697,7 +2565,7 @@ function _finishARQuest(success) {
   arClearTargets(); arHidePhaseHud(); AR.PHASE = null;
   if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
   videoFeed.srcObject = null; cameraView.classList.remove('active'); G.arActive = false;
-  detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
+  detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook(); stopARLoop();
   const q = G.arQuest.quest; G.arQuest = null;
   G.busy = false; G.activeQuest = null; G.questPhase = 'inactive'; G.pendingReward = false;
   $('questOverlay').classList.remove('show');
@@ -2727,7 +2595,7 @@ async function startARPenalty() {
       AR.PENALTY.monsters.push(m);
     }
     await attachOrientation().catch(() => false);
-    attachDragLook(); scheduleARUpdate();
+    attachDragLook(); startARLoop();
     AR.DOM.penaltyHud.classList.add('show');
     AR.DOM.aphTimer.textContent = '01:00'; AR.DOM.aphKilled.textContent = '0'; AR.DOM.aphFill.style.width = '0%';
     speak('Зона наказания. Уничтожьте 10 монстров.');
@@ -2771,7 +2639,7 @@ function finishARPenalty(success) {
   if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
   videoFeed.srcObject = null; cameraView.classList.remove('active');
   G.arActive = false; G.inPenalty = false;
-  detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
+  detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook(); stopARLoop();
   if (AR.PENALTY.oldBtnHandler !== null) btnAttack.onclick = AR.PENALTY.oldBtnHandler;
   btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
   AR.DOM.penaltyHud.classList.remove('show'); AR.PENALTY = null;
@@ -2797,9 +2665,7 @@ const penaltyTimerEl = $('penaltyTimer'); const penaltyScoreEl = $('penaltyScore
 const btnSurrender = $('btnSurrender');
 let penaltyActive = false, penaltyTimeLeft = 60, penaltyCollected = 0;
 let penaltyTimerInterval = null, penaltySpawnInterval = null;
-function getBallLifetime(rank) { const base = {E:1500,D:1300,C:1100,B:900,A:800,S:700}; return base[rank]||1500; }
-function startPenaltyZone() { /* v38.6: не используется */ }
-function collectBall(ball) { if(!penaltyActive || ball.classList.contains('collected')) return; ball.classList.add('collected'); penaltyCollected++; penaltyScoreEl.textContent = penaltyCollected; SFX.ballPop(); if(penaltyCollected >= 55) endPenaltyZone(true); }
+function startPenaltyZone() {}
 function endPenaltyZone(success) { if(!penaltyActive) return; penaltyActive = false; clearInterval(penaltyTimerInterval); clearInterval(penaltySpawnInterval); penaltyField.innerHTML = ''; setTimeout(() => penaltyZone.classList.remove('active'), 1500); }
 btnSurrender.addEventListener('click', () => { if(penaltyActive) endPenaltyZone(false); });
 
@@ -2812,7 +2678,6 @@ function takeDamage(dmg, reason) {
   showFloatingText(`-${dmg} HP`,'#ff4444');
   updateUI(); saveGame();
   if (G.hp <= 0) {
-    // Сначала корректно закрыть активный AR
     if (G.arQuest && G.arQuest.quest) finishARQuest(false);
     else if (AR.PENALTY) finishARPenalty(false);
     setTimeout(() => {
@@ -2960,10 +2825,7 @@ function showQuest(q, isPenalty=false) {
     q.duration = q.minTime + Math.random() * Math.max(0, q.maxTime - q.minTime);
   }
   if (!isFinite(q.duration) || q.duration <= 0) q.duration = 120;
-  // НЕ сбрасываем remaining, если он уже задан
-  if (typeof q.remaining !== 'number' || !isFinite(q.remaining) || q.remaining <= 0) {
-    q.remaining = q.duration;
-  }
+  if (typeof q.remaining !== 'number' || !isFinite(q.remaining) || q.remaining <= 0) q.remaining = q.duration;
   q.completed = false;
   $('questName').textContent = q.name; $('questDesc').textContent = q.desc;
   $('questRank').textContent = q.rank;
@@ -3157,7 +3019,7 @@ document.addEventListener('visibilitychange', () => {
         if (AR.QUEST && !AR.QUEST.ended) {
           AR.QUEST.ended = true;
           clearInterval(AR.QUEST.timerIv);
-          arClearTargets();
+          arClearTargets(); stopARLoop();
           addLog('AR-задание отменено (сворачивание).', '');
           G.arActive = false;
           if (G.stream) { G.stream.getTracks().forEach(t => t.stop()); G.stream = null; }
