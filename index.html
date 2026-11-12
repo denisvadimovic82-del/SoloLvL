@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050a18">
-<title>Solo Leveling — Система (v38.4 AR)</title>
+<title>Solo Leveling — Система (v38.5 AR fix)</title>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
 html, body { width:100vw; height:100vh; height:100dvh; overflow:hidden; position:fixed; inset:0; background:#000; font-family:'Segoe UI',sans-serif; color:#b8d4ff; }
@@ -428,7 +428,6 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
 .ar-reticle .corner-mark.br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
 .ar-reticle.active .corner-mark { border-color: #44ff88; }
 
-/* FIX v38.4: плавное движение стрелки по кругу */
 .ar-pointer {
   position: absolute; width: 0; height: 0;
   z-index: 101;
@@ -834,7 +833,7 @@ button:disabled:active, .btn-quest:disabled:active, .stat-plus:disabled:active {
   </div>
 </div>
 
-<!-- Старые оверлеи (для совместимости, не используются в v38.4) -->
+<!-- Старые оверлеи (для совместимости, не используются в v38.5) -->
 <div class="penalty-zone" id="penaltyZone">
   <div class="penalty-header"><div class="penalty-title">⚠ ЗОНА НАКАЗАНИЯ ⚠</div></div>
   <div class="penalty-info">
@@ -998,8 +997,8 @@ const G = {
   xpBoostNext:1,
   arRewardBoost:false
 };
-const SAVE_KEY = 'solo_leveling_v384';
-const LEGACY_KEYS = ['solo_leveling_v383','solo_leveling_v382','solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36','solo_leveling_v35','solo_leveling_v34','solo_leveling_v33','solo_leveling_v31','solo_leveling_v30'];
+const SAVE_KEY = 'solo_leveling_v385';
+const LEGACY_KEYS = ['solo_leveling_v384','solo_leveling_v383','solo_leveling_v382','solo_leveling_v381','solo_leveling_v38','solo_leveling_v37','solo_leveling_v36','solo_leveling_v35','solo_leveling_v34','solo_leveling_v33','solo_leveling_v31','solo_leveling_v30'];
 
 let _saveTimer = null;
 function saveGame() {
@@ -1048,6 +1047,8 @@ function resetGame() {
   if (penaltyTimerInterval) { clearInterval(penaltyTimerInterval); penaltyTimerInterval = null; }
   if (penaltySpawnInterval) { clearInterval(penaltySpawnInterval); penaltySpawnInterval = null; }
   if (G.arQuest && G.arQuest.timerInterval) { clearInterval(G.arQuest.timerInterval); G.arQuest.timerInterval = null; }
+  if (G.arQuest && G.arQuest.timerIv) { clearInterval(G.arQuest.timerIv); G.arQuest.timerIv = null; }
+  if (AR.PENALTY && AR.PENALTY.timerIv) { clearInterval(AR.PENALTY.timerIv); AR.PENALTY.timerIv = null; }
   stopMonsterAttacks(); endARLook();
   window.removeEventListener('beforeunload', beforeUnloadHandler);
   window.removeEventListener('popstate', popstateHandler);
@@ -1458,6 +1459,19 @@ let arMonsterAttackInterval = null;
 let arMonsterWarnTimeout = null;
 
 function normalizeAngle(a) { a = ((a % 360) + 360) % 360; return a > 180 ? a - 360 : a; }
+
+/* ЕДИНАЯ ФУНКЦИЯ: камера вверх → монстр вниз (инверсия) */
+function arScreenY(deltaElev) {
+  return 50 + (deltaElev / (AR_ELEV_RANGE / 2)) * 50;
+}
+function pointerAnchor(deltaYaw, deltaElev) {
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  const radius = Math.min(window.innerWidth, window.innerHeight) * 0.32;
+  const ang = Math.atan2(-deltaElev, deltaYaw);
+  return { x: cx + Math.cos(ang) * radius, y: cy + Math.sin(ang) * radius, angle: ang };
+}
+
 function requestCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.reject(new Error('Камера не поддерживается'));
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
@@ -1482,6 +1496,7 @@ function attachOrientation() {
 }
 function detachOrientation() { if (arLook.orientationHandler) { window.removeEventListener('deviceorientation', arLook.orientationHandler, true); arLook.orientationHandler = null; } }
 function attachDragLook() {
+  if (arLook.detachDragLook) return; // уже привязан
   let dragging = false, sx = 0, sy = 0, startYaw = 0, startPitch = 0;
   const down = (e) => { const p = e.touches ? e.touches[0] : e; dragging = true; sx = p.clientX; sy = p.clientY; startYaw = arLook.camYaw; startPitch = arLook.camPitch; };
   const move = (e) => {
@@ -1489,7 +1504,8 @@ function attachDragLook() {
     const p = e.touches ? e.touches[0] : e;
     arLook.camYaw = (startYaw + (p.clientX - sx) * 0.35) % 360;
     if (arLook.camYaw < 0) arLook.camYaw += 360;
-    arLook.camPitch = Math.max(-30, Math.min(30, startPitch - (p.clientY - sy) * 0.25));
+    // ИНВЕРСИЯ: палец вверх → camPitch растёт (смотрит вверх)
+    arLook.camPitch = Math.max(-30, Math.min(30, startPitch + (p.clientY - sy) * 0.25));
     scheduleARUpdate();
   };
   const up = () => { dragging = false; };
@@ -1514,21 +1530,8 @@ function scheduleARUpdate() {
   arLook.rafId = requestAnimationFrame(() => {
     arLook.rafId = null;
     updateMonsterScreenPos();
-    if (typeof arUpdateAllTargets === 'function') arUpdateAllTargets();
+    arUpdateAllTargets();
   });
-}
-// FIX v38.4: pointerAnchor — ОДНА формула для позиции и угла
-function pointerAnchor(deltaYaw, deltaElev) {
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
-  const radius = Math.min(window.innerWidth, window.innerHeight) * 0.32;
-  // Инверсия elev: цель выше → стрелка вверх
-  const ang = Math.atan2(-deltaElev, deltaYaw);
-  return {
-    x: cx + Math.cos(ang) * radius,
-    y: cy + Math.sin(ang) * radius,
-    angle: ang
-  };
 }
 function getDamageMultiplier(monsterRank, playerRank) {
   const diff = RANK_ORDER.indexOf(monsterRank) - RANK_ORDER.indexOf(playerRank);
@@ -1578,12 +1581,13 @@ function showRankWarning(monsterRank) {
   setTimeout(() => arRankWarning.classList.remove('show'), 4000);
 }
 
-// FIX v38.4: единая функция для прицела, стрелки, дуги, кнопки
+/* ЕДИНАЯ точка обновления прицела, стрелки, кольца и кнопки атаки */
 function arUpdateTargetUI(nearest, isPenalty, phaseType) {
   if (!nearest) {
     arPointer.classList.add('hidden');
     arReticle.classList.remove('active');
     arProgress.classList.add('hidden');
+    arProgressFill.setAttribute('stroke-dashoffset', AR_ARC_LENGTH);
     btnAttack.disabled = true;
     btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ';
     btnAttack.classList.remove('ready');
@@ -1596,7 +1600,7 @@ function arUpdateTargetUI(nearest, isPenalty, phaseType) {
 
   arReticle.classList.toggle('active', inReticle);
 
-  const closeness = Math.max(0, 1 - dist / AR.RETICLE_ZONE);
+  const closeness = Math.max(0, Math.min(1, 1 - dist / AR.RETICLE_ZONE));
   arProgressFill.setAttribute('stroke-dashoffset', (AR_ARC_LENGTH * (1 - closeness)).toFixed(1));
   arProgressFill.classList.toggle('close', inReticle);
   arProgress.classList.remove('hidden');
@@ -1606,77 +1610,50 @@ function arUpdateTargetUI(nearest, isPenalty, phaseType) {
     arPointer.classList.remove('hidden');
     arPointer.style.left = anchor.x + 'px';
     arPointer.style.top = anchor.y + 'px';
-    // FIX v38.4: использовать anchor.angle (уже с инверсией elev)
     const deg = (anchor.angle * 180 / Math.PI) + 90;
     arPointerArrow.style.transform = `rotate(${deg}deg)`;
     arPointerLabel.textContent = `${Math.round(dist)}°`;
+    arPointerLabel.classList.remove('close');
+    arPointerArrow.classList.toggle('pulse', dist < 45);
   } else {
     arPointer.classList.add('hidden');
+    arPointerArrow.classList.remove('pulse');
   }
 
-  if (isPenalty) {
+  const tapByDom = ['collect','sequence','parry','track','dodge','scan','protect','hold','balance','avoid_gaze','chase','multi_lock'].includes(phaseType);
+  if (tapByDom) {
+    btnAttack.disabled = true;
+    btnAttack.textContent = 'ТАПНИТЕ ПО ЦЕЛИ';
+    btnAttack.classList.remove('ready');
+  } else if (isPenalty) {
     btnAttack.disabled = !inReticle;
     btnAttack.textContent = inReticle ? 'АТАКОВАТЬ' : 'НАВЕДИТЕ НА ЦЕЛЬ';
     btnAttack.classList.toggle('ready', inReticle);
   } else {
-    const tapByDom = ['collect','sequence','parry','track','dodge','scan','protect','hold','balance','avoid_gaze','chase','multi_lock'].includes(phaseType);
-    if (tapByDom) {
-      btnAttack.disabled = true;
-      btnAttack.textContent = 'ТАПНИТЕ ПО ЦЕЛИ';
-      btnAttack.classList.remove('ready');
-    } else {
-      btnAttack.disabled = !inReticle;
-      let btnText = 'АТАКОВАТЬ';
-      if (phaseType === 'shoot') btnText = 'ВЫСТРЕЛ';
-      if (phaseType === 'rhythm') btnText = 'В РИТМ';
-      btnAttack.textContent = inReticle ? btnText : 'НАВЕДИТЕ НА ЦЕЛЬ';
-      btnAttack.classList.toggle('ready', inReticle);
-    }
+    btnAttack.disabled = !inReticle;
+    let btnText = 'АТАКОВАТЬ';
+    if (phaseType === 'shoot') btnText = 'ВЫСТРЕЛ';
+    if (phaseType === 'rhythm') btnText = 'В РИТМ';
+    btnAttack.textContent = inReticle ? btnText : 'НАВЕДИТЕ НА ЦЕЛЬ';
+    btnAttack.classList.toggle('ready', inReticle);
   }
 }
 
 function updateMonsterScreenPos() {
   if (!G.arActive || !G.arQuest) return;
-  if (G.arQuest.scenario) return;
+  if (G.arQuest.scenario) return; // новый движок — не трогаем
 
   const deltaYaw = normalizeAngle(arLook.monsterYaw - arLook.camYaw);
   const deltaElev = arLook.monsterElev - arLook.camPitch;
   const inView = Math.abs(deltaYaw) < AR_VIEW_ANGLE / 2 && Math.abs(deltaElev) < AR_ELEV_RANGE / 2;
   arLook.inView = inView;
-  const inAttackZone = Math.hypot(deltaYaw, deltaElev) < AR_ATTACK_ZONE;
-  arLook.inAttackZone = inAttackZone;
-  arReticle.classList.toggle('active', inAttackZone);
-
-  const dist = Math.hypot(deltaYaw, deltaElev);
-  const closeness = Math.max(0, 1 - dist / AR_ATTACK_ZONE);
-  arProgressFill.setAttribute('stroke-dashoffset', (AR_ARC_LENGTH * (1 - closeness)).toFixed(1));
-  arProgressFill.classList.toggle('close', inAttackZone);
-  arProgress.classList.remove('hidden');
-
-  if (inAttackZone) {
-    arPointer.classList.add('hidden'); arHint.classList.add('hide'); arMonster.classList.add('locked');
-    btnAttack.disabled = false; btnAttack.textContent = 'АТАКОВАТЬ'; btnAttack.classList.add('ready');
-  } else {
-    arPointer.classList.remove('hidden'); arMonster.classList.remove('locked');
-    arHint.classList.toggle('hide', inView);
-    btnAttack.disabled = true; btnAttack.textContent = inView ? 'НАВЕДИТЕ НА ЦЕЛЬ' : 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
-    // FIX v38.4: та же формула, что в pointerAnchor
-    const anchor = pointerAnchor(deltaYaw, deltaElev);
-    arPointer.style.left = anchor.x + 'px'; arPointer.style.top = anchor.y + 'px';
-    const deg = (anchor.angle * 180 / Math.PI) + 90;
-    arPointerArrow.style.transform = `rotate(${deg}deg)`;
-    const absYaw = Math.round(Math.abs(deltaYaw)), absElev = Math.round(Math.abs(deltaElev));
-    let dirText;
-    if (Math.abs(deltaYaw) > Math.abs(deltaElev)) dirText = deltaYaw > 0 ? 'ВПРАВО' : 'ВЛЕВО';
-    else dirText = deltaElev > 0 ? 'ВЫШЕ' : 'НИЖЕ';
-    if (absYaw < 15 && absElev < 15) { arPointerLabel.textContent = 'ЦЕЛЬ РЯДОМ'; arPointerLabel.classList.add('close'); arPointerArrow.classList.add('pulse'); }
-    else { arPointerLabel.textContent = `${dirText} ${Math.max(absYaw, absElev)}°`; arPointerLabel.classList.remove('close'); arPointerArrow.classList.toggle('pulse', Math.max(absYaw, absElev) < 45); }
-  }
+  arLook.inAttackZone = Math.hypot(deltaYaw, deltaElev) < AR_ATTACK_ZONE;
 
   if (!inView) { arMonster.classList.add('hidden'); arMonsterHud.classList.add('hidden'); return; }
   arMonster.classList.remove('hidden'); arMonsterHud.classList.remove('hidden');
+
   const xPct = 50 + (deltaYaw / (AR_VIEW_ANGLE / 2)) * 50;
-  const yPct = 50 + (deltaElev / (AR_ELEV_RANGE / 2)) * 50;
+  const yPct = arScreenY(deltaElev);
   const clampedX = Math.max(8, Math.min(92, xPct));
   const clampedY = Math.max(15, Math.min(85, yPct));
   arMonster.style.left = clampedX + '%'; arMonster.style.top = clampedY + '%';
@@ -1702,12 +1679,12 @@ function startMonsterAttacks() {
   stopMonsterAttacks();
   const m = G.arQuest && G.arQuest.monster; if (!m) return;
   arMonsterAttackInterval = setInterval(() => {
-    if (!G.arActive || !G.arQuest || G.arQuest.hp <= 0) return;
+    if (!G.arActive || !G.arQuest || G.arQuest.ended || !G.arQuest.monster) return;
     if (!arLook.inView) return;
     arAttackWarning.classList.add('show'); arMonster.classList.add('winding'); SFX.error();
     arMonsterWarnTimeout = setTimeout(() => {
       arAttackWarning.classList.remove('show'); arMonster.classList.remove('winding');
-      if (!G.arActive || !G.arQuest || G.arQuest.hp <= 0) return;
+      if (!G.arActive || !G.arQuest || G.arQuest.ended) return;
       if (!arLook.inView) return;
       arMonster.classList.add('lunging');
       setTimeout(() => {
@@ -1779,7 +1756,7 @@ function startAR(questData = null) {
     updateArPlayerHud(); updateArMonsterHud(); showRankWarning(monster.rank);
     beginARLook(); startMonsterAttacks(); updateARTimer();
     G.arQuest.timerInterval = setInterval(() => {
-      if (!G.arQuest) return;
+      if (!G.arQuest || !G.arQuest.monster) return;
       G.arQuest.timeLeft--; updateARTimer();
       if (G.arQuest.timeLeft <= 0) endAR(false);
     }, 1000);
@@ -1801,7 +1778,7 @@ function updateARTimer() {
   arTimer.classList.toggle('danger', t <= 5);
 }
 btnAttack.addEventListener('click', () => {
-  if (!G.arQuest || G.arQuest.hp <= 0) return;
+  if (!G.arQuest || !G.arQuest.monster || G.arQuest.ended) return;
   if (!arLook.inAttackZone) { SFX.error(); return; }
   const baseDmg = 8 + Math.floor(Math.random() * 7) + Math.floor(G.level / 2);
   const dmgMult = getPlayerDamageMultiplier(G.arQuest.monster.rank, G.rank);
@@ -1845,6 +1822,11 @@ function endAR(success) {
 }
 $('btnAR').addEventListener('click', () => startAR());
 $('btnExitAR').addEventListener('click', () => {
+  if (G.arQuest && G.arQuest.quest) {         // AR-квест из задания
+    finishARQuest(false);
+    return;
+  }
+  // старый AR (свободная охота)
   if (G.arQuest && G.arQuest.timerInterval) clearInterval(G.arQuest.timerInterval);
   stopMonsterAttacks(); endARLook();
   if (G.stream) G.stream.getTracks().forEach(t => t.stop());
@@ -1854,7 +1836,7 @@ $('btnExitAR').addEventListener('click', () => {
 });
 
 /* ============================================================
-   v38.4: AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
+   v38.5: AR-ДВИЖОК + 15 МЕХАНИК + AR-ЗОНА НАКАЗАНИЯ
    ============================================================ */
 const AR = {
   VIEW_ANGLE: 70, ELEV_RANGE: 40, RETICLE_ZONE: 22, LOCK_ZONE: 14, ATTACK_ZONE: 22,
@@ -1931,15 +1913,22 @@ function arUpdateAllTargets() {
     if (!inView) { t.el.classList.add('hidden'); t.hudEl?.classList.add('hidden'); continue; }
     t.el.classList.remove('hidden'); if (t.hudEl) t.hudEl.classList.remove('hidden');
     const xPct = 50 + (dYaw / (AR.VIEW_ANGLE / 2)) * 50;
-    const yPct = 50 + (dElev / (AR.ELEV_RANGE / 2)) * 50;
+    const yPct = arScreenY(dElev);
     const cx = arClamp(xPct, 8, 92), cy = arClamp(yPct, 15, 85);
     t.el.style.left = cx + '%'; t.el.style.top = cy + '%';
     t.el.classList.toggle('locked', t.inReticle && t.type === 'MONSTER');
     if (t.hudEl) { t.hudEl.style.left = cx + '%'; t.hudEl.style.top = cy + '%'; }
   }
 
-  // FIX v38.4: только видимые цели (не hidden, не dead)
-  if (G.arQuest && !G.arQuest.ended) {
+  // Fallback для старого AR (свободная охота — нет AR.TARGETS, но есть G.arQuest.monster)
+  if ((!AR.TARGETS || AR.TARGETS.length === 0) && G.arQuest && G.arQuest.monster && !G.arQuest.scenario) {
+    const fakeTarget = { yaw: arLook.monsterYaw, elev: arLook.monsterElev };
+    arUpdateTargetUI(fakeTarget, false, 'strike');
+    return;
+  }
+
+  // Новый AR-квест
+  if (G.arQuest && !G.arQuest.ended && G.arQuest.scenario) {
     const visibleTargets = AR.TARGETS.filter(t => t.alive && !t.el.classList.contains('hidden'));
     const nearest = visibleTargets.sort((a, b) => {
       const da = Math.hypot(arDeltaYaw(a.yaw), arDeltaElev(a.elev));
@@ -1949,8 +1938,8 @@ function arUpdateAllTargets() {
     arUpdateTargetUI(nearest, false, AR.PHASE ? AR.PHASE.type : null);
   }
 
+  // AR-зона наказания
   if (AR.PENALTY && !AR.PENALTY.ended) {
-    // FIX v38.4: обновить таймер наказания
     AR.DOM.aphTimer.textContent = formatShort(Math.max(0, AR.PENALTY.timeLeft));
     const visibleTargets = AR.TARGETS.filter(t => t.alive && t.type === 'MONSTER' && !t.el.classList.contains('hidden'));
     const nearest = visibleTargets.sort((a, b) => {
@@ -1999,7 +1988,7 @@ function arCollectTarget(t) {
 /* ---------- 15 МЕХАНИК ---------- */
 function arRunTrack(phase) {
   return new Promise((resolve) => {
-    const total = phase.targets || 1; let found = 0, current = null;
+    const total = phase.targets || 1; let found = 0, current = null, finished = false;
     const startTime = Date.now(), limit = (phase.timeLimit || 15) * 1000;
     function spawnNext() {
       if (found >= total) { finish(); return; }
@@ -2007,6 +1996,7 @@ function arRunTrack(phase) {
       arSetPhaseHud(`ПОИСК ${found + 1} / ${total}`, found / total);
     }
     function check() {
+      if (finished) return;
       if (!current || !current.alive) return;
       if (arInReticle(current, 20)) {
         arCollectTarget(current); found++;
@@ -2017,24 +2007,33 @@ function arRunTrack(phase) {
       if (Date.now() - startTime > limit) finish();
     }
     const iv = setInterval(check, 100);
-    function finish() { clearInterval(iv); if (current && current.alive) arRemoveTarget(current); arHidePhaseHud(); resolve(found >= total); }
+    function finish() {
+      if (finished) return;
+      finished = true;
+      clearInterval(iv);
+      if (current && current.alive) arRemoveTarget(current);
+      arHidePhaseHud();
+      resolve(found >= total);
+    }
     spawnNext();
   });
 }
 function arRunStrike(phase) {
   return new Promise((resolve) => {
     const totalKills = phase.count || 1, hp = phase.hp || 20, speed = phase.moveSpeed || 0;
-    let kills = 0, current = null, tapCount = 0;
+    let kills = 0, current = null;
     const startTime = Date.now(), limit = (phase.timeLimit || 60) * 1000, needTaps = phase.tapCount || 0;
+    let finished = false;
     function spawnNext() {
       if (kills >= totalKills) { finish(true); return; }
       current = arCreateTarget({
         type:'MONSTER', emoji: phase.emoji || '👹',
         yaw: (arLook.camYaw + arRand(90, 270)) % 360, elev: arRand(-15, 15), hp, moveSpeed: speed,
         onHit: (t, dmg) => {
+          if (finished) return;
           if (needTaps) {
-            tapCount++;
-            if (tapCount >= needTaps) { arRemoveTarget(t); kills++; tapCount = 0; if (kills >= totalKills) finish(true); else spawnNext(); }
+            t.extra.taps = (t.extra.taps || 0) + 1;
+            if (t.extra.taps >= needTaps) { arRemoveTarget(t); kills++; if (kills >= totalKills) finish(true); else spawnNext(); }
           } else if (t.hp <= 0) {
             kills++; arSetPhaseHud(`УБИТО ${kills} / ${totalKills}`, kills / totalKills);
             if (kills >= totalKills) finish(true); else setTimeout(spawnNext, 400);
@@ -2044,6 +2043,7 @@ function arRunStrike(phase) {
       arSetPhaseHud(`ЦЕЛЕЙ: ${kills} / ${totalKills}`, kills / totalKills);
     }
     function onAttack() {
+      if (finished) return;
       if (!current || !current.alive) return;
       if (!arInReticle(current)) { SFX.error(); return; }
       const dmg = 8 + Math.floor(Math.random() * 7) + Math.floor(G.level / 2);
@@ -2051,8 +2051,10 @@ function arRunStrike(phase) {
     }
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
-    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(kills >= totalKills); }, 200);
+    const iv = setInterval(() => { if (!finished && Date.now() - startTime > limit) finish(kills >= totalKills); }, 200);
     function finish(success) {
+      if (finished) return;
+      finished = true;
       clearInterval(iv); btnAttack.onclick = oldHandler;
       btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
       if (current && current.alive) arRemoveTarget(current); arHidePhaseHud(); resolve(success);
@@ -2063,12 +2065,13 @@ function arRunStrike(phase) {
 function arRunDodge(phase) {
   return new Promise((resolve) => {
     const total = phase.obstacles || 6, limit = (phase.timeLimit || 12) * 1000, speed = phase.speed || 1.5, parry = !!phase.parry;
-    const startTime = Date.now(); let dodged = 0, failed = false; const active = [];
+    const startTime = Date.now(); let dodged = 0, failed = false, finished = false; const active = [];
     let sx = 0, sy = 0, swiping = false;
     function onDown(e) { const p = e.touches ? e.touches[0] : e; sx = p.clientX; sy = p.clientY; swiping = true; }
     function onUp(e) {
       if (!swiping) return; swiping = false;
       const p = e.changedTouches ? e.changedTouches[0] : e;
+      if (!p) return;
       const dx = p.clientX - sx, dy = p.clientY - sy;
       if (Math.abs(dx) < 25 && Math.abs(dy) < 25) return;
       handleSwipe(dx, dy);
@@ -2078,6 +2081,7 @@ function arRunDodge(phase) {
     cameraView.addEventListener('mousedown', onDown);
     cameraView.addEventListener('mouseup', onUp);
     function handleSwipe(dx, dy) {
+      if (finished) return;
       const candidates = active.filter(o => o.alive && arInReticle(o, 35));
       if (candidates.length === 0) return;
       const obj = candidates[0];
@@ -2092,7 +2096,7 @@ function arRunDodge(phase) {
       } else { SFX.fail(); takeDamage(5, 'Промах уклонения!'); }
     }
     function spawnObstacle() {
-      if (failed) return;
+      if (failed || finished) return;
       const yaw = (arLook.camYaw + arRand(60, 180) * (Math.random() < 0.5 ? 1 : -1) + 360) % 360;
       const obj = arCreateTarget({ type:'OBSTACLE', emoji: phase.emoji || (parry ? '⚡' : '🪨'), yaw, elev: arRand(-10, 10), moveSpeed: speed });
       const flyIv = setInterval(() => {
@@ -2104,24 +2108,30 @@ function arRunDodge(phase) {
     }
     const spawner = setInterval(spawnObstacle, Math.max(800, limit / total));
     spawnObstacle();
-    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(dodged >= total); }, 200);
+    const iv = setInterval(() => { if (!finished && Date.now() - startTime > limit) finish(dodged >= total); }, 200);
     function finish(success) {
-      clearInterval(iv); clearInterval(spawner);
-      cameraView.removeEventListener('touchstart', onDown); cameraView.removeEventListener('touchend', onUp);
-      cameraView.removeEventListener('mousedown', onDown); cameraView.removeEventListener('mouseup', onUp);
-      active.forEach(o => { if (o.alive) { o.alive = false; o.el?.remove(); } });
-      arHidePhaseHud(); resolve(success);
+      if (finished) return;
+      finished = true;
+      try {
+        clearInterval(iv); clearInterval(spawner);
+        active.forEach(o => { if (o.alive) { o.alive = false; o.el?.remove(); } });
+        arHidePhaseHud();
+      } finally {
+        cameraView.removeEventListener('touchstart', onDown); cameraView.removeEventListener('touchend', onUp);
+        cameraView.removeEventListener('mousedown', onDown); cameraView.removeEventListener('mouseup', onUp);
+        resolve(success);
+      }
     }
   });
 }
 function arRunCollect(phase) {
   return new Promise((resolve) => {
-    const total = phase.items || 10; let collected = 0;
+    const total = phase.items || 10; let collected = 0, finished = false;
     const limit = (phase.timeLimit || 20) * 1000, startTime = Date.now();
     const spawnRate = phase.spawnRate || 600, emoji = phase.emoji || '🌿';
     const active = [];
     function spawn() {
-      if (collected >= total) return;
+      if (finished || collected >= total) return;
       const t = arCreateTarget({
         type:'COIN', emoji, yaw: (arLook.camYaw + arRand(-60, 60) + 360) % 360, elev: arRand(-15, 15),
         onCollect: () => { collected++; arSetPhaseHud(`СОБРАНО ${collected} / ${total}`, collected / total); if (collected >= total) finish(true); }
@@ -2134,30 +2144,40 @@ function arRunCollect(phase) {
     }
     const spawner = setInterval(spawn, spawnRate);
     for (let i = 0; i < 3; i++) setTimeout(spawn, i * 200);
-    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(collected >= total); }, 200);
-    function finish(success) { clearInterval(iv); clearInterval(spawner); active.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success); }
+    const iv = setInterval(() => { if (!finished && Date.now() - startTime > limit) finish(collected >= total); }, 200);
+    function finish(success) {
+      if (finished) return;
+      finished = true;
+      clearInterval(iv); clearInterval(spawner); active.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success);
+    }
   });
 }
 function arRunHold(phase) {
   return new Promise((resolve) => {
     const need = (phase.targetSec || 5) * 1000, stability = phase.stability || 0.9, speed = phase.moveSpeed || 0;
-    let held = 0; const startTime = Date.now(), limit = (phase.timeLimit || 60) * 1000;
+    let held = 0, finished = false; const startTime = Date.now(), limit = (phase.timeLimit || 60) * 1000;
     const ring = AR.DOM.holdRing; ring.classList.add('show');
     const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '📦', yaw: (arLook.camYaw + arRand(60, 180)) % 360, elev: arRand(-10, 10), hp: 999, moveSpeed: speed });
     const iv = setInterval(() => {
+      if (finished) return;
       if (!t.alive) { finish(false); return; }
       if (arInReticle(t, 18 * stability + 4)) { held += 100; AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5 * (1 - Math.min(1, held / need))); arSetPhaseHud('УДЕРЖАНИЕ', held / need); }
       else { held = Math.max(0, held - 60); AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5 * (1 - Math.min(1, held / need))); }
       if (held >= need) finish(true);
       if (Date.now() - startTime > limit) finish(false);
     }, 100);
-    function finish(success) { clearInterval(iv); ring.classList.remove('show'); AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
+    function finish(success) {
+      if (finished) return;
+      finished = true;
+      clearInterval(iv); ring.classList.remove('show'); AR.DOM.holdFill.setAttribute('stroke-dashoffset', 565.5); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success);
+    }
   });
 }
 function arRunSequence(phase) {
   return new Promise((resolve) => {
     const total = phase.targets || 4, limit = (phase.timeLimit || 15) * 1000;
-    let sequence = [], input = [], showing = false; const targets = [];
+    let sequence = [], input = [], showing = false, finished = false; const targets = [];
+    let seqIv = null;
     for (let i = 0; i < total; i++) {
       const t = arCreateTarget({ type:'RUNE', emoji: ['💠','🔮','⚡','🌟','❄','🔥'][i % 6], yaw: (arLook.camYaw + (i / total) * 360) % 360, elev: arRand(-10, 10), extra: { index: i } });
       t.el.style.pointerEvents = 'auto'; t.el.style.cursor = 'pointer';
@@ -2166,7 +2186,7 @@ function arRunSequence(phase) {
       targets.push(t);
     }
     function onTap(t) {
-      if (showing) return; if (!arInReticle(t, 28)) return;
+      if (showing || finished) return; if (!arInReticle(t, 28)) return;
       input.push(t.extra.index); SFX.ballPop();
       t.el.style.transform = 'translate(-50%,-50%) scale(1.3)';
       setTimeout(() => { if (t.alive) t.el.style.transform = 'translate(-50%,-50%) scale(1)'; }, 150);
@@ -2179,8 +2199,9 @@ function arRunSequence(phase) {
       for (let i = 0; i < total; i++) sequence.push(Math.floor(Math.random() * total));
       arSetPhaseHud('ЗАПОМНИТЕ', 0);
       let i = 0;
-      const iv = setInterval(() => {
-        if (i >= sequence.length) { clearInterval(iv); showing = false; arSetPhaseHud('ПОВТОРИТЕ', 0); return; }
+      seqIv = setInterval(() => {
+        if (finished) { clearInterval(seqIv); return; }
+        if (i >= sequence.length) { clearInterval(seqIv); seqIv = null; showing = false; arSetPhaseHud('ПОВТОРИТЕ', 0); return; }
         const t = targets[sequence[i]];
         if (t && t.alive) {
           t.el.style.transform = 'translate(-50%,-50%) scale(1.4)';
@@ -2192,14 +2213,20 @@ function arRunSequence(phase) {
     }
     const timeout = setTimeout(() => finish(false), limit);
     playSequence();
-    function finish(success) { clearTimeout(timeout); targets.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success); }
+    function finish(success) {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeout); if (seqIv) clearInterval(seqIv);
+      targets.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success);
+    }
   });
 }
 function arRunParry(phase) {
   return new Promise((resolve) => {
     const total = phase.attacks || 5, limit = (phase.timeLimit || 15) * 1000, startTime = Date.now();
-    let parried = 0, current = null, sx = 0, sy = 0; const arrow = AR.DOM.parryArrow;
+    let parried = 0, current = null, sx = 0, sy = 0, finished = false; const arrow = AR.DOM.parryArrow;
     function spawn() {
+      if (finished) return;
       if (parried >= total) { finish(true); return; }
       const yaw = (arLook.camYaw + arRand(60, 180) * (Math.random() < 0.5 ? 1 : -1) + 360) % 360;
       current = arCreateTarget({ type:'OBSTACLE', emoji: '⚡', yaw, elev: arRand(-10, 10) });
@@ -2209,8 +2236,9 @@ function arRunParry(phase) {
     }
     function onDown(e) { const p = e.touches ? e.touches[0] : e; sx = p.clientX; sy = p.clientY; }
     function onUp(e) {
-      if (!current || !current.alive) return;
+      if (finished || !current || !current.alive) return;
       const p = e.changedTouches ? e.changedTouches[0] : e;
+      if (!p) return;
       const dx = p.clientX - sx, dy = p.clientY - sy;
       if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
       const swipeAng = Math.atan2(dy, dx) * 180 / Math.PI;
@@ -2225,12 +2253,18 @@ function arRunParry(phase) {
     cameraView.addEventListener('touchend', onUp);
     cameraView.addEventListener('mousedown', onDown);
     cameraView.addEventListener('mouseup', onUp);
-    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(parried >= total); }, 200);
+    const iv = setInterval(() => { if (!finished && Date.now() - startTime > limit) finish(parried >= total); }, 200);
     function finish(success) {
-      clearInterval(iv);
-      cameraView.removeEventListener('touchstart', onDown); cameraView.removeEventListener('touchend', onUp);
-      cameraView.removeEventListener('mousedown', onDown); cameraView.removeEventListener('mouseup', onUp);
-      arrow.classList.remove('show'); if (current && current.alive) arRemoveTarget(current); arHidePhaseHud(); resolve(success);
+      if (finished) return;
+      finished = true;
+      try {
+        clearInterval(iv);
+        arrow.classList.remove('show'); if (current && current.alive) arRemoveTarget(current); arHidePhaseHud();
+      } finally {
+        cameraView.removeEventListener('touchstart', onDown); cameraView.removeEventListener('touchend', onUp);
+        cameraView.removeEventListener('mousedown', onDown); cameraView.removeEventListener('mouseup', onUp);
+        resolve(success);
+      }
     }
     spawn();
   });
@@ -2239,16 +2273,18 @@ function arRunShoot(phase) {
   return new Promise((resolve) => {
     const total = phase.targets || 5, limit = (phase.timeLimit || 15) * 1000;
     const lifetime = (phase.lifetime || 2) * 1000, speed = phase.speed || 2;
-    let hit = 0, current = null; const startTime = Date.now();
+    let hit = 0, current = null, finished = false; const startTime = Date.now();
     function spawn() {
+      if (finished) return;
       if (hit >= total) { finish(true); return; }
       current = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🎯', yaw: (arLook.camYaw + arRand(-50, 50) + 360) % 360, elev: arRand(-15, 15), hp: 1, moveSpeed: speed });
       arSetPhaseHud(`ПОПАДАНИЙ ${hit} / ${total}`, hit / total);
       setTimeout(() => {
-        if (current && current.alive) { arRemoveTarget(current); current = null; SFX.fail(); if (hit < total) spawn(); }
+        if (current && current.alive && !finished) { arRemoveTarget(current); current = null; SFX.fail(); if (hit < total) spawn(); }
       }, lifetime);
     }
     function onAttack() {
+      if (finished) return;
       if (!current || !current.alive) return;
       if (!arInReticle(current, 25)) { SFX.error(); return; }
       hit++; SFX.hit(); arRemoveTarget(current); current = null;
@@ -2256,8 +2292,10 @@ function arRunShoot(phase) {
     }
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
-    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(hit >= total); }, 200);
+    const iv = setInterval(() => { if (!finished && Date.now() - startTime > limit) finish(hit >= total); }, 200);
     function finish(success) {
+      if (finished) return;
+      finished = true;
       clearInterval(iv); btnAttack.onclick = oldHandler;
       btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
       if (current && current.alive) arRemoveTarget(current); arHidePhaseHud(); resolve(success);
@@ -2268,10 +2306,11 @@ function arRunShoot(phase) {
 function arRunAvoidGaze(phase) {
   return new Promise((resolve) => {
     const limit = (phase.timeLimit || 12) * 1000, gazeAngle = phase.gazeAngle || 60, rotateSpeed = phase.rotateSpeed || 1;
-    const startTime = Date.now(); let survived = 0, damageCooldown = 0;
+    const startTime = Date.now(); let damageTaken = 0, damageCooldown = 0, finished = false;
     const guard = { yaw: Math.random() * 360, angle: gazeAngle };
     const cone = document.createElement('div'); cone.className = 'ar-gaze-cone'; cameraView.appendChild(cone);
     const iv = setInterval(() => {
+      if (finished) return;
       guard.yaw = (guard.yaw + rotateSpeed + 360) % 360;
       const d = Math.abs(normalizeAngle(guard.yaw - arLook.camYaw));
       const inGaze = d < gazeAngle / 2;
@@ -2281,36 +2320,39 @@ function arRunAvoidGaze(phase) {
       cone.style.left = arClamp(xPct, -20, 120) + '%'; cone.style.top = '50%';
       cone.style.transform = `translate(-50%, -100%) rotate(${rel}deg)`;
       if (inGaze) {
-        if (Date.now() > damageCooldown) { damageCooldown = Date.now() + 1000; takeDamage(5, 'Вас заметили!'); SFX.fail(); triggerFlash('red'); }
-      } else { survived += 100; arSetPhaseHud('СКРЫТНОСТЬ', survived / limit); }
-      if (Date.now() - startTime > limit) finish(true);
+        if (Date.now() > damageCooldown) { damageCooldown = Date.now() + 1000; damageTaken++; takeDamage(5, 'Вас заметили!'); SFX.fail(); triggerFlash('red'); }
+      } else { arSetPhaseHud('СКРЫТНОСТЬ', Math.min(1, (Date.now() - startTime) / limit)); }
+      if (Date.now() - startTime > limit) finish(damageTaken < 5);
     }, 100);
-    function finish(success) { clearInterval(iv); cone.remove(); arHidePhaseHud(); resolve(success); }
+    function finish(success) { if (finished) return; finished = true; clearInterval(iv); cone.remove(); arHidePhaseHud(); resolve(success); }
   });
 }
 function arRunChase(phase) {
   return new Promise((resolve) => {
     const need = (phase.chaseSec || 8) * 1000, speed = phase.moveSpeed || 3;
-    const startTime = Date.now(), limit = (phase.timeLimit || 30) * 1000; let held = 0;
+    const startTime = Date.now(), limit = (phase.timeLimit || 30) * 1000; let held = 0, finished = false;
     const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🏃', yaw: (arLook.camYaw + 180) % 360, elev: arRand(-10, 10), hp: 999, moveSpeed: speed });
     const iv = setInterval(() => {
+      if (finished) return;
       if (!t.alive) { finish(false); return; }
       if (arInReticle(t, 25)) { held += 100; arSetPhaseHud('ПОГОНЯ', held / need); }
       else { held = Math.max(0, held - 50); }
       if (held >= need) finish(true);
       if (Date.now() - startTime > limit) finish(false);
     }, 100);
-    function finish(success) { clearInterval(iv); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
+    function finish(success) { if (finished) return; finished = true; clearInterval(iv); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
   });
 }
 function arRunProtect(phase) {
   return new Promise((resolve) => {
     const waves = phase.waves || 3, perWave = phase.enemiesPerWave || 3, protectSec = (phase.protectSec || 15) * 1000;
-    const startTime = Date.now(); let wave = 0, killed = 0, objectHp = 100; const enemies = [];
+    const startTime = Date.now(); let wave = 0, killed = 0, objectHp = 100, finished = false; const enemies = [];
     const core = arCreateTarget({ type:'POINT', emoji: '🛡', yaw: arLook.camYaw, elev: 0, hp: 100 });
     core.el.style.pointerEvents = 'none';
+    const oldHandler = btnAttack.onclick;
+    btnAttack.onclick = () => { SFX.error(); };
     function spawnWave() {
-      if (wave >= waves) return;
+      if (finished || wave >= waves) return;
       wave++; arSetPhaseHud(`ВОЛНА ${wave} / ${waves}`, wave / waves);
       for (let i = 0; i < perWave; i++) {
         const e = arCreateTarget({ type:'MONSTER', emoji: '👹', yaw: (arLook.camYaw + arRand(-60, 60) + 360) % 360, elev: arRand(-15, 15), hp: 15, moveSpeed: 1.5 });
@@ -2321,16 +2363,19 @@ function arRunProtect(phase) {
       }
     }
     function tryKill(e) {
+      if (finished) return;
       killed++; SFX.hit(); arRemoveTarget(e);
       const idx = enemies.indexOf(e); if (idx >= 0) enemies.splice(idx, 1);
       if (killed >= waves * perWave) finish(true);
     }
     function enemyReachedCore(e) {
+      if (finished) return;
       objectHp -= 20; SFX.fail(); takeDamage(5, 'Объект повреждён!'); arRemoveTarget(e);
       const idx = enemies.indexOf(e); if (idx >= 0) enemies.splice(idx, 1);
       if (objectHp <= 0) finish(false);
     }
     const moveIv = setInterval(() => {
+      if (finished) return;
       enemies.forEach(e => {
         if (!e.alive) return;
         const d = arDeltaYaw(e.yaw);
@@ -2339,51 +2384,65 @@ function arRunProtect(phase) {
       if (Date.now() - startTime > protectSec && enemies.length === 0 && wave >= waves) finish(true);
     }, 200);
     spawnWave();
-    const waveIv = setInterval(() => { if (wave < waves && enemies.length === 0) spawnWave(); }, 2500);
-    function finish(success) { clearInterval(moveIv); clearInterval(waveIv); enemies.forEach(e => { if (e.alive) arRemoveTarget(e); }); if (core.alive) arRemoveTarget(core); arHidePhaseHud(); resolve(success); }
+    const waveIv = setInterval(() => { if (!finished && wave < waves && enemies.length === 0) spawnWave(); }, 2500);
+    function finish(success) {
+      if (finished) return;
+      finished = true;
+      clearInterval(moveIv); clearInterval(waveIv);
+      enemies.forEach(e => { if (e.alive) arRemoveTarget(e); });
+      if (core.alive) arRemoveTarget(core);
+      btnAttack.onclick = oldHandler;
+      arHidePhaseHud(); resolve(success);
+    }
   });
 }
 function arRunBalanceHold(phase) {
   return new Promise((resolve) => {
     const need = (phase.targetSec || 6) * 1000, tol = phase.tiltTolerance || 5;
-    const startTime = Date.now(), limit = (phase.timeLimit || 30) * 1000; let held = 0;
+    const startTime = Date.now(), limit = (phase.timeLimit || 30) * 1000; let held = 0, finished = false;
     const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '⚖', yaw: arLook.camYaw, elev: 0, hp: 999 });
     const iv = setInterval(() => {
+      if (finished) return;
       if (!t.alive) { finish(false); return; }
-      const tilt = Math.abs(arLook.camPitch) + Math.abs((arLook.camYaw % 10) - 5);
+      // Реальный наклон: camPitch + отклонение по yaw
+      const tilt = Math.abs(arLook.camPitch) + Math.abs(arDeltaYaw(t.yaw) * 0.5);
       const stable = tilt < tol * 3;
       if (stable && arInReticle(t, 30)) { held += 100; arSetPhaseHud('БАЛАНС', held / need); }
       else { held = Math.max(0, held - 80); }
       if (held >= need) finish(true);
       if (Date.now() - startTime > limit) finish(false);
     }, 100);
-    function finish(success) { clearInterval(iv); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
+    function finish(success) { if (finished) return; finished = true; clearInterval(iv); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success); }
   });
 }
 function arRunTapRhythm(phase) {
   return new Promise((resolve) => {
     const beats = phase.beats || 10, bpm = phase.bpm || 120, tolerance = (phase.tolerance || 0.15) * 1000;
     const interval = 60000 / bpm, limit = (phase.timeLimit || 30) * 1000, startTime = Date.now();
-    let beatCount = 0, successHits = 0, lastBeatTime = 0, beatActive = false;
+    let beatCount = 0, successHits = 0, beatActive = false, beatWindowStart = 0, finished = false;
     const reticle = document.getElementById('arReticle');
     const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🎵', yaw: arLook.camYaw, elev: 0, hp: 999 });
     const beatIv = setInterval(() => {
+      if (finished) return;
       if (beatCount >= beats) { clearInterval(beatIv); return; }
-      beatCount++; beatActive = true; lastBeatTime = Date.now();
+      beatCount++; beatActive = true; beatWindowStart = Date.now();
       reticle.classList.add('rhythm-beat'); SFX.incoming();
       arSetPhaseHud(`РИТМ ${successHits} / ${beats}`, successHits / beats);
-      setTimeout(() => { beatActive = false; reticle.classList.remove('rhythm-beat'); }, tolerance);
+      setTimeout(() => { if (!finished) { beatActive = false; reticle.classList.remove('rhythm-beat'); } }, tolerance * 2);
     }, interval);
     function onAttack() {
+      if (finished) return;
       if (!beatActive) { SFX.fail(); return; }
-      const dt = Date.now() - lastBeatTime;
+      const dt = Math.abs(Date.now() - beatWindowStart);
       if (dt <= tolerance) { successHits++; SFX.hit(); arSetPhaseHud(`РИТМ ${successHits} / ${beats}`, successHits / beats); if (successHits >= beats) finish(true); }
       else { SFX.fail(); }
     }
     const oldHandler = btnAttack.onclick;
     btnAttack.onclick = onAttack;
-    const iv = setInterval(() => { if (Date.now() - startTime > limit) finish(successHits >= beats); }, 200);
+    const iv = setInterval(() => { if (!finished && Date.now() - startTime > limit) finish(successHits >= beats); }, 200);
     function finish(success) {
+      if (finished) return;
+      finished = true;
       clearInterval(iv); clearInterval(beatIv);
       btnAttack.onclick = oldHandler; btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
       reticle.classList.remove('rhythm-beat'); if (t.alive) arRemoveTarget(t); arHidePhaseHud(); resolve(success);
@@ -2393,13 +2452,14 @@ function arRunTapRhythm(phase) {
 function arRunMultiLock(phase) {
   return new Promise((resolve) => {
     const total = phase.targets || 3, need = (phase.lockSec || 5) * 1000, spread = phase.spread || 30;
-    const startTime = Date.now(), limit = (phase.timeLimit || 20) * 1000; let locked = 0; const targets = [];
+    const startTime = Date.now(), limit = (phase.timeLimit || 20) * 1000; let locked = 0, finished = false; const targets = [];
     const baseYaw = (arLook.camYaw + 180) % 360;
     for (let i = 0; i < total; i++) {
       const t = arCreateTarget({ type:'MONSTER', emoji: phase.emoji || '🎯', yaw: (baseYaw + (i - total/2) * spread / total + 360) % 360, elev: arRand(-10, 10), hp: 999 });
       targets.push(t);
     }
     const iv = setInterval(() => {
+      if (finished) return;
       let allIn = true;
       targets.forEach(t => { if (!t.alive) { allIn = false; return; } if (!arInReticle(t, 30)) allIn = false; });
       if (allIn) { locked += 100; arSetPhaseHud('ЗАХВАТ', locked / need); }
@@ -2407,16 +2467,17 @@ function arRunMultiLock(phase) {
       if (locked >= need) finish(true);
       if (Date.now() - startTime > limit) finish(false);
     }, 100);
-    function finish(success) { clearInterval(iv); targets.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success); }
+    function finish(success) { if (finished) return; finished = true; clearInterval(iv); targets.forEach(t => { if (t.alive) arRemoveTarget(t); }); arHidePhaseHud(); resolve(success); }
   });
 }
 function arRunScan(phase) {
   return new Promise((resolve) => {
     const total = phase.hiddenPoints || 5, limit = (phase.timeLimit || 20) * 1000, scanRadius = phase.scanRadius || 15;
-    const startTime = Date.now(); let found = 0; const points = [];
+    const startTime = Date.now(); let found = 0, finished = false; const points = [];
     for (let i = 0; i < total; i++) points.push({ yaw: Math.random() * 360, elev: arRand(-15, 15), found: false });
     AR.DOM.scanBeam.classList.add('show');
     const iv = setInterval(() => {
+      if (finished) return;
       points.forEach(p => {
         if (p.found) return;
         const dYaw = Math.abs(arDeltaYaw(p.yaw)), dElev = Math.abs(arDeltaElev(p.elev));
@@ -2433,7 +2494,7 @@ function arRunScan(phase) {
       });
       if (Date.now() - startTime > limit) finish(found >= total);
     }, 100);
-    function finish(success) { clearInterval(iv); AR.DOM.scanBeam.classList.remove('show'); arHidePhaseHud(); resolve(success); }
+    function finish(success) { if (finished) return; finished = true; clearInterval(iv); AR.DOM.scanBeam.classList.remove('show'); arHidePhaseHud(); resolve(success); }
   });
 }
 
@@ -2527,7 +2588,6 @@ const QUEST_AR_SCENARIO = {
   'Уничтожить ледяную королеву': [{ type:'strike', hp:280, emoji:'❄', moveSpeed:1, dodgeChance:0.4 },{ type:'dodge', obstacles:8, timeLimit:15 },{ type:'collect', items:10, timeLimit:15, spawnRate:600, emoji:'❄' },{ type:'parry', attacks:4, timeLimit:12 }]
 };
 
-// FIX v38.4: защита от NaN в q.remaining
 async function startARQuest(q) {
   if (G.arActive) return;
   try {
@@ -2542,11 +2602,14 @@ async function startARQuest(q) {
     await attachOrientation().catch(() => false);
     attachDragLook(); scheduleARUpdate();
     $('arTimer').textContent = formatShort(Math.max(0, q.remaining));
+
+    // ЕДИНЫЙ ТАЙМЕР: уменьшаем q.remaining каждые 250мс
     const timerIv = setInterval(() => {
       if (!G.arActive || !G.arQuest || G.arQuest.ended) { clearInterval(timerIv); return; }
+      q.remaining = Math.max(0, q.remaining - 0.25);
       $('arTimer').textContent = formatShort(Math.max(0, q.remaining));
       if (q.remaining <= 0) { clearInterval(timerIv); finishARQuest(false); }
-    }, 500);
+    }, 250);
     G.arQuest.timerIv = timerIv;
 
     let allSuccess = true;
@@ -2591,7 +2654,8 @@ function finishARQuest(success) {
   videoFeed.srcObject = null; cameraView.classList.remove('active'); G.arActive = false;
   detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
   const q = G.arQuest.quest; G.arQuest = null;
-  G.busy = false;
+  G.busy = false; G.activeQuest = null; G.questPhase = 'inactive'; G.pendingReward = false;
+  $('questOverlay').classList.remove('show');
   if (success) { addLog(`✓ AR-задание «${q.name}» выполнено!`, 'success'); speak('Задание выполнено.'); completeQuestReward(q); }
   else { addLog(`✕ AR-задание «${q.name}» провалено.`, 'fail'); speak('Задание провалено.'); failQuest('AR-провал'); }
   updateUI(); saveGame();
@@ -2599,6 +2663,7 @@ function finishARQuest(success) {
 
 async function startARPenalty() {
   if (AR.PENALTY) return;
+  if (Date.now() < G.penaltyCooldown) { addLog('Зона наказания на кулдауне.', 'penalty'); return; }
   try {
     const stream = await requestCamera();
     videoFeed.srcObject = stream; G.stream = stream;
@@ -2606,7 +2671,7 @@ async function startARPenalty() {
     const rankIdx = RANK_ORDER.indexOf(G.rank);
     const hpTable = [10, 15, 20, 25, 30, 40], speedTable = [0, 0.5, 1, 1.5, 2, 3];
     const hp = hpTable[rankIdx], speed = speedTable[rankIdx];
-    AR.PENALTY = { killed: 0, total: 10, timeLeft: 60, monsters: [], ended: false, timerIv: null };
+    AR.PENALTY = { killed: 0, total: 10, timeLeft: 60, monsters: [], ended: false, timerIv: null, oldBtnHandler: null };
     for (let i = 0; i < 10; i++) {
       const m = arCreateTarget({ type:'MONSTER', emoji: ['👹','👺','🐺','💀','👻','🕷','🦇','🐍','🦂','🧟'][i], yaw: Math.random() * 360, elev: arRand(-20, 20), hp, moveSpeed: speed, extra: { penalty: true } });
       m.el.style.pointerEvents = 'auto'; m.el.style.cursor = 'pointer';
@@ -2660,7 +2725,7 @@ function finishARPenalty(success) {
   videoFeed.srcObject = null; cameraView.classList.remove('active');
   G.arActive = false; G.inPenalty = false;
   detachOrientation(); if (arLook.detachDragLook) arLook.detachDragLook();
-  if (AR.PENALTY.oldBtnHandler) btnAttack.onclick = AR.PENALTY.oldBtnHandler;
+  if (AR.PENALTY.oldBtnHandler !== null) btnAttack.onclick = AR.PENALTY.oldBtnHandler;
   btnAttack.disabled = true; btnAttack.textContent = 'ЦЕЛЬ НЕ В ПРИЦЕЛЕ'; btnAttack.classList.remove('ready');
   AR.DOM.penaltyHud.classList.remove('show'); AR.PENALTY = null;
   if (success) {
@@ -2686,7 +2751,7 @@ const btnSurrender = $('btnSurrender');
 let penaltyActive = false, penaltyTimeLeft = 60, penaltyCollected = 0;
 let penaltyTimerInterval = null, penaltySpawnInterval = null;
 function getBallLifetime(rank) { const base = {E:1500,D:1300,C:1100,B:900,A:800,S:700}; return base[rank]||1500; }
-function startPenaltyZone() { /* v38.4: не используется */ }
+function startPenaltyZone() { /* v38.5: не используется */ }
 function collectBall(ball) { if(!penaltyActive || ball.classList.contains('collected')) return; ball.classList.add('collected'); penaltyCollected++; penaltyScoreEl.textContent = penaltyCollected; SFX.ballPop(); if(penaltyCollected >= 55) endPenaltyZone(true); }
 function endPenaltyZone(success) { if(!penaltyActive) return; penaltyActive = false; clearInterval(penaltyTimerInterval); clearInterval(penaltySpawnInterval); penaltyField.innerHTML = ''; setTimeout(() => penaltyZone.classList.remove('active'), 1500); }
 btnSurrender.addEventListener('click', () => { if(penaltyActive) endPenaltyZone(false); });
@@ -2700,6 +2765,9 @@ function takeDamage(dmg, reason) {
   showFloatingText(`-${dmg} HP`,'#ff4444');
   updateUI(); saveGame();
   if (G.hp <= 0) {
+    // Сначала корректно закрыть активный AR
+    if (G.arQuest && G.arQuest.quest) finishARQuest(false);
+    else if (AR.PENALTY) finishARPenalty(false);
     setTimeout(() => {
       G.hp = Math.floor(G.maxHp*0.3); G.gold = Math.max(0, G.gold-50);
       addLog('Вы потеряли сознание. -50 золота.','fail');
@@ -2802,7 +2870,6 @@ function pickRandomQuest() {
   return (highest.length>0 && Math.random()<0.6) ? highest[Math.floor(Math.random()*highest.length)]() : available[Math.floor(Math.random()*available.length)]();
 }
 
-// FIX v38.4: защита от NaN
 function startQuestTimer(q) {
   if (G.timerInterval) clearInterval(G.timerInterval);
   if (!q) return;
@@ -2839,34 +2906,37 @@ function showQuest(q, isPenalty=false) {
   G.busy = true; G.activeQuest = q; G.questPhase = 'active';
   G.pendingReward = false; G.questCollapsed = false;
   if (q.isPenalty === undefined) q.isPenalty = isPenalty;
-  // FIX v38.4: защита от NaN
   if (!isFinite(q.minTime)) q.minTime = 60;
   if (!isFinite(q.maxTime)) q.maxTime = 180;
   if (!q.duration || !isFinite(q.duration) || q.duration <= 0) {
     q.duration = q.minTime + Math.random() * Math.max(0, q.maxTime - q.minTime);
   }
   if (!isFinite(q.duration) || q.duration <= 0) q.duration = 120;
-  q.remaining = q.duration; q.completed = false;
+  // НЕ сбрасываем remaining, если он уже задан
+  if (typeof q.remaining !== 'number' || !isFinite(q.remaining) || q.remaining <= 0) {
+    q.remaining = q.duration;
+  }
+  q.completed = false;
   $('questName').textContent = q.name; $('questDesc').textContent = q.desc;
   $('questRank').textContent = q.rank;
   $('questTitleText').textContent = q.isPenalty ? 'ЗОНА НАКАЗАНИЯ' : 'НОВОЕ ЗАДАНИЕ';
-  $('timerNumber').textContent = formatTime(q.duration);
+  $('timerNumber').textContent = formatTime(q.remaining);
   $('timerNumber').className = 'timer-number';
   $('timerFill').style.width = '100%'; $('timerFill').className = 'timer-fill';
   const btn = $('btnComplete');
   btn.textContent = 'ПОДТВЕРДИТЬ'; btn.className = 'btn-quest'; btn.disabled = false;
   $('questOverlay').classList.add('show');
   SFX.incoming(); triggerFlash(q.isPenalty ? 'red' : 'blue'); triggerScreenShake();
-  addLog(`${q.isPenalty ? '⚠ ' : ''}Новое задание: «${q.name}» [Ранг ${q.rank}]. Время: ${formatTime(q.duration)}.`, q.isPenalty ? 'penalty' : '');
+  addLog(`${q.isPenalty ? '⚠ ' : ''}Новое задание: «${q.name}» [Ранг ${q.rank}]. Время: ${formatTime(q.remaining)}.`, q.isPenalty ? 'penalty' : '');
   speak(`Новое задание. ${q.name}`);
   setTimeout(() => speak(`Цель: ${q.desc}`), 100);
-  setTimeout(() => speak(`Время: ${formatTime(q.duration)}`), 100);
+  setTimeout(() => speak(`Время: ${formatTime(q.remaining)}`), 100);
 }
 
 $('btnComplete').addEventListener('click', () => {
   const q = G.activeQuest; if (!q) return;
   if (G.questPhase === 'active') {
-    startQuestTimer(q);
+    // startQuestTimer(q); — УДАЛЕНО: таймер запускается внутри startARQuest
     $('btnComplete').disabled = true; $('btnComplete').textContent = 'ВЫПОЛНЕНИЕ...';
     G.questPhase = 'minigame';
     $('questOverlay').classList.remove('show');
@@ -3067,10 +3137,12 @@ document.addEventListener('visibilitychange', () => {
 function attachRipple(e) {
   const btn = e.target.closest('button, .header-btn, .btn-confirm, .btn-quest, .shop-buy, .inv-use, .stat-plus, .settings-btn, .modal-close, .collapse-btn, .quest-card, .penalty-surrender, .mg-surrender, .mg-btn-big, .mg-answer, .rankup-btn, .reward-btn, .blocker-btn, .welcome-consent');
   if (!btn || btn.disabled) return;
+  const point = (e.touches && e.touches[0]) ? e.touches[0] : (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : e;
+  if (!point || typeof point.clientX !== 'number') return;
   const rect = btn.getBoundingClientRect();
   const size = Math.max(rect.width, rect.height);
-  const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-  const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+  const x = point.clientX - rect.left;
+  const y = point.clientY - rect.top;
   const wave = document.createElement('span'); wave.className = 'ripple-wave';
   wave.style.width = wave.style.height = size + 'px';
   wave.style.left = (rect.left + x - size/2) + 'px';
